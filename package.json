@@ -1,0 +1,32 @@
+{
+  "author": "Michael Bradley, Jr. <michaelsbradleyjr@gmail.com> (https://github.com/michaelsbradleyjr)",
+  "name": "jolt",
+  "description": "Reactive Objects for JavaScript",
+  "version": "0.0.0",
+  "homepage": "https://github.com/projexsys/Jolt",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/projexsys/Jolt.git"
+  },
+  "main": "./index.js",
+  "engines": {
+    "node": "~0.6.0"
+  },
+  "dependencies": {
+    "cli-color" : ">=0.1.4"
+  },
+  "devDependencies": {
+    "async" : ">=0.1.12",
+    "coffee-script" : ">=1.1.2",
+    "uglify-js" : ">=1.0.7",
+    "underscore" : ">=1.2.0"
+  },
+  "directories": { "bundles" : "./bundles", "doc": "./doc", "lib": "./lib", "tests" : "./t" },
+  "scripts": {},
+  "licenses" : [
+    {
+      "type" : "GPLv3",
+      "url" : "https://raw.github.com/projexsys/Jolt/master/LICENSE"
+    }
+  ]
+}
