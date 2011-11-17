@@ -176,6 +176,7 @@ Jolt.defaultHeapE = defaultHeapE = HEAP_E.mapE((where, timeNow, timeElapsed, tra
         #{timeNow}
         epoch: #{timeNow.valueOf()}
       """
+      say message, false, 'green'
     when 'end'
       message = """
         ----HEAP-END-----
@@ -185,10 +186,8 @@ Jolt.defaultHeapE = defaultHeapE = HEAP_E.mapE((where, timeNow, timeElapsed, tra
         elapsed:  #{timeElapsed}
         trace:    #{0}
         est. net: #{0}
-        heap: #{JSON.stringify HEAP}
       """
-
-  say message
+      say message, false, 'blue'
 ).name('Jolt.defaultHeapE').PulseClass Pulse_cat
 
 

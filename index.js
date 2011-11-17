@@ -4511,11 +4511,11 @@
     switch (where) {
       case 'start':
         message = "----HEAP-START----\n" + timeNow + "\nepoch: " + (timeNow.valueOf());
-        break;
+        return say(message, false, 'green');
       case 'end':
-        message = "----HEAP-END-----\n" + timeNow + "\nepoch:   " + (timeNow.valueOf()) + "\n  (time in ms)\nelapsed:  " + timeElapsed + "\ntrace:    " + 0 + "\nest. net: " + 0 + "\nheap: " + (JSON.stringify(HEAP));
+        message = "----HEAP-END-----\n" + timeNow + "\nepoch:   " + (timeNow.valueOf()) + "\n  (time in ms)\nelapsed:  " + timeElapsed + "\ntrace:    " + 0 + "\nest. net: " + 0;
+        return say(message, false, 'blue');
     }
-    return say(message);
   }).name('Jolt.defaultHeapE').PulseClass(Pulse_cat);
   
   Jolt.defaultCatchE = defaultCatchE = CATCH_E.mapE(function(error, prePulse, sender, receiver, timeNow) {
