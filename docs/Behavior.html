@@ -1,0 +1,57 @@
+<!DOCTYPE html>  <html> <head>   <title>Behavior.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               Behavior.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.isB = isB = </span><span class="nf">(behavior) -&gt;</span>
+  <span class="nx">behavior</span> <span class="k">instanceof</span> <span class="nx">Behavior</span>
+
+
+<span class="k">class</span> <span class="nx">ChangesE</span> <span class="k">extends</span> <span class="nx">InternalE</span>
+
+  <span class="nv">constructor: </span><span class="nf">(behavior) -&gt;</span>
+    <span class="k">super</span> <span class="nx">behavior</span>
+    <span class="nv">name = </span><span class="nx">behavior</span><span class="p">.</span><span class="nx">name</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nx">name</span>
+      <span class="vi">@_name = </span><span class="nx">name</span> <span class="o">+</span> <span class="s">&#39; changes&#39;</span>
+    <span class="k">else</span>
+      <span class="vi">@_name = </span><span class="s">&#39;absRank &#39;</span> <span class="o">+</span> <span class="nx">behavior</span><span class="p">.</span><span class="nx">absRank</span> <span class="o">+</span> <span class="s">&#39; changes&#39;</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">ClassName: </span><span class="s">&#39;ChangesE&#39;</span>
+
+  <span class="vi">@factory: </span><span class="nf">(behavior) -&gt;</span>
+    <span class="k">new</span> <span class="k">this</span> <span class="nx">behavior</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">changesE = </span><span class="nf">(behavior) -&gt;</span>
+  <span class="nx">ChangesE</span><span class="p">.</span><span class="nx">factory</span> <span class="nx">behavior</span>
+
+
+<span class="nv">Jolt.Behavior = </span><span class="k">class</span> <span class="nx">Behavior</span> <span class="k">extends</span> <span class="nx">EventStream</span>
+
+  <span class="nv">constructor: </span><span class="nf">(recvFrom, init...) -&gt;</span>
+    <span class="k">super</span> <span class="nx">recvFrom</span>
+    <span class="nv">length = </span><span class="nx">init</span><span class="p">.</span><span class="nx">length</span>
+    <span class="vi">@last =</span>
+      <span class="nv">arity: </span><span class="k">if</span> <span class="o">not</span> <span class="nx">length</span> <span class="k">then</span> <span class="p">(</span><span class="nx">init</span><span class="p">.</span><span class="nx">push</span> <span class="kc">undefined</span> <span class="p">;</span> <span class="nx">length</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">)</span> <span class="k">else</span> <span class="nx">length</span>
+      <span class="nv">value: </span><span class="nx">init</span>
+
+    <span class="vi">@_changes = </span><span class="kc">null</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">changes: </span><span class="o">-&gt;</span>
+    <span class="k">if</span> <span class="o">not</span> <span class="nx">@_changes</span><span class="o">?</span> <span class="k">then</span> <span class="vi">@_changes = </span><span class="nx">changesE</span><span class="p">(</span><span class="k">this</span><span class="p">)</span>
+    <span class="nx">@_changes</span>
+
+  <span class="nv">ClassName: </span><span class="s">&#39;Behavior&#39;</span>
+
+  <span class="nv">no_null_junc: </span><span class="kc">true</span>
+
+  <span class="nv">UPDATER: </span><span class="nf">(pulse) -&gt;</span>
+
+    <span class="k">super</span>
+
+    <span class="nv">value = </span><span class="nx">pulse</span><span class="p">.</span><span class="nx">value</span>
+    <span class="vi">@last =</span>
+      <span class="nv">arity: </span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span>
+      <span class="nv">value: </span><span class="nx">value</span>
+
+    <span class="nx">pulse</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="vi">@factory: </span><span class="nf">(args...) -&gt;</span>
+    <span class="k">new</span> <span class="k">this</span> <span class="nx">args</span><span class="p">...</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.valueNow = valueNow = </span><span class="nf">(behavior) -&gt;</span> <span class="nx">behavior</span><span class="p">.</span><span class="nx">last</span><span class="p">.</span><span class="nx">value</span>
+
+<span class="nv">Behavior::valueNow = </span><span class="nf">(behavior) -&gt;</span> <span class="nx">valueNow</span> <span class="k">this</span>
+
+<span class="nx">Jolt</span><span class="p">.</span><span class="nv">$B = Jolt.extractB = $B = extractB = </span><span class="nf">(args...) -&gt;</span>
+  <span class="nx">Behavior</span><span class="p">.</span><span class="nx">factory</span> <span class="nx">args</span><span class="p">...</span>
+
+<span class="nx">EventStream_api</span><span class="o">::</span><span class="nv">$B = EventStream_api::extractB = </span><span class="nf">(args...) -&gt;</span>
+  <span class="nx">extractB</span> <span class="k">this</span><span class="p">,</span> <span class="nx">args</span><span class="p">...</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
