@@ -52,7 +52,7 @@ http://www.gnu.org/licenses/gpl-3.0.txt
 
 However, if you have executed an End User Software License and Services Agreement or an OEM Software License and Support Services Agreement, or another commercial license agreement with Projexsys, Inc. (each, a "Commercial Agreement"), the terms of the license in such Commercial Agreement will supersede the GNU GENERAL PUBLIC LICENSE Version 3 and you may use the Software solely pursuant to the terms of the relevant Commercial Agreement.
 
-This program is derived from and incorporates existing works. For further information and license texts please refer to:<br />
+This software is derived from and incorporates existing works. For further information and license texts please refer to:<br />
 https://raw.github.com/projexsys/Jolt/master/LICENSES
 
 ---------------------------------------

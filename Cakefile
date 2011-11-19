@@ -11,13 +11,7 @@ task 'docs', 'rebuild the internal documentation', ->
   (exec 'docco lib/EventStream/*.coffee', (err) ->
     throw err if err).stdout.pipe process.stdout
 
-  (exec 'docco lib/packaging/bottom.js', (err) ->
-    throw err if err).stdout.pipe process.stdout
-
   (exec 'docco lib/packaging/exporter.coffee', (err) ->
-    throw err if err).stdout.pipe process.stdout
-
-  (exec 'docco lib/packaging/top.js', (err) ->
     throw err if err).stdout.pipe process.stdout
 
   (exec 'docco lib/Pulse/*.coffee', (err) ->
