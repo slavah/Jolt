@@ -5,7 +5,7 @@ if isNodeJS
   Jolt = require path.normalize process.cwd() + '/../index'
 
 describe 'Jolt.globalize', ->
-  ###
+
   it '''
     _ [underscore] should not be defined globally before calling Jolt.globalize
   ''', ->
@@ -20,4 +20,4 @@ describe 'Jolt.globalize', ->
 
     Jolt.globalize()
     ( expect _ ).toBe Jolt._
-  ###
+

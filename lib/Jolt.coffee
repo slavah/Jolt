@@ -5,7 +5,7 @@
 
 isNodeJS = Boolean process?.pid
 
-# All properties of the `Jolt` object will be exported and constitute the
+# All properties of the `Jolt` object will be exported, and constitute the
 # library's API.
 
 Jolt = {}
