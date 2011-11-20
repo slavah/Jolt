@@ -19,7 +19,7 @@ describe 'Sanity', ->
 
     ( expect typeof Jolt ).toEqual 'object'
 
-
+  ###
   it '''
     Jolt should have an _ [underscore] property
   ''', ->
@@ -39,7 +39,7 @@ describe 'Sanity', ->
   ''', ->
 
     ( expect (Jolt._.str and Jolt._.string) ).toBeTruthy()
-
+  ###
 
   it '''
     Jolt should have an EventEmitter2 property

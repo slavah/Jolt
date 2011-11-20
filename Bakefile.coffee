@@ -38,9 +38,9 @@ async.parallel(
   helpersJS: ((callback) -> async.parallel(_([
 
     'helpers/eventemitter2.mymod.js'
-    'helpers/sizzle.mymod.js'
+    #'helpers/sizzle.mymod.js'
     'helpers/underscore.mymod.js'
-    'helpers/underscore.string.mymod.js'
+    #'helpers/underscore.string.mymod.js'
 
   ]).map((path) -> ((callback) -> readI path, callback))
 
@@ -51,16 +51,17 @@ async.parallel(
 
     'helpers/BinaryHeap.mymod.coffee'
     'Jolt.coffee'
+    'helpers/say.coffee'
     'PriorityQueue.coffee'
     'Pulse.coffee'
     'EventStream.coffee'
     'EventStream/EventStream_api.coffee'
     'EventStream/InternalE.coffee'
-    'EventStream/ConcatE.coffee'
-    'EventStream/MappedE.coffee'
-    'Pulse/Pulse_cat.coffee'
-    'Behavior.coffee'
-    'Reactor.coffee'
+    #'EventStream/ConcatE.coffee'
+    #'EventStream/MappedE.coffee'
+    #'Pulse/Pulse_cat.coffee'
+    #'Behavior.coffee'
+    #'Reactor.coffee'
     'packaging/exporter.coffee'
 
   ]).map((path) -> ((callback) -> read path, callback))

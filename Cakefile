@@ -11,6 +11,9 @@ task 'docs', 'rebuild the internal documentation', ->
   (exec 'docco lib/EventStream/*.coffee', (err) ->
     throw err if err).stdout.pipe process.stdout
 
+  (exec 'docco lib/helpers/little_underscore.coffee', (err) ->
+    throw err if err).stdout.pipe process.stdout
+
   (exec 'docco lib/packaging/exporter.coffee', (err) ->
     throw err if err).stdout.pipe process.stdout
 
