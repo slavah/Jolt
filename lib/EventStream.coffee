@@ -259,7 +259,26 @@ Jolt.sendEvent = sendEvent = (estream, vals...) ->
   P = new pClass length, false, sendCall, nextStamp(), vals
   pClass.prototype.propagate P, P.sender, estream, high
   undefined
-#
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 # <<<>>>
 #
 # Jolt - Reactive Objects for JavaScript
@@ -279,7 +298,7 @@ Jolt.sendEvent = sendEvent = (estream, vals...) ->
 # Foundation, either version 3 of the License, or (at your option) any
 # later version. The code is distributed WITHOUT ANY WARRANTY; without
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-# PARTICULAR PURPOSE. See the GNU GPL for more details.
+# PARTICULAR PURPOSE. See the GNU GPL for more details:
 #
 # https://raw.github.com/projexsys/Jolt/master/LICENSE
 # http://www.gnu.org/licenses/gpl-3.0.txt

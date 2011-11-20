@@ -167,7 +167,26 @@ Jolt.Pulse = class Pulse
       throw 'receiver\'s UPDATER did not return a pulse object'
     else
       PULSE
-#
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 # <<<>>>
 #
 # Jolt - Reactive Objects for JavaScript
@@ -187,7 +206,7 @@ Jolt.Pulse = class Pulse
 # Foundation, either version 3 of the License, or (at your option) any
 # later version. The code is distributed WITHOUT ANY WARRANTY; without
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-# PARTICULAR PURPOSE. See the GNU GPL for more details.
+# PARTICULAR PURPOSE. See the GNU GPL for more details:
 #
 # https://raw.github.com/projexsys/Jolt/master/LICENSE
 # http://www.gnu.org/licenses/gpl-3.0.txt

@@ -15,7 +15,7 @@
  * the Free Software Foundation, either version 3 of the License, or (at
  * your option) any later version. The code is distributed WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU GPL for more details.
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU GPL for more details:
  *
  * https://raw.github.com/projexsys/Jolt/master/LICENSE
  * http://www.gnu.org/licenses/gpl-3.0.txt
@@ -34,9 +34,7 @@
  *
  *  https://github.com/brownplt/flapjax
  *  https://github.com/hij1nx/EventEmitter2
- *  https://github.com/jquery/sizzle
  *  https://github.com/documentcloud/underscore
- *  https://github.com/epeli/underscore.string
  *  https://github.com/autotelicum/Smooth-CoffeeScript
  *
  * For further information and license texts please refer to:
@@ -1558,8 +1556,8 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var BinaryHeap, EventStream, EventStream_api, HeapStore, InternalE, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, defer, defer_high, delay, doNotPropagate, exporter, genericAttachListener, genericRemoveListener, genericRemoveWeakReference, internalE, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, say, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating;
-  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; }, __slice = Array.prototype.slice;
+  var BinaryHeap, EventStream, EventStream_api, HeapStore, InternalE, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, defer, defer_high, delay, doNotPropagate, exporter, genericAttachListener, genericRemoveListener, genericRemoveWeakReference, internalE, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, say, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating;
+  var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
   
@@ -1704,6 +1702,11 @@
       return;
     }
     return say.console.log(say.clc[color](message));
+  };
+  
+  Jolt.sayError = sayError = function() {
+    var colors, message;
+    message = arguments[0], colors = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
   };
   
   Jolt.PriorityQueue = PriorityQueue = (function() {

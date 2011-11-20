@@ -1,4 +1,4 @@
-<!DOCTYPE html>  <html> <head>   <title>EventStream.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               EventStream.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="nv">lastRank = </span><span class="mi">0</span>
+<!DOCTYPE html>  <html> <head>   <title>EventStream.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="LiftedB.html">                 LiftedB.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="ConcatE.html">                 ConcatE.coffee               </a>                                           <a class="source" href="EventStream_api.html">                 EventStream_api.coffee               </a>                                           <a class="source" href="InternalE.html">                 InternalE.coffee               </a>                                           <a class="source" href="MappedE.html">                 MappedE.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Pulse_cat.html">                 Pulse_cat.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                                           <a class="source" href="say.html">                 say.coffee               </a>                                           <a class="source" href="exporter.html">                 exporter.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               EventStream.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="nv">lastRank = </span><span class="mi">0</span>
 <span class="nv">nextRank = </span><span class="o">-&gt;</span> <span class="o">++</span><span class="nx">lastRank</span>
 
 
@@ -250,7 +250,27 @@
   <span class="nv">length = </span><span class="nx">vals</span><span class="p">.</span><span class="nx">length</span>
   <span class="nv">P = </span><span class="k">new</span> <span class="nx">pClass</span> <span class="nx">length</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">sendCall</span><span class="p">,</span> <span class="nx">nextStamp</span><span class="p">(),</span> <span class="nx">vals</span>
   <span class="nx">pClass</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">P</span><span class="p">,</span> <span class="nx">P</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">estream</span><span class="p">,</span> <span class="nx">high</span>
-  <span class="kc">undefined</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
+  <span class="kc">undefined</span>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
 
 <p>Jolt - Reactive Objects for JavaScript</p>
 
@@ -269,7 +289,7 @@ Public License (GNU GPL) as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any
 later version. The code is distributed WITHOUT ANY WARRANTY; without
 even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU GPL for more details.</p>
+PARTICULAR PURPOSE. See the GNU GPL for more details:</p>
 
 <p>https://raw.github.com/projexsys/Jolt/master/LICENSE
 http://www.gnu.org/licenses/gpl-3.0.txt</p>

@@ -16,7 +16,7 @@
  * Foundation, either version 3 of the License, or (at your option) any
  * later version. The code is distributed WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU GPL for more details.
+ * PARTICULAR PURPOSE. See the GNU GPL for more details:
  *
  * https://raw.github.com/projexsys/Jolt/master/LICENSE
  * http://www.gnu.org/licenses/gpl-3.0.txt
@@ -35,9 +35,7 @@
  *
  * https://github.com/brownplt/flapjax
  * https://github.com/hij1nx/EventEmitter2
- * https://github.com/jquery/sizzle
  * https://github.com/documentcloud/underscore
- * https://github.com/epeli/underscore.string
  * https://github.com/autotelicum/Smooth-CoffeeScript
  *
 /////////////////////////// ORIGINAL LICENSES //////////////////////////
@@ -105,16 +103,6 @@
  *
 ////////////////////////////////////////////////////////////////////////
  *
- * Sizzle CSS Selector Engine
- * https://github.com/jquery/sizzle
- *
- * Copyright 2011, The Dojo Foundation
- *
- * Released under the MIT, BSD, and GPL Licenses.
- * More information: http://sizzlejs.com/
- *
-////////////////////////////////////////////////////////////////////////
- *
  * Underscore.js 1.2.2
  * https://github.com/documentcloud/underscore
  *
@@ -123,17 +111,6 @@
  * Underscore is freely distributable under the MIT license.
  * Portions of Underscore are inspired or borrowed from Prototype,
  * Oliver Steele's Functional, and John Resig's Micro-Templating.
- *
-////////////////////////////////////////////////////////////////////////
- *
- * Underscore.string
- * https://github.com/epeli/underscore.string
- *
- * (c) 2010 Esa-Matti Suuronen <esa-matti aet suuronen dot org>
- *
- * Underscore.strings is freely distributable under the terms of the MIT
- * license. Documentation: https://github.com/epeli/underscore.string
- * Some code is borrowed from MooTools and Alexandru Marasteanu.
  *
 ////////////////////////////////////////////////////////////////////////
  *

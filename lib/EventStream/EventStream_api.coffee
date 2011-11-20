@@ -1,5 +1,24 @@
 Jolt.EventStream_api = class EventStream_api extends EventStream
-#
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 # <<<>>>
 #
 # Jolt - Reactive Objects for JavaScript
@@ -19,7 +38,7 @@ Jolt.EventStream_api = class EventStream_api extends EventStream
 # Foundation, either version 3 of the License, or (at your option) any
 # later version. The code is distributed WITHOUT ANY WARRANTY; without
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-# PARTICULAR PURPOSE. See the GNU GPL for more details.
+# PARTICULAR PURPOSE. See the GNU GPL for more details:
 #
 # https://raw.github.com/projexsys/Jolt/master/LICENSE
 # http://www.gnu.org/licenses/gpl-3.0.txt

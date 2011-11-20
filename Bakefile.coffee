@@ -38,9 +38,7 @@ async.parallel(
   helpersJS: ((callback) -> async.parallel(_([
 
     'helpers/eventemitter2.mymod.js'
-    #'helpers/sizzle.mymod.js'
     'helpers/underscore.mymod.js'
-    #'helpers/underscore.string.mymod.js'
 
   ]).map((path) -> ((callback) -> readI path, callback))
 

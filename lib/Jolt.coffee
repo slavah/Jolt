@@ -1,7 +1,34 @@
+# Jolt is designed for use in both browser and server environments, but the
+# definition and execution of some methods can vary according to the env.
+# `isNodeJS` provides a reliable, if simple, means for determing whether the
+# runtime is node.js or not. If not, we assume it's running in a browser.
+
 isNodeJS = Boolean process?.pid
 
+# All properties of the `Jolt` object will be exported and constitute the
+# library's API.
+
 Jolt = {}
-#
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 # <<<>>>
 #
 # Jolt - Reactive Objects for JavaScript
@@ -21,7 +48,7 @@ Jolt = {}
 # Foundation, either version 3 of the License, or (at your option) any
 # later version. The code is distributed WITHOUT ANY WARRANTY; without
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-# PARTICULAR PURPOSE. See the GNU GPL for more details.
+# PARTICULAR PURPOSE. See the GNU GPL for more details:
 #
 # https://raw.github.com/projexsys/Jolt/master/LICENSE
 # http://www.gnu.org/licenses/gpl-3.0.txt
