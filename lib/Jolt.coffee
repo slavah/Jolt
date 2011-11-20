@@ -1,5 +1,11 @@
+# The source code for Jolt is contained in multiple `.coffee` and `.js` files
+# which are sewn together per the logic in its
+# [Bakefile.coffee](https://raw.github.com/projexsys/Jolt/master/Bakefile.coffee)
+# build script. Use the *JUMP TO ...* menu at the top right of the page to
+# navigate among the annotated component files.
+
 # Jolt is designed for use in both browser and server environments, but the
-# definition and execution of some methods can vary according to the context.
+# definition and execution of some methods can vary with the environment.
 # `isNodeJS` provides a reliable, if simple, means for determing whether the
 # runtime is node.js or not. If not, we assume Jolt is running in a browser.
 
