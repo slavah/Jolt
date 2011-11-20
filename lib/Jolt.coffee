@@ -1,7 +1,7 @@
 # Jolt is designed for use in both browser and server environments, but the
-# definition and execution of some methods can vary according to the env.
+# definition and execution of some methods can vary according to the context.
 # `isNodeJS` provides a reliable, if simple, means for determing whether the
-# runtime is node.js or not. If not, we assume it's running in a browser.
+# runtime is node.js or not. If not, we assume Jolt is running in a browser.
 
 isNodeJS = Boolean process?.pid
 
