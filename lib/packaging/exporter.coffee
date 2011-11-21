@@ -1,15 +1,28 @@
+# The `exports` object is in scope per the function wrapper around the entire
+# library -- i.e. that wrapper has a parameter named `exports`. In a node.js
+# environment, `module.exports` will be passed as the `exports` argument; for
+# other environments (e.g. browsers), an object named `this.Jolt` is passed,
+# after being created inline. See Jolt's
+# [bottom.js](https://raw.github.com/projexsys/Jolt/master/lib/packaging/bottom.js)
+# component file.
+
 exporter = (ns = Jolt, target = exports) ->
   for own key, value of ns
     target[key] = ns[key]
 
 
+# Both the `EventEmitter2` and `_` libraries are accessible as properties of
+# `Jolt`. Note that if `Jolt.globalize()` is called (see the next annotation),
+# both will be placed in the global namespace.
+
 Jolt.EventEmitter2 = EventEmitter
 Jolt._             = _
 
 
-# manual calls to globalize would be superfluous for browser envs given
-# top/bottom wrapper implementation and the call to exporter at the end
-# of this script
+# Jolt's `globalize` method provides a convenient means to place the library's
+# API in the global namespace. It's never necessary to call it, but for
+# Jolt-heavy development and testing, it can be useful for reducing verbosity.
+
 Jolt.globalize = (namespaces...) ->
   which = if window? then window else (if global? then global else {})
   if not namespaces.length then exporter(Jolt, which)

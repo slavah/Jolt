@@ -1,42 +1,59 @@
-Jolt.say = say = (message, isError, color = 'white') ->
-  if not say.okay?
+# Jolt's `say` and `sayError` methods are intended as convenient,
+# cross-platform abstractions on top of `console.log`, and `console.error` if it
+# exists in a given environment. Both support colorized terminal output in a
+# node.js runtime by way of the
+# [cli-color](https://github.com/medikoo/cli-color) package.
+
+clog_err = 'Jolt.say: console.log method is not available'
+
+_say = (message, isError = false, styles...) ->
+  if not _say.okay?
     if not (console? or window?.console?)
-      say.okay = -1
-      throw 'console.log method is not available'
+      _say.okay = -1
+      throw clog_err
     console ?= window?.console
-    say.console = console
-    say.error = console.error?
-    if not console.log?
-      say.okay = -1
-      throw 'console.log method is not available'
+    _say.console = console
+    _say.error = console.error?
+  if not console.log?
+      _say.okay = -1
+      throw clog_err
     else
-      say.okay =  1
+      _say.okay =  1
       if isNodeJS
-        say.clc = require 'cli-color'
+        _say.clc = require 'cli-color'
+  if _say.okay is -1
+    throw clog_err
+  if not isNodeJS
+    if isError
+      if _say.error?
+        _say.console.error message
+        return
+    _say.console.log message
+  else
+    switch styles.length
+      when 0
+        message = message
+      when 1
+        message = _say.clc[styles[0]] message
+      when 2
+        message = _say.clc[styles[0]][styles[1]] message
+      when 3
+        message = _say.clc[styles[0]][styles[1]][styles[2]] message
       else
-        say.clc = {}
-        colors = [
-          'black'
-          'red'
-          'green'
-          'yellow'
-          'blue'
-          'magenta'
-          'cyan'
-          'white'
-          'gray'
-        ]
-        fn = (text) -> text
-        (say.clc[c] = fn ; say.clc[c].bold = fn) for c in colors
-  if say.okay is -1
-    throw 'console.log method is not available'
-  if isError and say.error?
-    say.console.error (say.clc['red'].bold message)
-    return
-  say.console.log (say.clc[color] message)
+        message = _say.clc[styles[0]][styles[1]][styles[2]][styles[3]] message
+    if isError
+      if _say.error?
+        _say.console.error message
+        return
+    _say.console.log message
 
 
-Jolt.sayError = sayError = (message, colors...) ->
+Jolt.say = say = (message, styles...) ->
+  _say message, false, styles...
+
+
+Jolt.sayError = Jolt.sayErr = sayError = sayErr = (message, styles...) ->
+  _say message, true, styles...
  
  
  

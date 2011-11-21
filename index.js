@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var BinaryHeap, EventStream, EventStream_api, HeapStore, InternalE, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, defer, defer_high, delay, doNotPropagate, exporter, genericAttachListener, genericRemoveListener, genericRemoveWeakReference, internalE, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, say, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating;
+  var BinaryHeap, EventStream, EventStream_api, HeapStore, InternalE, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, genericAttachListener, genericRemoveListener, genericRemoveWeakReference, internalE, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, _say;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -1662,51 +1662,76 @@
   
   Jolt = {};
   
-  Jolt.say = say = function(message, isError, color) {
-    var c, colors, fn, _i, _len;
-    if (color == null) color = 'white';
-    if (!(say.okay != null)) {
+  clog_err = 'Jolt.say: console.log method is not available';
+  
+  _say = function() {
+    var isError, message, styles;
+    message = arguments[0], isError = arguments[1], styles = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
+    if (isError == null) isError = false;
+    if (!(_say.okay != null)) {
       if (!((typeof console !== "undefined" && console !== null) || ((typeof window !== "undefined" && window !== null ? window.console : void 0) != null))) {
-        say.okay = -1;
-        throw 'console.log method is not available';
+        _say.okay = -1;
+        throw clog_err;
       }
       if (typeof console === "undefined" || console === null) {
         console = typeof window !== "undefined" && window !== null ? window.console : void 0;
       }
-      say.console = console;
-      say.error = console.error != null;
-      if (!(console.log != null)) {
-        say.okay = -1;
-        throw 'console.log method is not available';
-      } else {
-        say.okay = 1;
-        if (isNodeJS) {
-          say.clc = require('cli-color');
-        } else {
-          say.clc = {};
-          colors = ['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white', 'gray'];
-          fn = function(text) {
-            return text;
-          };
-          for (_i = 0, _len = colors.length; _i < _len; _i++) {
-            c = colors[_i];
-            say.clc[c] = fn;
-            say.clc[c].bold = fn;
-          }
+      _say.console = console;
+      _say.error = console.error != null;
+    }
+    if (!(console.log != null)) {
+      _say.okay = -1;
+      throw clog_err;
+    } else {
+      _say.okay = 1;
+      if (isNodeJS) _say.clc = require('cli-color');
+    }
+    if (_say.okay === -1) throw clog_err;
+    if (!isNodeJS) {
+      if (isError) {
+        if (_say.error != null) {
+          _say.console.error(message);
+          return;
         }
       }
+      return _say.console.log(message);
+    } else {
+      switch (styles.length) {
+        case 0:
+          message = message;
+          break;
+        case 1:
+          message = _say.clc[styles[0]](message);
+          break;
+        case 2:
+          message = _say.clc[styles[0]][styles[1]](message);
+          break;
+        case 3:
+          message = _say.clc[styles[0]][styles[1]][styles[2]](message);
+          break;
+        default:
+          message = _say.clc[styles[0]][styles[1]][styles[2]][styles[3]](message);
+      }
+      if (isError) {
+        if (_say.error != null) {
+          _say.console.error(message);
+          return;
+        }
+      }
+      return _say.console.log(message);
     }
-    if (say.okay === -1) throw 'console.log method is not available';
-    if (isError && (say.error != null)) {
-      say.console.error(say.clc['red'].bold(message));
-      return;
-    }
-    return say.console.log(say.clc[color](message));
   };
   
-  Jolt.sayError = sayError = function() {
-    var colors, message;
-    message = arguments[0], colors = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+  Jolt.say = say = function() {
+    var message, styles;
+    message = arguments[0], styles = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    return _say.apply(null, [message, false].concat(__slice.call(styles)));
+  };
+  
+  Jolt.sayError = Jolt.sayErr = sayError = sayErr = function() {
+    var message, styles;
+    message = arguments[0], styles = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    return _say.apply(null, [message, true].concat(__slice.call(styles)));
   };
   
   Jolt.PriorityQueue = PriorityQueue = (function() {
