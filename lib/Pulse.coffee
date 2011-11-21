@@ -12,8 +12,10 @@
 lastStamp = 0
 nextStamp = -> ++lastStamp
 
-Jolt.isPropagating  = isPropagating = false
-Jolt.setPropagating = setPropagating = (bool) -> isPropagating = Boolean bool
+propagating = false
+
+Jolt.isPropagating  = isPropagating  = -> propagating
+Jolt.setPropagating = setPropagating = (bool) -> propagating = Boolean bool
 
 Jolt.doNotPropagate = doNotPropagate = {}
 Jolt.propagateHigh  = propagateHigh  = {}
@@ -96,8 +98,6 @@ Jolt.Pulse = class Pulse
   # stamp is unique and gives us a key with which to pair heaps and estreams
   constructor: (@arity, @junction, @sender, @stamp, @value, @heap = new HeapStore @stamp) ->
 
-  # --- #
-
   propagate: (pulse, sender, receiver, high, more...) ->
 
     if not receiver.weaklyHeld
@@ -132,7 +132,7 @@ Jolt.Pulse = class Pulse
         if nextPulse isnt doNotPropagate
           nextPulse.sender = qv.estream
 
-          _( qv.estream.sendTo ).map (receiver) ->
+          for receiver in qv.estream.sendTo
             weaklyHeld = weaklyHeld and receiver.weaklyHeld
             if receiver.weaklyHeld
               scheduleCleanup cleanupQ, qv.estream, receiver

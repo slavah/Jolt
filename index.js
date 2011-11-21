@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var BinaryHeap, EventStream, EventStream_api, HeapStore, InternalE, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, genericAttachListener, genericRemoveListener, genericRemoveWeakReference, internalE, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, _say, _say_helper;
+  var BinaryHeap, EventStream, EventStream_api, HeapStore, InternalE, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, genericAttachListener, genericRemoveListener, genericRemoveWeakReference, internalE, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -1753,10 +1753,14 @@
     return ++lastStamp;
   };
   
-  Jolt.isPropagating = isPropagating = false;
+  propagating = false;
+  
+  Jolt.isPropagating = isPropagating = function() {
+    return propagating;
+  };
   
   Jolt.setPropagating = setPropagating = function(bool) {
-    return isPropagating = Boolean(bool);
+    return propagating = Boolean(bool);
   };
   
   Jolt.doNotPropagate = doNotPropagate = {};
@@ -1890,7 +1894,7 @@
     }
   
     Pulse.prototype.propagate = function() {
-      var P, high, more, nextPulse, pulse, queue, qv, receiver, sender, weaklyHeld, _ref;
+      var P, high, more, nextPulse, pulse, queue, qv, receiver, sender, weaklyHeld, _i, _len, _ref, _ref2;
       pulse = arguments[0], sender = arguments[1], receiver = arguments[2], high = arguments[3], more = 5 <= arguments.length ? __slice.call(arguments, 4) : [];
       if (!receiver.weaklyHeld) {
         if (beforeQ.length && !high) {
@@ -1913,18 +1917,20 @@
           weaklyHeld = true;
           if (nextPulse !== doNotPropagate) {
             nextPulse.sender = qv.estream;
-            _(qv.estream.sendTo).map(function(receiver) {
+            _ref2 = qv.estream.sendTo;
+            for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+              receiver = _ref2[_i];
               weaklyHeld = weaklyHeld && receiver.weaklyHeld;
               if (receiver.weaklyHeld) {
-                return scheduleCleanup(cleanupQ, qv.estream, receiver);
+                scheduleCleanup(cleanupQ, qv.estream, receiver);
               } else {
-                return queue.push({
+                queue.push({
                   estream: receiver,
                   pulse: nextPulse,
                   rank: receiver.rank
                 });
               }
-            });
+            }
             if (qv.estream.sendTo.length && weaklyHeld) {
               qv.estream.weaklyHeld = true;
               scheduleCleanup(cleanupQ, qv.pulse.sender, qv.estream);
@@ -1967,7 +1973,7 @@
   
   genericAttachListener = function(sender, receiver) {
     var cur, doNextRank, estream, i, q, sentinel, _i, _len, _results;
-    if (!isPropagating) {
+    if (!isPropagating()) {
       if (sender.rank === receiver.rank) {
         throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph';
       }
@@ -2004,7 +2010,7 @@
   
   genericRemoveListener = function(sender, receiver) {
     var i;
-    if (!isPropagating) {
+    if (!isPropagating()) {
       i = _.indexOf(sender.sendTo, receiver);
       if (i + 1) return sender.sendTo.splice(i, 1);
     } else {
@@ -2016,7 +2022,7 @@
     var i;
     weakReference.cleanupScheduled = false;
     if (!weakReference.cleanupCanceled) {
-      if (!isPropagating) {
+      if (!isPropagating()) {
         i = _.indexOf(sender.sendTo, weakReference);
         if (i + 1) sender.sendTo.splice(i, 1);
         if (!sender.sendTo.length) return sender.weaklyHeld = true;

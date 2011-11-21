@@ -7,7 +7,7 @@ Jolt.isE = isE = (estream) ->
 
 
 genericAttachListener = (sender, receiver) ->
-  if not isPropagating
+  if not isPropagating()
     if sender.rank is receiver.rank
       throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph'
     i = _.indexOf sender.sendTo, receiver
@@ -32,7 +32,7 @@ genericAttachListener = (sender, receiver) ->
 
 
 genericRemoveListener = (sender, receiver) ->
-  if not isPropagating
+  if not isPropagating()
     i = _.indexOf sender.sendTo, receiver
     if (i + 1) then sender.sendTo.splice i, 1
   else
@@ -42,7 +42,7 @@ genericRemoveListener = (sender, receiver) ->
 genericRemoveWeakReference = (sender, weakReference) ->
   weakReference.cleanupScheduled = false
   if not weakReference.cleanupCanceled
-    if not isPropagating
+    if not isPropagating()
       i = _.indexOf sender.sendTo, weakReference
       if (i + 1) then sender.sendTo.splice i, 1
       if not sender.sendTo.length then sender.weaklyHeld = true

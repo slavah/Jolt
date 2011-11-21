@@ -7,7 +7,7 @@
 
 
 <span class="nv">genericAttachListener = </span><span class="nf">(sender, receiver) -&gt;</span>
-  <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span>
+  <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span><span class="p">()</span>
     <span class="k">if</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">rank</span> <span class="o">is</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
       <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: cycle detected in propagation graph&#39;</span>
     <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">receiver</span>
@@ -32,7 +32,7 @@
 
 
 <span class="nv">genericRemoveListener = </span><span class="nf">(sender, receiver) -&gt;</span>
-  <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span>
+  <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span><span class="p">()</span>
     <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">receiver</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">splice</span> <span class="nx">i</span><span class="p">,</span> <span class="mi">1</span>
   <span class="k">else</span>
@@ -42,7 +42,7 @@
 <span class="nv">genericRemoveWeakReference = </span><span class="nf">(sender, weakReference) -&gt;</span>
   <span class="nv">weakReference.cleanupScheduled = </span><span class="kc">false</span>
   <span class="k">if</span> <span class="o">not</span> <span class="nx">weakReference</span><span class="p">.</span><span class="nx">cleanupCanceled</span>
-    <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span>
+    <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span><span class="p">()</span>
       <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">weakReference</span>
       <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">splice</span> <span class="nx">i</span><span class="p">,</span> <span class="mi">1</span>
       <span class="k">if</span> <span class="o">not</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">length</span> <span class="k">then</span> <span class="nv">sender.weaklyHeld = </span><span class="kc">true</span>
