@@ -1,6 +1,17 @@
+# Jolt's `PriorityQueue` is an extension of the
+# [bundled implementation](https://raw.github.com/projexsys/Jolt/master/lib/helpers/BinaryHeap.mymod.coffee)
+# of class `BinaryHeap`.
+
 Jolt.PriorityQueue = class PriorityQueue extends BinaryHeap
+
+  # `BinaryHeap`'s constructor has been overrided so that the scoring method
+  # can be affixed to the extension's prototype.
+
   constructor: ->
     @content = []
+
+  # The fixed `scoreFunction` references a property of instances of
+  # `EventStream` (and derived classes).
 
   scoreFunction: (x) -> x.rank
  
