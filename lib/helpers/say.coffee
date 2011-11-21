@@ -4,9 +4,7 @@
 # node.js runtime by way of the
 # [cli-color](https://github.com/medikoo/cli-color) package.
 
-clog_err = 'Jolt.say: console.log method is not available'
-
-_say = (message, isError = false, styles...) ->
+_say = (message, isError, styles...) ->
   if not _say.okay?
     if not (console? or window?.console?)
       _say.okay = -1
@@ -24,11 +22,7 @@ _say = (message, isError = false, styles...) ->
   if _say.okay is -1
     throw clog_err
   if not isNodeJS
-    if isError
-      if _say.error?
-        _say.console.error message
-        return
-    _say.console.log message
+    _say_helper message, isError
   else
     switch styles.length
       when 0
@@ -41,11 +35,18 @@ _say = (message, isError = false, styles...) ->
         message = _say.clc[styles[0]][styles[1]][styles[2]] message
       else
         message = _say.clc[styles[0]][styles[1]][styles[2]][styles[3]] message
-    if isError
-      if _say.error?
-        _say.console.error message
-        return
-    _say.console.log message
+    _say_helper message, isError
+
+
+clog_err = 'Jolt.say: console.log method is not available'
+
+
+_say_helper = (message, isError) ->
+  if isError
+    if _say.error?
+      _say.console.error message
+      return
+  _say.console.log message
 
 
 Jolt.say = say = (message, styles...) ->

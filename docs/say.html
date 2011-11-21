@@ -2,9 +2,7 @@
 cross-platform abstractions on top of <code>console.log</code>, and <code>console.error</code> if it
 exists in a given environment. Both support colorized terminal output in a
 node.js runtime by way of the
-<a href="https://github.com/medikoo/cli-color">cli-color</a> package.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">clog_err = </span><span class="s">&#39;Jolt.say: console.log method is not available&#39;</span>
-
-<span class="nv">_say = </span><span class="nf">(message, isError = false, styles...) -&gt;</span>
+<a href="https://github.com/medikoo/cli-color">cli-color</a> package.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">_say = </span><span class="nf">(message, isError, styles...) -&gt;</span>
   <span class="k">if</span> <span class="o">not</span> <span class="nx">_say</span><span class="p">.</span><span class="nx">okay</span><span class="o">?</span>
     <span class="k">if</span> <span class="o">not</span> <span class="p">(</span><span class="nx">console</span><span class="o">?</span> <span class="o">or</span> <span class="nb">window</span><span class="o">?</span><span class="p">.</span><span class="nx">console</span><span class="o">?</span><span class="p">)</span>
       <span class="nv">_say.okay = </span><span class="o">-</span><span class="mi">1</span>
@@ -22,11 +20,7 @@ node.js runtime by way of the
   <span class="k">if</span> <span class="nx">_say</span><span class="p">.</span><span class="nx">okay</span> <span class="o">is</span> <span class="o">-</span><span class="mi">1</span>
     <span class="k">throw</span> <span class="nx">clog_err</span>
   <span class="k">if</span> <span class="o">not</span> <span class="nx">isNodeJS</span>
-    <span class="k">if</span> <span class="nx">isError</span>
-      <span class="k">if</span> <span class="nx">_say</span><span class="p">.</span><span class="nx">error</span><span class="o">?</span>
-        <span class="nx">_say</span><span class="p">.</span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span> <span class="nx">message</span>
-        <span class="k">return</span>
-    <span class="nx">_say</span><span class="p">.</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">message</span>
+    <span class="nx">_say_helper</span> <span class="nx">message</span><span class="p">,</span> <span class="nx">isError</span>
   <span class="k">else</span>
     <span class="k">switch</span> <span class="nx">styles</span><span class="p">.</span><span class="nx">length</span>
       <span class="k">when</span> <span class="mi">0</span>
@@ -39,11 +33,18 @@ node.js runtime by way of the
         <span class="nv">message = </span><span class="nx">_say</span><span class="p">.</span><span class="nx">clc</span><span class="p">[</span><span class="nx">styles</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="nx">styles</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="nx">styles</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="nx">message</span>
       <span class="k">else</span>
         <span class="nv">message = </span><span class="nx">_say</span><span class="p">.</span><span class="nx">clc</span><span class="p">[</span><span class="nx">styles</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="nx">styles</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="nx">styles</span><span class="p">[</span><span class="mi">2</span><span class="p">]][</span><span class="nx">styles</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="nx">message</span>
-    <span class="k">if</span> <span class="nx">isError</span>
-      <span class="k">if</span> <span class="nx">_say</span><span class="p">.</span><span class="nx">error</span><span class="o">?</span>
-        <span class="nx">_say</span><span class="p">.</span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span> <span class="nx">message</span>
-        <span class="k">return</span>
-    <span class="nx">_say</span><span class="p">.</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">message</span>
+    <span class="nx">_say_helper</span> <span class="nx">message</span><span class="p">,</span> <span class="nx">isError</span>
+
+
+<span class="nv">clog_err = </span><span class="s">&#39;Jolt.say: console.log method is not available&#39;</span>
+
+
+<span class="nv">_say_helper = </span><span class="nf">(message, isError) -&gt;</span>
+  <span class="k">if</span> <span class="nx">isError</span>
+    <span class="k">if</span> <span class="nx">_say</span><span class="p">.</span><span class="nx">error</span><span class="o">?</span>
+      <span class="nx">_say</span><span class="p">.</span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span> <span class="nx">message</span>
+      <span class="k">return</span>
+  <span class="nx">_say</span><span class="p">.</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">message</span>
 
 
 <span class="nv">Jolt.say = say = </span><span class="nf">(message, styles...) -&gt;</span>
