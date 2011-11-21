@@ -191,7 +191,7 @@ Jolt.Pulse = class Pulse
 #
 # Jolt - Reactive Objects for JavaScript
 #
-# https://github.com/projexsys/Jolt
+# [https://github.com/projexsys/Jolt](https://github.com/projexsys/Jolt)
 #
 # This software is Copyright (c) 2011 by Projexsys, Inc.
 #
@@ -208,8 +208,8 @@ Jolt.Pulse = class Pulse
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE. See the GNU GPL for more details:
 #
-# https://raw.github.com/projexsys/Jolt/master/LICENSE
-# http://www.gnu.org/licenses/gpl-3.0.txt
+# [https://raw.github.com/projexsys/Jolt/master/LICENSE](https://raw.github.com/projexsys/Jolt/master/LICENSE)
+# [http://www.gnu.org/licenses/gpl-3.0.txt](http://www.gnu.org/licenses/gpl-3.0.txt)
 #
 # However, if you have executed an End User Software License and
 # Services Agreement or an OEM Software License and Support Services
@@ -222,4 +222,4 @@ Jolt.Pulse = class Pulse
 # This sofware is derived from and incorporates existing works. For
 # further information and license texts please refer to:
 #
-# https://raw.github.com/projexsys/Jolt/master/LICENSES
+# [https://raw.github.com/projexsys/Jolt/master/LICENSES](https://raw.github.com/projexsys/Jolt/master/LICENSES)

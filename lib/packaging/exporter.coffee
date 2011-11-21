@@ -11,9 +11,15 @@ exporter = (ns = Jolt, target = exports) ->
     target[key] = ns[key]
 
 
-# Both the `EventEmitter2` and `_` libraries are accessible as properties of
-# `Jolt`. Note that if `Jolt.globalize()` is called (see the next annotation),
-# both will be placed in the global namespace.
+# Jolt bundles the [EventEmitter2](https://github.com/hij1nx/EventEmitter2) and
+# [Underscore](http://documentcloud.github.com/underscore/) libraries. See
+# their respective component files if you wish to understand how they've been
+# *slightly* modified to facilitate inline bundling:
+# [eventemitter2.mymod.js](https://raw.github.com/projexsys/Jolt/master/lib/helpers/eventemitter2.mymod.js),
+# [underscore.mymod.js](https://raw.github.com/projexsys/Jolt/master/lib/helpers/underscore.mymod.js).
+# Both are accessible as members of the exported API (e.g. `Jolt._`). Note that
+# if `Jolt.globalize()` is called (see the next annotation), both will be placed
+# in the global namespace.
 
 Jolt.EventEmitter2 = EventEmitter
 Jolt._             = _
@@ -21,7 +27,7 @@ Jolt._             = _
 
 # Jolt's `globalize` method provides a convenient means to place the library's
 # API in the global namespace. It's never necessary to call it, but for
-# Jolt-heavy development and testing, it can be useful for reducing verbosity.
+# Jolt-heavy development and testing, it is useful for reducing verbosity.
 
 Jolt.globalize = (namespaces...) ->
   which = if window? then window else (if global? then global else {})
@@ -56,7 +62,7 @@ exporter()
 #
 # Jolt - Reactive Objects for JavaScript
 #
-# https://github.com/projexsys/Jolt
+# [https://github.com/projexsys/Jolt](https://github.com/projexsys/Jolt)
 #
 # This software is Copyright (c) 2011 by Projexsys, Inc.
 #
@@ -73,8 +79,8 @@ exporter()
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE. See the GNU GPL for more details:
 #
-# https://raw.github.com/projexsys/Jolt/master/LICENSE
-# http://www.gnu.org/licenses/gpl-3.0.txt
+# [https://raw.github.com/projexsys/Jolt/master/LICENSE](https://raw.github.com/projexsys/Jolt/master/LICENSE)
+# [http://www.gnu.org/licenses/gpl-3.0.txt](http://www.gnu.org/licenses/gpl-3.0.txt)
 #
 # However, if you have executed an End User Software License and
 # Services Agreement or an OEM Software License and Support Services
@@ -87,4 +93,4 @@ exporter()
 # This sofware is derived from and incorporates existing works. For
 # further information and license texts please refer to:
 #
-# https://raw.github.com/projexsys/Jolt/master/LICENSES
+# [https://raw.github.com/projexsys/Jolt/master/LICENSES](https://raw.github.com/projexsys/Jolt/master/LICENSES)
