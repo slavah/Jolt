@@ -1,615 +1,147 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<!DOCTYPE html>  <html> <head>   <title>Pulse.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="LiftedB.html">                 LiftedB.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="ConcatE.html">                 ConcatE.coffee               </a>                                           <a class="source" href="EventStream_api.html">                 EventStream_api.coffee               </a>                                           <a class="source" href="InternalE.html">                 InternalE.coffee               </a>                                           <a class="source" href="MappedE.html">                 MappedE.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Pulse_cat.html">                 Pulse_cat.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                                           <a class="source" href="say.html">                 say.coffee               </a>                                           <a class="source" href="exporter.html">                 exporter.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               Pulse.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>Each propagation cycle is (supposed to be) "stamped" with a unique value. In
+practice this means using <code>nextStamp</code> to generate an always-increasing integer
+value which is then passed to a <code>&lt;PulseClass&gt;</code> constructor.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">lastStamp = </span><span class="mi">0</span>
+<span class="nv">nextStamp = </span><span class="o">-&gt;</span> <span class="o">++</span><span class="nx">lastStamp</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>Pulse propagation is, by design, a synchronous operation which in terms of
+Jolt's own algorightms should always be computationally finite. Practically,
+this means disallowing modification of event propagation graphs during
+propagation. The <code>popagating</code> flag is therefore toggled at the beginning
+and end of propagation cycles, by way of its setter function
+<code>Jolt.setPropagating</code>. EventStream methods which affect node-relationships
+use the getter function <code>Jolt.isPropagating</code> to determine whether they should
+proceed or schedule themselves for execution outside of a popagation cycle.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">propagating = </span><span class="kc">false</span>
 
-<html>
-<head>
-  <meta name="generator" content=
-  "HTML Tidy for Mac OS X (vers 16 November 2011), see www.w3.org">
-
-  <title>Pulse.coffee</title>
-  <meta http-equiv="content-type" content=
-  "text/html; charset=us-ascii">
-  <link rel="stylesheet" media="all" href="docco.css">
-</head>
-
-<body>
-  <div id="container">
-    <div id="background"></div>
-
-    <div id="jump_to">
-      Jump To &hellip;
-
-      <div id="jump_wrapper">
-        <div id="jump_page">
-          <a class="source" href=
-          "Behavior.html">Behavior.coffee</a> <a class="source"
-          href="LiftedB.html">LiftedB.coffee</a> <a class="source"
-          href="EventStream.html">EventStream.coffee</a> <a class=
-          "source" href="ConcatE.html">ConcatE.coffee</a> <a class=
-          "source" href=
-          "EventStream_api.html">EventStream_api.coffee</a>
-          <a class="source" href=
-          "InternalE.html">InternalE.coffee</a> <a class="source"
-          href="MappedE.html">MappedE.coffee</a> <a class="source"
-          href="Jolt.html">Jolt.coffee</a> <a class="source" href=
-          "PriorityQueue.html">PriorityQueue.coffee</a> <a class=
-          "source" href="Pulse.html">Pulse.coffee</a> <a class=
-          "source" href="Pulse_cat.html">Pulse_cat.coffee</a>
-          <a class="source" href="Reactor.html">Reactor.coffee</a>
-          <a class="source" href="say.html">say.coffee</a>
-          <a class="source" href=
-          "exporter.html">exporter.coffee</a>
-        </div>
-      </div>
-    </div>
-
-    <table cellpadding="0" cellspacing="0">
-      <thead>
-        <tr>
-          <th class="docs">
-            <h1>Pulse.coffee</h1>
-          </th>
-
-          <th class="code"></th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr id="section-1">
-          <td class="docs">
-            <div class="pilwrap">
-              <a class="pilcrow" href="#section-1">&para;</a>
-            </div>
-
-            <p>Each propagation cycle is (supposed to be) "stamped"
-            with a unique value. In practice this means using
-            <code>nextStamp</code> to generate an always-increasing
-            integer value which is then passed to a
-            <code>&lt;PulseClass&gt;</code> constructor.</p>
-          </td>
-
-          <td class="code">
-            <div class="highlight">
-              <pre>
-<span class="nv">lastStamp = </span><span class="mi">0</span>
-<span class="nv">nextStamp = </span><span class=
-"o">-&gt;</span> <span class="o">++</span><span class=
-"nx">lastStamp</span>
-</pre>
-            </div>
-          </td>
-        </tr>
-
-        <tr id="section-2">
-          <td class="docs">
-            <div class="pilwrap">
-              <a class="pilcrow" href="#section-2">&para;</a>
-            </div>
-
-            <p>Pulse propagation is, by design, a synchronous
-            operation which in terms of Jolt's own algorightms
-            should always be computationally finite. Practically,
-            this means disallowing modification of event
-            propagation graphs during propagation. The
-            <code>popagating</code> flag is therefore toggled at
-            the beginning and end of propagation cycles, by way of
-            its setter function <code>Jolt.setPropagating</code>.
-            EventStream methods which affect node-relationships use
-            the getter function <code>Jolt.isPropagating</code> to
-            determine whether they should proceed or schedule
-            themselves for execution outside of a popagation
-            cycle.</p>
-          </td>
-
-          <td class="code">
-            <div class="highlight">
-              <pre>
-<span class="nv">propagating = </span><span class="kc">false</span>
-
-<span class=
-"nv">Jolt.isPropagating  = isPropagating  = </span><span class=
-"o">-&gt;</span> <span class="nx">propagating</span>
-<span class=
-"nv">Jolt.setPropagating = setPropagating = </span><span class=
-"nf">(bool) -&gt;</span> <span class=
-"nv">propagating = </span><span class=
-"nb">Boolean</span> <span class="nx">bool</span>
-</pre>
-            </div>
-          </td>
-        </tr>
-
-        <tr id="section-3">
-          <td class="docs">
-            <div class="pilwrap">
-              <a class="pilcrow" href="#section-3">&para;</a>
-            </div>
-
-            <p><code>Jolt.doNotPropagate</code> is a sentinel value
-            which signals that event propagation should be halted
-            in the emitting node's branch of a propagation
-            graph.</p>
-          </td>
-
-          <td class="code">
-            <div class="highlight">
-              <pre>
-<span class=
-"nv">Jolt.doNotPropagate = doNotPropagate = </span><span class=
-"p">{}</span>
-</pre>
-            </div>
-          </td>
-        </tr>
-
-        <tr id="section-4">
-          <td class="docs">
-            <div class="pilwrap">
-              <a class="pilcrow" href="#section-4">&para;</a>
-            </div>
-
-            <p><code>Jolt.propagateHigh</code> is a unique value
-            which when passed as the last argument to
-            <code>Jolt.sendEvent</code> signals the
-            <code>&lt;PulseClass&gt;.prototype.propagate</code>
-            method to invoke its <code>high</code> logic.</p>
-          </td>
-
-          <td class="code">
-            <div class="highlight">
-              <pre>
-<span class=
-"nv">Jolt.propagateHigh  = propagateHigh  = </span><span class=
-"p">{}</span>
-</pre>
-            </div>
-          </td>
-        </tr>
-
-        <tr id="section-5">
-          <td class="docs">
-            <div class="pilwrap">
-              <a class="pilcrow" href="#section-5">&para;</a>
-            </div>
-
-            <p><code>sendCall</code> facilitates the always
-            imperatively called method <code>Jolt.sendEvent</code>
-            being named and treated as the first node in a
-            propagation cycle, though it's not properly a node in
-            the graph.</p>
-          </td>
-
-          <td class="code">
-            <div class="highlight">
-              <pre>
-<span class="nv">sendCall = name: </span><span class=
-"p">(</span><span class="o">-&gt;</span> <span class=
-"s">'Jolt.sendEvent'</span><span class="p">),</span> <span class=
-"nv">removeWeakReference: </span><span class="o">-&gt;</span>
-</pre>
-            </div>
-          </td>
-        </tr>
-
-        <tr id="section-6">
-          <td class="docs">
-            <div class="pilwrap">
-              <a class="pilcrow" href="#section-6">&para;</a>
-            </div>
-
-            <p>keep in mind the following when composing functions
-            to call via defer
-            https://bugzilla.mozilla.org/show_bug.cgi?id=394769</p>
-          </td>
-
-          <td class="code">
-            <div class="highlight">
-              <pre>
-<span class="k">if</span> <span class="nx">isNodeJS</span>
-  <span class=
-"nv">Jolt.defer_high = defer_high = </span><span class=
-"nf">(func, args...) -&gt;</span> <span class=
-"nx">process</span><span class="p">.</span><span class=
-"nx">nextTick</span> <span class="o">-&gt;</span> <span class=
-"nx">func</span> <span class="nx">args</span><span class=
-"p">...</span>
-  <span class="nv">Jolt.delay = delay = </span><span class=
-"nf">(func, ms, args...) -&gt;</span> <span class=
-"nx">setTimeout</span> <span class="p">(</span><span class=
-"o">-&gt;</span> <span class="nx">func</span> <span class=
-"nx">args</span><span class="p">...),</span> <span class=
-"nx">ms</span>
+<span class="nv">Jolt.isPropagating  = isPropagating  = </span><span class="o">-&gt;</span> <span class="nx">propagating</span>
+<span class="nv">Jolt.setPropagating = setPropagating = </span><span class="nf">(bool) -&gt;</span> <span class="nv">propagating = </span><span class="nb">Boolean</span> <span class="nx">bool</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p><code>Jolt.doNotPropagate</code> is a sentinel value which signals that event propagation
+should be halted in the emitting node's branch of a propagation graph.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.doNotPropagate = doNotPropagate = </span><span class="p">{}</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p><code>Jolt.propagateHigh</code> is a unique value which when passed as the last argument
+to <code>Jolt.sendEvent</code> signals the <code>&lt;PulseClass&gt;.prototype.propagate</code> method to
+invoke its <code>high</code> logic.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.propagateHigh  = propagateHigh  = </span><span class="p">{}</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p><code>sendCall</code> facilitates the always imperatively called method <code>Jolt.sendEvent</code>
+being named and treated as the first node in a propagation cycle, though it's not
+properly a node in the graph.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">sendCall = name: </span><span class="p">(</span><span class="o">-&gt;</span> <span class="s">&#39;Jolt.sendEvent&#39;</span><span class="p">),</span> <span class="nv">removeWeakReference: </span><span class="o">-&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>keep in mind the following when composing functions to call via defer
+https://bugzilla.mozilla.org/show_bug.cgi?id=394769</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="k">if</span> <span class="nx">isNodeJS</span>
+  <span class="nv">Jolt.defer_high = defer_high = </span><span class="nf">(func, args...) -&gt;</span> <span class="nx">process</span><span class="p">.</span><span class="nx">nextTick</span> <span class="o">-&gt;</span> <span class="nx">func</span> <span class="nx">args</span><span class="p">...</span>
+  <span class="nv">Jolt.delay = delay = </span><span class="nf">(func, ms, args...) -&gt;</span> <span class="nx">setTimeout</span> <span class="p">(</span><span class="o">-&gt;</span> <span class="nx">func</span> <span class="nx">args</span><span class="p">...),</span> <span class="nx">ms</span>
 <span class="k">else</span>
-  <span class=
-"nv">Jolt.defer_high = defer_high = </span><span class=
-"nf">(func, args...) -&gt;</span> <span class=
-"nx">defer</span> <span class="nx">func</span><span class=
-"p">,</span> <span class="nx">args</span><span class="p">...</span>
-  <span class="nv">Jolt.delay = delay = </span><span class=
-"nf">(func, ms, args...) -&gt;</span> <span class=
-"nb">window</span><span class="p">.</span><span class=
-"nx">setTimeout</span> <span class="p">(</span><span class=
-"o">-&gt;</span> <span class="nx">func</span> <span class=
-"nx">args</span><span class="p">...),</span> <span class=
-"nx">ms</span>
+  <span class="nv">Jolt.defer_high = defer_high = </span><span class="nf">(func, args...) -&gt;</span> <span class="nx">defer</span> <span class="nx">func</span><span class="p">,</span> <span class="nx">args</span><span class="p">...</span>
+  <span class="nv">Jolt.delay = delay = </span><span class="nf">(func, ms, args...) -&gt;</span> <span class="nb">window</span><span class="p">.</span><span class="nx">setTimeout</span> <span class="p">(</span><span class="o">-&gt;</span> <span class="nx">func</span> <span class="nx">args</span><span class="p">...),</span> <span class="nx">ms</span>
 
-<span class="nv">Jolt.defer = defer = </span><span class=
-"nf">(func, args...) -&gt;</span> <span class=
-"nx">delay</span> <span class="nx">func</span><span class=
-"p">,</span> <span class="mi">0</span><span class=
-"p">,</span> <span class="nx">args</span><span class="p">...</span>
-</pre>
-            </div>
-          </td>
-        </tr>
-
-        <tr id="section-7">
-          <td class="docs">
-            <div class="pilwrap">
-              <a class="pilcrow" href="#section-7">&para;</a>
-            </div>
-
-            <p>this queue should be adjusted so that it is drained
-            more quickly/slowly, both in terms of the delay ms
-            value and how many tasks are shifted/exec'd in one
-            step, if the queue length grows beyond a certain upper
-            threshold; research should be conducted to find a
-            robust algorithm, as certainly this project is not the
-            first with such a need</p>
-          </td>
-
-          <td class="code">
-            <div class="highlight">
-              <pre>
-<span class=
-"nv">Jolt.cleanupQ = cleanupQ = cleanupWeakReference = </span><span class="p">[]</span>
-<span class="nv">cleanupQ.draining = </span><span class=
-"kc">false</span>
+<span class="nv">Jolt.defer = defer = </span><span class="nf">(func, args...) -&gt;</span> <span class="nx">delay</span> <span class="nx">func</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">args</span><span class="p">...</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>this queue should be adjusted so that it is drained more quickly/slowly, both
+in terms of the delay ms value and how many tasks are shifted/exec'd in one
+step, if the queue length grows beyond a certain upper threshold; research
+should be conducted to find a robust algorithm, as certainly this project
+is not the first with such a need</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.cleanupQ = cleanupQ = cleanupWeakReference = </span><span class="p">[]</span>
+<span class="nv">cleanupQ.draining = </span><span class="kc">false</span>
 <span class="nv">cleanupQ.freq = </span><span class="mi">100</span>
-<span class="nv">cleanupQ.drain = </span><span class=
-"o">-&gt;</span>
-  <span class="k">if</span> <span class=
-"nx">cleanupQ</span><span class="p">.</span><span class=
-"nx">length</span>
-    <span class="p">(</span><span class=
-"nx">cleanupQ</span><span class="p">.</span><span class=
-"nx">shift</span><span class="p">())()</span>
-    <span class="nx">delay</span> <span class=
-"nx">cleanupQ</span><span class="p">.</span><span class=
-"nx">drain</span><span class="p">,</span> <span class=
-"nx">cleanupQ</span><span class="p">.</span><span class=
-"nx">freq</span>
+<span class="nv">cleanupQ.drain = </span><span class="o">-&gt;</span>
+  <span class="k">if</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">length</span>
+    <span class="p">(</span><span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span>
+    <span class="nx">delay</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">drain</span><span class="p">,</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">freq</span>
   <span class="k">else</span>
-    <span class="nv">cleanupQ.draining = </span><span class=
-"kc">false</span>
+    <span class="nv">cleanupQ.draining = </span><span class="kc">false</span>
 
-<span class=
-"nv">Jolt.scheduleCleanup = scheduleCleanup = </span><span class=
-"nf">(cleanupQ, sender, weakReference) -&gt;</span>
-  <span class="k">if</span> <span class="o">not</span> <span class=
-"nx">cleanupQ</span> <span class="k">then</span> <span class=
-"nv">cleanupQ = </span><span class="nx">cleanupWeakReference</span>
-  <span class="k">if</span> <span class="o">not</span> <span class=
-"nx">weakReference</span><span class="p">.</span><span class=
-"nx">cleanupScheduled</span>
-    <span class=
-"nv">weakReference.cleanupScheduled = </span><span class=
-"kc">true</span>
-    <span class="nx">cleanupQ</span><span class=
-"p">.</span><span class="nx">push</span> <span class=
-"o">-&gt;</span>
-      <span class="nx">sender</span><span class=
-"p">.</span><span class=
-"nx">removeWeakReference</span> <span class="nx">weakReference</span>
-    <span class="k">if</span> <span class=
-"o">not</span> <span class="nx">cleanupQ</span><span class=
-"p">.</span><span class="nx">draining</span>
-      <span class="nv">cleanupQ.draining = </span><span class=
-"kc">true</span>
-      <span class="nx">delay</span> <span class=
-"nx">cleanupQ</span><span class="p">.</span><span class=
-"nx">drain</span><span class="p">,</span> <span class=
-"nx">cleanupQ</span><span class="p">.</span><span class=
-"nx">freq</span>
-</pre>
-            </div>
-          </td>
-        </tr>
-
-        <tr id="section-8">
-          <td class="docs">
-            <div class="pilwrap">
-              <a class="pilcrow" href="#section-8">&para;</a>
-            </div>
-
-            <p>this queue should be adjusted so that it is drained
-            more quickly/slowly, both in terms of the delay ms
-            value and how many tasks are shifted/exec'd in one
-            step, with respect to the average number of tasks that
-            remain for a "drain all" step that precedes pulse
-            propagation; again, research is needed.......</p>
-          </td>
-
-          <td class="code">
-            <div class="highlight">
-              <pre>
-<span class=
-"nv">Jolt.beforeQ = beforeQ = beforeNextPulse = </span><span class=
-"p">[]</span>
-<span class="nv">beforeQ.draining = </span><span class=
-"kc">false</span>
+<span class="nv">Jolt.scheduleCleanup = scheduleCleanup = </span><span class="nf">(cleanupQ, sender, weakReference) -&gt;</span>
+  <span class="k">if</span> <span class="o">not</span> <span class="nx">cleanupQ</span> <span class="k">then</span> <span class="nv">cleanupQ = </span><span class="nx">cleanupWeakReference</span>
+  <span class="k">if</span> <span class="o">not</span> <span class="nx">weakReference</span><span class="p">.</span><span class="nx">cleanupScheduled</span>
+    <span class="nv">weakReference.cleanupScheduled = </span><span class="kc">true</span>
+    <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">push</span> <span class="o">-&gt;</span>
+      <span class="nx">sender</span><span class="p">.</span><span class="nx">removeWeakReference</span> <span class="nx">weakReference</span>
+    <span class="k">if</span> <span class="o">not</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">draining</span>
+      <span class="nv">cleanupQ.draining = </span><span class="kc">true</span>
+      <span class="nx">delay</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">drain</span><span class="p">,</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">freq</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>this queue should be adjusted so that it is drained more quickly/slowly, both
+in terms of the delay ms value and how many tasks are shifted/exec'd in one
+step, with respect to the average number of tasks that remain for a "drain
+all" step that precedes pulse propagation; again, research is needed.......</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.beforeQ = beforeQ = beforeNextPulse = </span><span class="p">[]</span>
+<span class="nv">beforeQ.draining = </span><span class="kc">false</span>
 <span class="nv">beforeQ.freq = </span><span class="mi">10</span>
-<span class="nv">beforeQ.drain = </span><span class=
-"o">-&gt;</span>
-  <span class="k">if</span> <span class=
-"nx">beforeQ</span><span class="p">.</span><span class=
-"nx">length</span>
-    <span class="p">(</span><span class=
-"nx">beforeQ</span><span class="p">.</span><span class=
-"nx">shift</span><span class="p">())()</span>
-    <span class="nx">delay</span> <span class=
-"nx">beforeQ</span><span class="p">.</span><span class=
-"nx">drain</span><span class="p">,</span> <span class=
-"nx">beforeQ</span><span class="p">.</span><span class=
-"nx">freq</span>
+<span class="nv">beforeQ.drain = </span><span class="o">-&gt;</span>
+  <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">length</span>
+    <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span>
+    <span class="nx">delay</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drain</span><span class="p">,</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">freq</span>
   <span class="k">else</span>
-    <span class="nv">beforeQ.draining = </span><span class=
-"kc">false</span>
+    <span class="nv">beforeQ.draining = </span><span class="kc">false</span>
 
-<span class=
-"nv">Jolt.scheduleBefore = scheduleBefore = </span><span class=
-"nf">(beforeQ, func, args...) -&gt;</span>
-  <span class="k">if</span> <span class="o">not</span> <span class=
-"nx">beforeQ</span> <span class="k">then</span> <span class=
-"nv">beforeQ = </span><span class="nx">beforeNextPulse</span>
-  <span class="nx">beforeQ</span><span class=
-"p">.</span><span class="nx">push</span> <span class=
-"o">-&gt;</span>
-    <span class="nx">func</span> <span class=
-"nx">args</span><span class="p">...</span>
-  <span class="k">if</span> <span class="o">not</span> <span class=
-"nx">beforeQ</span><span class="p">.</span><span class=
-"nx">draining</span>
-    <span class="nv">beforeQ.draining = </span><span class=
-"kc">true</span>
-    <span class="nx">delay</span> <span class=
-"nx">beforeQ</span><span class="p">.</span><span class=
-"nx">drain</span><span class="p">,</span> <span class=
-"nx">beforeQ</span><span class="p">.</span><span class=
-"nx">freq</span>
+<span class="nv">Jolt.scheduleBefore = scheduleBefore = </span><span class="nf">(beforeQ, func, args...) -&gt;</span>
+  <span class="k">if</span> <span class="o">not</span> <span class="nx">beforeQ</span> <span class="k">then</span> <span class="nv">beforeQ = </span><span class="nx">beforeNextPulse</span>
+  <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">push</span> <span class="o">-&gt;</span>
+    <span class="nx">func</span> <span class="nx">args</span><span class="p">...</span>
+  <span class="k">if</span> <span class="o">not</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">draining</span>
+    <span class="nv">beforeQ.draining = </span><span class="kc">true</span>
+    <span class="nx">delay</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drain</span><span class="p">,</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">freq</span>
 
 
 <span class="k">class</span> <span class="nx">HeapStore</span>
-  <span class="nv">constructor: </span><span class=
-"nf">(@stamp) -&gt;</span>
+  <span class="nv">constructor: </span><span class="nf">(@stamp) -&gt;</span>
     <span class="vi">@nodes = </span><span class="p">[]</span>
 
 
-<span class="nv">Jolt.isP = isP = </span><span class=
-"nf">(pulse) -&gt;</span>
-  <span class="nx">pulse</span> <span class=
-"k">instanceof</span> <span class="nx">Pulse</span>
+<span class="nv">Jolt.isP = isP = </span><span class="nf">(pulse) -&gt;</span>
+  <span class="nx">pulse</span> <span class="k">instanceof</span> <span class="nx">Pulse</span>
 
 
-<span class="nv">Jolt.Pulse = </span><span class=
-"k">class</span> <span class="nx">Pulse</span>
-</pre>
-            </div>
-          </td>
-        </tr>
+<span class="nv">Jolt.Pulse = </span><span class="k">class</span> <span class="nx">Pulse</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <p>stamp is unique and gives us a key with which to pair heaps and estreams</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">constructor: </span><span class="nf">(@arity, @junction, @sender, @stamp, @value, @heap = new HeapStore @stamp) -&gt;</span>
 
-        <tr id="section-9">
-          <td class="docs">
-            <div class="pilwrap">
-              <a class="pilcrow" href="#section-9">&para;</a>
-            </div>
+  <span class="nv">propagate: </span><span class="nf">(pulse, sender, receiver, high, more...) -&gt;</span>
 
-            <p>stamp is unique and gives us a key with which to
-            pair heaps and estreams</p>
-          </td>
+    <span class="k">if</span> <span class="o">not</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span>
+      <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">length</span> <span class="o">and</span> <span class="o">not</span> <span class="nx">high</span> <span class="k">then</span> <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span> <span class="k">while</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">length</span>
 
-          <td class="code">
-            <div class="highlight">
-              <pre>
-  <span class="nv">constructor: </span><span class=
-"nf">(@arity, @junction, @sender, @stamp, @value, @heap = new HeapStore @stamp) -&gt;</span>
+      <span class="nx">setPropagating</span> <span class="kc">true</span>
 
-  <span class="nv">propagate: </span><span class=
-"nf">(pulse, sender, receiver, high, more...) -&gt;</span>
+      <span class="nv">queue = </span><span class="k">new</span> <span class="nx">PriorityQueue</span>
 
-    <span class="k">if</span> <span class=
-"o">not</span> <span class="nx">receiver</span><span class=
-"p">.</span><span class="nx">weaklyHeld</span>
-      <span class="k">if</span> <span class=
-"nx">beforeQ</span><span class="p">.</span><span class=
-"nx">length</span> <span class="o">and</span> <span class=
-"o">not</span> <span class="nx">high</span> <span class=
-"k">then</span> <span class="p">(</span><span class=
-"nx">beforeQ</span><span class="p">.</span><span class=
-"nx">shift</span><span class="p">())()</span> <span class=
-"k">while</span> <span class="nx">beforeQ</span><span class=
-"p">.</span><span class="nx">length</span>
+      <span class="nx">queue</span><span class="p">.</span><span class="nx">push</span> <span class="nv">estream: </span><span class="nx">receiver</span><span class="p">,</span> <span class="nv">pulse: </span><span class="nx">pulse</span><span class="p">,</span> <span class="nv">rank: </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
 
-      <span class="nx">setPropagating</span> <span class=
-"kc">true</span>
+      <span class="k">while</span> <span class="nx">queue</span><span class="p">.</span><span class="nx">size</span><span class="p">()</span>
+        <span class="nv">qv = </span><span class="nx">queue</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
 
-      <span class="nv">queue = </span><span class=
-"k">new</span> <span class="nx">PriorityQueue</span>
+        <span class="nv">P = </span><span class="k">new</span> <span class="p">(</span><span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">())</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">arity</span><span class="p">,</span> <span class="o">\</span>
+        <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">junction</span><span class="p">,</span> <span class="o">\</span>
+        <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
+        <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">stamp</span><span class="p">,</span> <span class="o">\</span>
+        <span class="p">(</span><span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">slice</span> <span class="mi">0</span><span class="p">),</span> <span class="o">\</span>
+        <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">heap</span>
 
-      <span class="nx">queue</span><span class=
-"p">.</span><span class="nx">push</span> <span class=
-"nv">estream: </span><span class="nx">receiver</span><span class=
-"p">,</span> <span class="nv">pulse: </span><span class=
-"nx">pulse</span><span class="p">,</span> <span class=
-"nv">rank: </span><span class="nx">receiver</span><span class=
-"p">.</span><span class="nx">rank</span>
+        <span class="nx">P</span><span class="p">.</span><span class="nx">heap</span><span class="p">.</span><span class="nx">nodes</span><span class="p">.</span><span class="nx">push</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span>
 
-      <span class="k">while</span> <span class=
-"nx">queue</span><span class="p">.</span><span class=
-"nx">size</span><span class="p">()</span>
-        <span class="nv">qv = </span><span class=
-"nx">queue</span><span class="p">.</span><span class=
-"nx">pop</span><span class="p">()</span>
-
-        <span class="nv">P = </span><span class=
-"k">new</span> <span class="p">(</span><span class=
-"nx">qv</span><span class="p">.</span><span class=
-"nx">estream</span><span class="p">.</span><span class=
-"nx">PulseClass</span><span class="p">())</span> <span class=
-"nx">qv</span><span class="p">.</span><span class=
-"nx">pulse</span><span class="p">.</span><span class=
-"nx">arity</span><span class="p">,</span> <span class="o">\</span>
-        <span class="nx">qv</span><span class=
-"p">.</span><span class="nx">pulse</span><span class=
-"p">.</span><span class="nx">junction</span><span class=
-"p">,</span> <span class="o">\</span>
-        <span class="nx">qv</span><span class=
-"p">.</span><span class="nx">pulse</span><span class=
-"p">.</span><span class="nx">sender</span><span class=
-"p">,</span> <span class="o">\</span>
-        <span class="nx">qv</span><span class=
-"p">.</span><span class="nx">pulse</span><span class=
-"p">.</span><span class="nx">stamp</span><span class=
-"p">,</span> <span class="o">\</span>
-        <span class="p">(</span><span class=
-"nx">qv</span><span class="p">.</span><span class=
-"nx">pulse</span><span class="p">.</span><span class=
-"nx">value</span><span class="p">.</span><span class=
-"nx">slice</span> <span class="mi">0</span><span class=
-"p">),</span> <span class="o">\</span>
-        <span class="nx">qv</span><span class=
-"p">.</span><span class="nx">pulse</span><span class=
-"p">.</span><span class="nx">heap</span>
-
-        <span class="nx">P</span><span class=
-"p">.</span><span class="nx">heap</span><span class=
-"p">.</span><span class="nx">nodes</span><span class=
-"p">.</span><span class="nx">push</span> <span class=
-"nx">qv</span><span class="p">.</span><span class=
-"nx">estream</span>
-
-        <span class="nv">nextPulse = </span><span class=
-"nx">qv</span><span class="p">.</span><span class=
-"nx">estream</span><span class="p">.</span><span class=
-"nx">PulseClass</span><span class="p">().</span><span class=
-"nx">prototype</span><span class="p">.</span><span class=
-"nx">PROPAGATE</span> <span class="nx">P</span><span class=
-"p">,</span> <span class="o">\</span>
-        <span class="nx">P</span><span class=
-"p">.</span><span class="nx">sender</span><span class=
-"p">,</span> <span class="o">\</span>
-        <span class="nx">qv</span><span class=
-"p">.</span><span class="nx">estream</span><span class=
-"p">,</span> <span class="o">\</span>
-        <span class="nx">high</span><span class=
-"p">,</span> <span class="o">\</span>
+        <span class="nv">nextPulse = </span><span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">().</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">PROPAGATE</span> <span class="nx">P</span><span class="p">,</span> <span class="o">\</span>
+        <span class="nx">P</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
+        <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">,</span> <span class="o">\</span>
+        <span class="nx">high</span><span class="p">,</span> <span class="o">\</span>
         <span class="nx">more</span><span class="p">...</span>
 
-        <span class="nv">weaklyHeld = </span><span class=
-"kc">true</span>
+        <span class="nv">weaklyHeld = </span><span class="kc">true</span>
 
-        <span class="k">if</span> <span class=
-"nx">nextPulse</span> <span class="o">isnt</span> <span class=
-"nx">doNotPropagate</span>
-          <span class="nv">nextPulse.sender = </span><span class=
-"nx">qv</span><span class="p">.</span><span class=
-"nx">estream</span>
+        <span class="k">if</span> <span class="nx">nextPulse</span> <span class="o">isnt</span> <span class="nx">doNotPropagate</span>
+          <span class="nv">nextPulse.sender = </span><span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span>
 
-          <span class="k">for</span> <span class=
-"nx">receiver</span> <span class="k">in</span> <span class=
-"nx">qv</span><span class="p">.</span><span class=
-"nx">estream</span><span class="p">.</span><span class=
-"nx">sendTo</span>
-            <span class="nv">weaklyHeld = </span><span class=
-"nx">weaklyHeld</span> <span class="o">and</span> <span class=
-"nx">receiver</span><span class="p">.</span><span class=
-"nx">weaklyHeld</span>
-            <span class="k">if</span> <span class=
-"nx">receiver</span><span class="p">.</span><span class=
-"nx">weaklyHeld</span>
-              <span class="nx">scheduleCleanup</span> <span class=
-"nx">cleanupQ</span><span class="p">,</span> <span class=
-"nx">qv</span><span class="p">.</span><span class=
-"nx">estream</span><span class="p">,</span> <span class=
-"nx">receiver</span>
+          <span class="k">for</span> <span class="nx">receiver</span> <span class="k">in</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">sendTo</span>
+            <span class="nv">weaklyHeld = </span><span class="nx">weaklyHeld</span> <span class="o">and</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span>
+            <span class="k">if</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span>
+              <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">,</span> <span class="nx">receiver</span>
             <span class="k">else</span>
-              <span class="nx">queue</span><span class=
-"p">.</span><span class="nx">push</span> <span class=
-"nv">estream: </span><span class="nx">receiver</span><span class=
-"p">,</span> <span class="nv">pulse: </span><span class=
-"nx">nextPulse</span><span class="p">,</span> <span class=
-"nv">rank: </span><span class="nx">receiver</span><span class=
-"p">.</span><span class="nx">rank</span>
+              <span class="nx">queue</span><span class="p">.</span><span class="nx">push</span> <span class="nv">estream: </span><span class="nx">receiver</span><span class="p">,</span> <span class="nv">pulse: </span><span class="nx">nextPulse</span><span class="p">,</span> <span class="nv">rank: </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
 
-          <span class="k">if</span> <span class=
-"nx">qv</span><span class="p">.</span><span class=
-"nx">estream</span><span class="p">.</span><span class=
-"nx">sendTo</span><span class="p">.</span><span class=
-"nx">length</span> <span class="o">and</span> <span class=
-"nx">weaklyHeld</span>
-            <span class=
-"nv">qv.estream.weaklyHeld = </span><span class="kc">true</span>
-            <span class="nx">scheduleCleanup</span> <span class=
-"nx">cleanupQ</span><span class="p">,</span> <span class=
-"nx">qv</span><span class="p">.</span><span class=
-"nx">pulse</span><span class="p">.</span><span class=
-"nx">sender</span><span class="p">,</span> <span class=
-"nx">qv</span><span class="p">.</span><span class=
-"nx">estream</span>
+          <span class="k">if</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">length</span> <span class="o">and</span> <span class="nx">weaklyHeld</span>
+            <span class="nv">qv.estream.weaklyHeld = </span><span class="kc">true</span>
+            <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span>
 
-      <span class="nx">setPropagating</span> <span class=
-"kc">false</span>
+      <span class="nx">setPropagating</span> <span class="kc">false</span>
 
-      <span class="nx">P</span><span class="p">.</span><span class=
-"nx">heap</span>
+      <span class="nx">P</span><span class="p">.</span><span class="nx">heap</span>
 
     <span class="k">else</span>
-      <span class="nx">scheduleCleanup</span> <span class=
-"nx">cleanupQ</span><span class="p">,</span> <span class=
-"nx">sender</span><span class="p">,</span> <span class=
-"nx">receiver</span>
+      <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span>
 
-      <span class="nx">pulse</span><span class=
-"p">.</span><span class="nx">heap</span>
+      <span class="nx">pulse</span><span class="p">.</span><span class="nx">heap</span>
 
 
-  <span class="nv">PROPAGATE: </span><span class=
-"nf">(pulse, sender, receiver, high, more...) -&gt;</span>
-</pre>
-            </div>
-          </td>
-        </tr>
+  <span class="nv">PROPAGATE: </span><span class="nf">(pulse, sender, receiver, high, more...) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <p>in non-catching scenarios (i.e. <em>PulseClass isnt Pulse</em>cat) in
+catching/finally branches, if this step results in an error being thrown
+then isPropagating will be "stuck true", so it's important that estreams
+attached to CATCH<em>E and FINALLY</em>E bet set to use Pulse_cat</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">PULSE = </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">UPDATER</span> <span class="nx">pulse</span>
 
-        <tr id="section-10">
-          <td class="docs">
-            <div class="pilwrap">
-              <a class="pilcrow" href="#section-10">&para;</a>
-            </div>
-
-            <p>in non-catching scenarios (i.e. <em>PulseClass isnt
-            Pulse</em>cat) in catching/finally branches, if this
-            step results in an error being thrown then
-            isPropagating will be "stuck true", so it's important
-            that estreams attached to CATCH<em>E and FINALLY</em>E
-            bet set to use Pulse_cat</p>
-          </td>
-
-          <td class="code">
-            <div class="highlight">
-              <pre>
-    <span class="nv">PULSE = </span><span class=
-"nx">receiver</span><span class="p">.</span><span class=
-"nx">UPDATER</span> <span class="nx">pulse</span>
-
-    <span class="k">if</span> <span class=
-"nx">PULSE</span> <span class="o">isnt</span> <span class=
-"nx">doNotPropagate</span> <span class="o">and</span> <span class=
-"o">not</span> <span class="p">(</span><span class=
-"nx">isP</span> <span class="nx">PULSE</span><span class=
-"p">)</span>
-      <span class="nx">setPropagating</span> <span class=
-"kc">false</span>
-      <span class="k">throw</span> <span class=
-"s">'receiver\'s UPDATER did not return a pulse object'</span>
+    <span class="k">if</span> <span class="nx">PULSE</span> <span class="o">isnt</span> <span class="nx">doNotPropagate</span> <span class="o">and</span> <span class="o">not</span> <span class="p">(</span><span class="nx">isP</span> <span class="nx">PULSE</span><span class="p">)</span>
+      <span class="nx">setPropagating</span> <span class="kc">false</span>
+      <span class="k">throw</span> <span class="s">&#39;receiver\&#39;s UPDATER did not return a pulse object&#39;</span>
     <span class="k">else</span>
       <span class="nx">PULSE</span>
  
@@ -631,73 +163,39 @@
  
  
  
- 
-</pre>
-            </div>
-          </td>
-        </tr>
+ </pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
 
-        <tr id="section-11">
-          <td class="docs">
-            <div class="pilwrap">
-              <a class="pilcrow" href="#section-11">&para;</a>
-            </div>
+<p>Jolt - Reactive Objects for JavaScript</p>
 
-            <p>&lt;&lt;&lt;&gt;&gt;&gt;</p>
+<p><a href="https://github.com/projexsys/Jolt">https://github.com/projexsys/Jolt</a></p>
 
-            <p>Jolt - Reactive Objects for JavaScript</p>
+<p>This software is Copyright (c) 2011 by Projexsys, Inc.</p>
 
-            <p><a href=
-            "https://github.com/projexsys/Jolt">https://github.com/projexsys/Jolt</a></p>
+<p>This is free software, licensed under:</p>
 
-            <p>This software is Copyright (c) 2011 by Projexsys,
-            Inc.</p>
+<p>The GNU General Public License Version 3</p>
 
-            <p>This is free software, licensed under:</p>
+<p>The JavaScript and/or CoffeeScript code developed and owned by
+Projexsys, Inc. presented in this page is free software: you can
+redistribute it and/or modify it under the terms of the GNU General
+Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any
+later version. The code is distributed WITHOUT ANY WARRANTY; without
+even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU GPL for more details:</p>
 
-            <p>The GNU General Public License Version 3</p>
+<p><a href="https://raw.github.com/projexsys/Jolt/master/LICENSE">https://raw.github.com/projexsys/Jolt/master/LICENSE</a>
+<a href="http://www.gnu.org/licenses/gpl-3.0.txt">http://www.gnu.org/licenses/gpl-3.0.txt</a></p>
 
-            <p>The JavaScript and/or CoffeeScript code developed
-            and owned by Projexsys, Inc. presented in this page is
-            free software: you can redistribute it and/or modify it
-            under the terms of the GNU General Public License (GNU
-            GPL) as published by the Free Software Foundation,
-            either version 3 of the License, or (at your option)
-            any later version. The code is distributed WITHOUT ANY
-            WARRANTY; without even the implied warranty of
-            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-            See the GNU GPL for more details:</p>
+<p>However, if you have executed an End User Software License and
+Services Agreement or an OEM Software License and Support Services
+Agreement, or another commercial license agreement with Projexsys,
+Inc. (each, a "Commercial Agreement"), the terms of the license in
+such Commercial Agreement will supersede the GNU GENERAL PUBLIC
+LICENSE Version 3 and you may use the Software solely pursuant to the
+terms of the relevant Commercial Agreement.</p>
 
-            <p><a href=
-            "https://raw.github.com/projexsys/Jolt/master/LICENSE">https://raw.github.com/projexsys/Jolt/master/LICENSE</a>
-            <a href=
-            "http://www.gnu.org/licenses/gpl-3.0.txt">http://www.gnu.org/licenses/gpl-3.0.txt</a></p>
+<p>This sofware is derived from and incorporates existing works. For
+further information and license texts please refer to:</p>
 
-            <p>However, if you have executed an End User Software
-            License and Services Agreement or an OEM Software
-            License and Support Services Agreement, or another
-            commercial license agreement with Projexsys, Inc.
-            (each, a "Commercial Agreement"), the terms of the
-            license in such Commercial Agreement will supersede the
-            GNU GENERAL PUBLIC LICENSE Version 3 and you may use
-            the Software solely pursuant to the terms of the
-            relevant Commercial Agreement.</p>
-
-            <p>This sofware is derived from and incorporates
-            existing works. For further information and license
-            texts please refer to:</p>
-
-            <p><a href=
-            "https://raw.github.com/projexsys/Jolt/master/LICENSES">
-            https://raw.github.com/projexsys/Jolt/master/LICENSES</a></p>
-          </td>
-
-          <td class="code">
-            <div class="highlight"></div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</body>
-</html>
+<p><a href="https://raw.github.com/projexsys/Jolt/master/LICENSES">https://raw.github.com/projexsys/Jolt/master/LICENSES</a></p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
