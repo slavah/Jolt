@@ -1,27 +1,169 @@
-<!DOCTYPE html>  <html> <head>   <title>exporter.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="LiftedB.html">                 LiftedB.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="ConcatE.html">                 ConcatE.coffee               </a>                                           <a class="source" href="EventStream_api.html">                 EventStream_api.coffee               </a>                                           <a class="source" href="InternalE.html">                 InternalE.coffee               </a>                                           <a class="source" href="MappedE.html">                 MappedE.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Pulse_cat.html">                 Pulse_cat.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                                           <a class="source" href="say.html">                 say.coffee               </a>                                           <a class="source" href="exporter.html">                 exporter.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               exporter.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>The <code>exports</code> object is in scope per the function wrapper around the entire
-library -- i.e. that wrapper has a parameter named <code>exports</code>. In a node.js
-environment, <code>module.exports</code> will be passed as the <code>exports</code> argument; for
-other environments (e.g. browsers), an object named <code>this.Jolt</code> is passed,
-after being created inline. See Jolt's
-<a href="https://raw.github.com/projexsys/Jolt/master/lib/packaging/bottom.js">bottom.js</a>
-component file.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">exporter = </span><span class="nf">(ns = Jolt, target = exports) -&gt;</span>
-  <span class="k">for</span> <span class="nx">own</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">value</span> <span class="k">of</span> <span class="nx">ns</span>
-    <span class="nx">target</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">ns</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>Jolt bundles the <a href="https://github.com/hij1nx/EventEmitter2">EventEmitter2</a> and
-<a href="http://documentcloud.github.com/underscore/">Underscore</a> libraries. See
-their respective component files if you wish to understand how they've been
-<em>slightly</em> modified to facilitate inline bundling:
-<a href="https://raw.github.com/projexsys/Jolt/master/lib/helpers/eventemitter2.mymod.js">eventemitter2.mymod.js</a>,
-<a href="https://raw.github.com/projexsys/Jolt/master/lib/helpers/underscore.mymod.js">underscore.mymod.js</a>.
-Both are accessible as members of the exported API (e.g. <code>Jolt._</code>). Note that
-if <code>Jolt.globalize()</code> is called (see the next annotation), both will be placed
-in the global namespace.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.EventEmitter2 = </span><span class="nx">EventEmitter</span>
-<span class="nv">Jolt._             = </span><span class="nx">_</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>Jolt's <code>globalize</code> method provides a convenient means to place the library's
-API in the global namespace. It's never necessary to call it, but for
-Jolt-heavy development and testing, it is useful for reducing verbosity.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.globalize = </span><span class="nf">(namespaces...) -&gt;</span>
-  <span class="nv">which = </span><span class="k">if</span> <span class="nb">window</span><span class="o">?</span> <span class="k">then</span> <span class="nb">window</span> <span class="k">else</span> <span class="p">(</span><span class="k">if</span> <span class="nx">global</span><span class="o">?</span> <span class="k">then</span> <span class="nx">global</span> <span class="k">else</span> <span class="p">{})</span>
-  <span class="k">if</span> <span class="o">not</span> <span class="nx">namespaces</span><span class="p">.</span><span class="nx">length</span> <span class="k">then</span> <span class="nx">exporter</span><span class="p">(</span><span class="nx">Jolt</span><span class="p">,</span> <span class="nx">which</span><span class="p">)</span>
-  <span class="k">for</span> <span class="nx">ns</span> <span class="k">in</span> <span class="nx">namespaces</span>
-    <span class="nx">exporter</span><span class="p">(</span><span class="nx">ns</span><span class="p">,</span> <span class="nx">which</span><span class="p">)</span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+
+<html>
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Mac OS X (vers 16 November 2011), see www.w3.org">
+
+  <title>exporter.coffee</title>
+  <meta http-equiv="content-type" content=
+  "text/html; charset=us-ascii">
+  <link rel="stylesheet" media="all" href="docco.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="background"></div>
+
+    <div id="jump_to">
+      Jump To &hellip;
+
+      <div id="jump_wrapper">
+        <div id="jump_page">
+          <a class="source" href=
+          "Behavior.html">Behavior.coffee</a> <a class="source"
+          href="LiftedB.html">LiftedB.coffee</a> <a class="source"
+          href="EventStream.html">EventStream.coffee</a> <a class=
+          "source" href="ConcatE.html">ConcatE.coffee</a> <a class=
+          "source" href=
+          "EventStream_api.html">EventStream_api.coffee</a>
+          <a class="source" href=
+          "InternalE.html">InternalE.coffee</a> <a class="source"
+          href="MappedE.html">MappedE.coffee</a> <a class="source"
+          href="Jolt.html">Jolt.coffee</a> <a class="source" href=
+          "PriorityQueue.html">PriorityQueue.coffee</a> <a class=
+          "source" href="Pulse.html">Pulse.coffee</a> <a class=
+          "source" href="Pulse_cat.html">Pulse_cat.coffee</a>
+          <a class="source" href="Reactor.html">Reactor.coffee</a>
+          <a class="source" href="say.html">say.coffee</a>
+          <a class="source" href=
+          "exporter.html">exporter.coffee</a>
+        </div>
+      </div>
+    </div>
+
+    <table cellpadding="0" cellspacing="0">
+      <thead>
+        <tr>
+          <th class="docs">
+            <h1>exporter.coffee</h1>
+          </th>
+
+          <th class="code"></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr id="section-1">
+          <td class="docs">
+            <div class="pilwrap">
+              <a class="pilcrow" href="#section-1">&para;</a>
+            </div>
+
+            <p>The <code>exports</code> object is in scope per the
+            function wrapper around the entire library -- i.e. that
+            wrapper has a parameter named <code>exports</code>. In
+            a node.js environment, <code>module.exports</code> will
+            be passed as the <code>exports</code> argument; for
+            other environments (e.g. browsers), an object named
+            <code>this.Jolt</code> is passed, after being created
+            inline. See Jolt's <a href=
+            "https://raw.github.com/projexsys/Jolt/master/lib/packaging/bottom.js">
+            bottom.js</a> component file.</p>
+          </td>
+
+          <td class="code">
+            <div class="highlight">
+              <pre>
+<span class="nv">exporter = </span><span class=
+"nf">(ns = Jolt, target = exports) -&gt;</span>
+  <span class="k">for</span> <span class=
+"nx">own</span> <span class="nx">key</span><span class=
+"p">,</span> <span class="nx">value</span> <span class=
+"k">of</span> <span class="nx">ns</span>
+    <span class="nx">target</span><span class=
+"p">[</span><span class="nx">key</span><span class=
+"p">]</span> <span class="o">=</span> <span class=
+"nx">ns</span><span class="p">[</span><span class=
+"nx">key</span><span class="p">]</span>
+</pre>
+            </div>
+          </td>
+        </tr>
+
+        <tr id="section-2">
+          <td class="docs">
+            <div class="pilwrap">
+              <a class="pilcrow" href="#section-2">&para;</a>
+            </div>
+
+            <p>Jolt bundles the <a href=
+            "https://github.com/hij1nx/EventEmitter2">EventEmitter2</a>
+            and <a href=
+            "http://documentcloud.github.com/underscore/">Underscore</a>
+            libraries. See their respective component files if you
+            wish to understand how they've been <em>slightly</em>
+            modified to facilitate inline bundling: <a href=
+            "https://raw.github.com/projexsys/Jolt/master/lib/helpers/eventemitter2.mymod.js">
+            eventemitter2.mymod.js</a>, <a href=
+            "https://raw.github.com/projexsys/Jolt/master/lib/helpers/underscore.mymod.js">
+            underscore.mymod.js</a>. Both are accessible as members
+            of the exported API (e.g. <code>Jolt._</code>). Note
+            that if <code>Jolt.globalize()</code> is called (see
+            the next annotation), both will be placed in the global
+            namespace.</p>
+          </td>
+
+          <td class="code">
+            <div class="highlight">
+              <pre>
+<span class="nv">Jolt.EventEmitter2 = </span><span class=
+"nx">EventEmitter</span>
+<span class="nv">Jolt._             = </span><span class=
+"nx">_</span>
+</pre>
+            </div>
+          </td>
+        </tr>
+
+        <tr id="section-3">
+          <td class="docs">
+            <div class="pilwrap">
+              <a class="pilcrow" href="#section-3">&para;</a>
+            </div>
+
+            <p>Jolt's <code>globalize</code> method provides a
+            convenient means to place the library's API in the
+            global namespace. It's never necessary to call it, but
+            for Jolt-heavy development and testing, it is useful
+            for reducing verbosity.</p>
+          </td>
+
+          <td class="code">
+            <div class="highlight">
+              <pre>
+<span class="nv">Jolt.globalize = </span><span class=
+"nf">(namespaces...) -&gt;</span>
+  <span class="nv">which = </span><span class=
+"k">if</span> <span class="nb">window</span><span class=
+"o">?</span> <span class="k">then</span> <span class=
+"nb">window</span> <span class="k">else</span> <span class=
+"p">(</span><span class="k">if</span> <span class=
+"nx">global</span><span class="o">?</span> <span class=
+"k">then</span> <span class="nx">global</span> <span class=
+"k">else</span> <span class="p">{})</span>
+  <span class="k">if</span> <span class="o">not</span> <span class=
+"nx">namespaces</span><span class="p">.</span><span class=
+"nx">length</span> <span class="k">then</span> <span class=
+"nx">exporter</span><span class="p">(</span><span class=
+"nx">Jolt</span><span class="p">,</span> <span class=
+"nx">which</span><span class="p">)</span>
+  <span class="k">for</span> <span class=
+"nx">ns</span> <span class="k">in</span> <span class=
+"nx">namespaces</span>
+    <span class="nx">exporter</span><span class=
+"p">(</span><span class="nx">ns</span><span class=
+"p">,</span> <span class="nx">which</span><span class="p">)</span>
   <span class="k">return</span> <span class="kc">undefined</span>
 
 
@@ -45,39 +187,73 @@ Jolt-heavy development and testing, it is useful for reducing verbosity.</p>    
  
  
  
- </pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
+ 
+</pre>
+            </div>
+          </td>
+        </tr>
 
-<p>Jolt - Reactive Objects for JavaScript</p>
+        <tr id="section-4">
+          <td class="docs">
+            <div class="pilwrap">
+              <a class="pilcrow" href="#section-4">&para;</a>
+            </div>
 
-<p><a href="https://github.com/projexsys/Jolt">https://github.com/projexsys/Jolt</a></p>
+            <p>&lt;&lt;&lt;&gt;&gt;&gt;</p>
 
-<p>This software is Copyright (c) 2011 by Projexsys, Inc.</p>
+            <p>Jolt - Reactive Objects for JavaScript</p>
 
-<p>This is free software, licensed under:</p>
+            <p><a href=
+            "https://github.com/projexsys/Jolt">https://github.com/projexsys/Jolt</a></p>
 
-<p>The GNU General Public License Version 3</p>
+            <p>This software is Copyright (c) 2011 by Projexsys,
+            Inc.</p>
 
-<p>The JavaScript and/or CoffeeScript code developed and owned by
-Projexsys, Inc. presented in this page is free software: you can
-redistribute it and/or modify it under the terms of the GNU General
-Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any
-later version. The code is distributed WITHOUT ANY WARRANTY; without
-even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU GPL for more details:</p>
+            <p>This is free software, licensed under:</p>
 
-<p><a href="https://raw.github.com/projexsys/Jolt/master/LICENSE">https://raw.github.com/projexsys/Jolt/master/LICENSE</a>
-<a href="http://www.gnu.org/licenses/gpl-3.0.txt">http://www.gnu.org/licenses/gpl-3.0.txt</a></p>
+            <p>The GNU General Public License Version 3</p>
 
-<p>However, if you have executed an End User Software License and
-Services Agreement or an OEM Software License and Support Services
-Agreement, or another commercial license agreement with Projexsys,
-Inc. (each, a "Commercial Agreement"), the terms of the license in
-such Commercial Agreement will supersede the GNU GENERAL PUBLIC
-LICENSE Version 3 and you may use the Software solely pursuant to the
-terms of the relevant Commercial Agreement.</p>
+            <p>The JavaScript and/or CoffeeScript code developed
+            and owned by Projexsys, Inc. presented in this page is
+            free software: you can redistribute it and/or modify it
+            under the terms of the GNU General Public License (GNU
+            GPL) as published by the Free Software Foundation,
+            either version 3 of the License, or (at your option)
+            any later version. The code is distributed WITHOUT ANY
+            WARRANTY; without even the implied warranty of
+            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+            See the GNU GPL for more details:</p>
 
-<p>This sofware is derived from and incorporates existing works. For
-further information and license texts please refer to:</p>
+            <p><a href=
+            "https://raw.github.com/projexsys/Jolt/master/LICENSE">https://raw.github.com/projexsys/Jolt/master/LICENSE</a>
+            <a href=
+            "http://www.gnu.org/licenses/gpl-3.0.txt">http://www.gnu.org/licenses/gpl-3.0.txt</a></p>
 
-<p><a href="https://raw.github.com/projexsys/Jolt/master/LICENSES">https://raw.github.com/projexsys/Jolt/master/LICENSES</a></p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
+            <p>However, if you have executed an End User Software
+            License and Services Agreement or an OEM Software
+            License and Support Services Agreement, or another
+            commercial license agreement with Projexsys, Inc.
+            (each, a "Commercial Agreement"), the terms of the
+            license in such Commercial Agreement will supersede the
+            GNU GENERAL PUBLIC LICENSE Version 3 and you may use
+            the Software solely pursuant to the terms of the
+            relevant Commercial Agreement.</p>
+
+            <p>This sofware is derived from and incorporates
+            existing works. For further information and license
+            texts please refer to:</p>
+
+            <p><a href=
+            "https://raw.github.com/projexsys/Jolt/master/LICENSES">
+            https://raw.github.com/projexsys/Jolt/master/LICENSES</a></p>
+          </td>
+
+          <td class="code">
+            <div class="highlight"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

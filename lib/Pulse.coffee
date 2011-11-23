@@ -1,24 +1,38 @@
-# it would NOT be necessary to pass the queues as arguments, nor to export the
-# defer/delay methods, if my build-test tool allowed me to create coupled
-# bundles and test specs, whereby I could take components of the Jolt library,
-# prefix them with "mocks" (and in a node.js context postfix them with the
-# contents of the specs, thereby avoiding the use of require so as to get the
-# "mocks" and the specs into the same scope); when my next-gen build-test tool
-# (built *with* Jolt) is ready, I should bundle it with a specific Jolt release
-# and then work on a new version of Jolt and test specs which have the then
-# unnecessary test-enabling workarounds removed; then in turn a new version of
-# the build-test tool can be tested and bundled with the new version of Jolt
+# Each propagation cycle is (supposed to be) "stamped" with a unique value. In
+# practice this means using `nextStamp` to generate an always-increasing integer
+# value which is then passed to a `<PulseClass>` constructor.
 
 lastStamp = 0
 nextStamp = -> ++lastStamp
+
+# Pulse propagation is, by design, a synchronous operation which in terms of
+# Jolt's own algorightms should always be computationally finite. Practically,
+# this means disallowing modification of event propagation graphs during
+# propagation. The `popagating` flag is therefore toggled at the beginning
+# and end of propagation cycles, by way of its setter function
+# `Jolt.setPropagating`. EventStream methods which affect node-relationships
+# use the getter function `Jolt.isPropagating` to determine whether they should
+# proceed or schedule themselves for execution outside of a popagation cycle.
 
 propagating = false
 
 Jolt.isPropagating  = isPropagating  = -> propagating
 Jolt.setPropagating = setPropagating = (bool) -> propagating = Boolean bool
 
+# `Jolt.doNotPropagate` is a sentinel value which signals that event propagation
+# should be halted in the emitting node's branch of a propagation graph.
+
 Jolt.doNotPropagate = doNotPropagate = {}
+
+# `Jolt.propagateHigh` is a unique value which when passed as the last argument
+# to `Jolt.sendEvent` signals the `<PulseClass>.prototype.propagate` method to
+# invoke its `high` logic.
+
 Jolt.propagateHigh  = propagateHigh  = {}
+
+# `sendCall` facilitates the always imperatively called method `Jolt.sendEvent`
+# being named and treated as the first node in a propagation cycle, though it's not
+# properly a node in the graph.
 
 sendCall = name: (-> 'Jolt.sendEvent'), removeWeakReference: ->
 

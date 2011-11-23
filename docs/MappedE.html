@@ -1,72 +1,235 @@
-<!DOCTYPE html>  <html> <head>   <title>MappedE.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="LiftedB.html">                 LiftedB.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="ConcatE.html">                 ConcatE.coffee               </a>                                           <a class="source" href="EventStream_api.html">                 EventStream_api.coffee               </a>                                           <a class="source" href="InternalE.html">                 InternalE.coffee               </a>                                           <a class="source" href="MappedE.html">                 MappedE.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Pulse_cat.html">                 Pulse_cat.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                                           <a class="source" href="say.html">                 say.coffee               </a>                                           <a class="source" href="exporter.html">                 exporter.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               MappedE.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.MappedE = </span><span class="k">class</span> <span class="nx">MappedE</span> <span class="k">extends</span> <span class="nx">EventStream_api</span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 
-  <span class="nv">constructor: </span><span class="nf">(@fn, args...) -&gt;</span>
-    <span class="k">super</span> <span class="nx">args</span><span class="p">...</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">ClassName: </span><span class="s">&#39;MappedE&#39;</span>
+<html>
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Mac OS X (vers 16 November 2011), see www.w3.org">
 
-  <span class="vi">@factory: </span><span class="nf">(fn, args...) -&gt;</span>
-    <span class="k">if</span> <span class="o">not</span> <span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">isFunction</span> <span class="nx">fn</span><span class="p">)</span>
-      <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@prototype</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.factory: 1st argument must be a function&#39;</span>
-    <span class="k">new</span> <span class="k">this</span> <span class="nx">fn</span><span class="p">,</span> <span class="nx">args</span><span class="p">...</span>
+  <title>MappedE.coffee</title>
+  <meta http-equiv="content-type" content=
+  "text/html; charset=us-ascii">
+  <link rel="stylesheet" media="all" href="docco.css">
+</head>
 
-  <span class="nv">updater: </span><span class="nf">(value...) -&gt;</span>
+<body>
+  <div id="container">
+    <div id="background"></div>
+
+    <div id="jump_to">
+      Jump To &hellip;
+
+      <div id="jump_wrapper">
+        <div id="jump_page">
+          <a class="source" href=
+          "Behavior.html">Behavior.coffee</a> <a class="source"
+          href="LiftedB.html">LiftedB.coffee</a> <a class="source"
+          href="EventStream.html">EventStream.coffee</a> <a class=
+          "source" href="ConcatE.html">ConcatE.coffee</a> <a class=
+          "source" href=
+          "EventStream_api.html">EventStream_api.coffee</a>
+          <a class="source" href=
+          "InternalE.html">InternalE.coffee</a> <a class="source"
+          href="MappedE.html">MappedE.coffee</a> <a class="source"
+          href="Jolt.html">Jolt.coffee</a> <a class="source" href=
+          "PriorityQueue.html">PriorityQueue.coffee</a> <a class=
+          "source" href="Pulse.html">Pulse.coffee</a> <a class=
+          "source" href="Pulse_cat.html">Pulse_cat.coffee</a>
+          <a class="source" href="Reactor.html">Reactor.coffee</a>
+          <a class="source" href="say.html">say.coffee</a>
+          <a class="source" href=
+          "exporter.html">exporter.coffee</a>
+        </div>
+      </div>
+    </div>
+
+    <table cellpadding="0" cellspacing="0">
+      <thead>
+        <tr>
+          <th class="docs">
+            <h1>MappedE.coffee</h1>
+          </th>
+
+          <th class="code"></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr id="section-1">
+          <td class="docs">
+            <div class="pilwrap">
+              <a class="pilcrow" href="#section-1">&para;</a>
+            </div>
+          </td>
+
+          <td class="code">
+            <div class="highlight">
+              <pre>
+<span class="nv">Jolt.MappedE = </span><span class=
+"k">class</span> <span class="nx">MappedE</span> <span class=
+"k">extends</span> <span class="nx">EventStream_api</span>
+
+  <span class="nv">constructor: </span><span class=
+"nf">(@fn, args...) -&gt;</span>
+    <span class="k">super</span> <span class=
+"nx">args</span><span class="p">...</span>
+</pre>
+            </div>
+          </td>
+        </tr>
+
+        <tr id="section-2">
+          <td class="docs">
+            <div class="pilwrap">
+              <a class="pilcrow" href="#section-2">&para;</a>
+            </div>
+
+            <p>--- #</p>
+          </td>
+
+          <td class="code">
+            <div class="highlight">
+              <pre>
+  <span class="nv">ClassName: </span><span class=
+"s">'MappedE'</span>
+
+  <span class="vi">@factory: </span><span class=
+"nf">(fn, args...) -&gt;</span>
+    <span class="k">if</span> <span class=
+"o">not</span> <span class="p">(</span><span class=
+"nx">_</span><span class="p">.</span><span class=
+"nx">isFunction</span> <span class="nx">fn</span><span class=
+"p">)</span>
+      <span class="k">throw</span> <span class=
+"s">'&lt;'</span> <span class="o">+</span> <span class=
+"nx">@prototype</span><span class="p">.</span><span class=
+"nx">ClassName</span> <span class="o">+</span> <span class=
+"s">'&gt;.factory: 1st argument must be a function'</span>
+    <span class="k">new</span> <span class=
+"k">this</span> <span class="nx">fn</span><span class=
+"p">,</span> <span class="nx">args</span><span class="p">...</span>
+
+  <span class="nv">updater: </span><span class=
+"nf">(value...) -&gt;</span>
     <span class="nv">fn = </span><span class="nx">@fn</span>
-    <span class="p">[</span> <span class="p">(</span><span class="nx">fn</span> <span class="nx">value</span><span class="p">...)</span> <span class="p">]</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.mapE = mapE = </span><span class="nf">(args...) -&gt;</span>
-  <span class="nx">MappedE</span><span class="p">.</span><span class="nx">factory</span> <span class="nx">args</span><span class="p">...</span>
+    <span class="p">[</span> <span class="p">(</span><span class=
+"nx">fn</span> <span class="nx">value</span><span class=
+"p">...)</span> <span class="p">]</span>
+</pre>
+            </div>
+          </td>
+        </tr>
 
-<span class="nv">EventStream_api::mapE = </span><span class="nf">(args...) -&gt;</span>
-  <span class="nx">mapE</span> <span class="p">(</span><span class="nx">args</span><span class="p">.</span><span class="nx">push</span> <span class="k">this</span> <span class="p">;</span> <span class="nx">args</span><span class="p">)...</span>
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- </pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
+        <tr id="section-3">
+          <td class="docs">
+            <div class="pilwrap">
+              <a class="pilcrow" href="#section-3">&para;</a>
+            </div>
 
-<p>Jolt - Reactive Objects for JavaScript</p>
+            <p>--- #</p>
+          </td>
 
-<p><a href="https://github.com/projexsys/Jolt">https://github.com/projexsys/Jolt</a></p>
+          <td class="code">
+            <div class="highlight">
+              <pre>
+<span class="nv">Jolt.mapE = mapE = </span><span class=
+"nf">(args...) -&gt;</span>
+  <span class="nx">MappedE</span><span class=
+"p">.</span><span class="nx">factory</span> <span class=
+"nx">args</span><span class="p">...</span>
 
-<p>This software is Copyright (c) 2011 by Projexsys, Inc.</p>
+<span class="nv">EventStream_api::mapE = </span><span class=
+"nf">(args...) -&gt;</span>
+  <span class="nx">mapE</span> <span class="p">(</span><span class=
+"nx">args</span><span class="p">.</span><span class=
+"nx">push</span> <span class="k">this</span> <span class=
+"p">;</span> <span class="nx">args</span><span class=
+"p">)...</span>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+</pre>
+            </div>
+          </td>
+        </tr>
 
-<p>This is free software, licensed under:</p>
+        <tr id="section-4">
+          <td class="docs">
+            <div class="pilwrap">
+              <a class="pilcrow" href="#section-4">&para;</a>
+            </div>
 
-<p>The GNU General Public License Version 3</p>
+            <p>&lt;&lt;&lt;&gt;&gt;&gt;</p>
 
-<p>The JavaScript and/or CoffeeScript code developed and owned by
-Projexsys, Inc. presented in this page is free software: you can
-redistribute it and/or modify it under the terms of the GNU General
-Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any
-later version. The code is distributed WITHOUT ANY WARRANTY; without
-even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU GPL for more details:</p>
+            <p>Jolt - Reactive Objects for JavaScript</p>
 
-<p><a href="https://raw.github.com/projexsys/Jolt/master/LICENSE">https://raw.github.com/projexsys/Jolt/master/LICENSE</a>
-<a href="http://www.gnu.org/licenses/gpl-3.0.txt">http://www.gnu.org/licenses/gpl-3.0.txt</a></p>
+            <p><a href=
+            "https://github.com/projexsys/Jolt">https://github.com/projexsys/Jolt</a></p>
 
-<p>However, if you have executed an End User Software License and
-Services Agreement or an OEM Software License and Support Services
-Agreement, or another commercial license agreement with Projexsys,
-Inc. (each, a "Commercial Agreement"), the terms of the license in
-such Commercial Agreement will supersede the GNU GENERAL PUBLIC
-LICENSE Version 3 and you may use the Software solely pursuant to the
-terms of the relevant Commercial Agreement.</p>
+            <p>This software is Copyright (c) 2011 by Projexsys,
+            Inc.</p>
 
-<p>This sofware is derived from and incorporates existing works. For
-further information and license texts please refer to:</p>
+            <p>This is free software, licensed under:</p>
 
-<p><a href="https://raw.github.com/projexsys/Jolt/master/LICENSES">https://raw.github.com/projexsys/Jolt/master/LICENSES</a></p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
+            <p>The GNU General Public License Version 3</p>
+
+            <p>The JavaScript and/or CoffeeScript code developed
+            and owned by Projexsys, Inc. presented in this page is
+            free software: you can redistribute it and/or modify it
+            under the terms of the GNU General Public License (GNU
+            GPL) as published by the Free Software Foundation,
+            either version 3 of the License, or (at your option)
+            any later version. The code is distributed WITHOUT ANY
+            WARRANTY; without even the implied warranty of
+            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+            See the GNU GPL for more details:</p>
+
+            <p><a href=
+            "https://raw.github.com/projexsys/Jolt/master/LICENSE">https://raw.github.com/projexsys/Jolt/master/LICENSE</a>
+            <a href=
+            "http://www.gnu.org/licenses/gpl-3.0.txt">http://www.gnu.org/licenses/gpl-3.0.txt</a></p>
+
+            <p>However, if you have executed an End User Software
+            License and Services Agreement or an OEM Software
+            License and Support Services Agreement, or another
+            commercial license agreement with Projexsys, Inc.
+            (each, a "Commercial Agreement"), the terms of the
+            license in such Commercial Agreement will supersede the
+            GNU GENERAL PUBLIC LICENSE Version 3 and you may use
+            the Software solely pursuant to the terms of the
+            relevant Commercial Agreement.</p>
+
+            <p>This sofware is derived from and incorporates
+            existing works. For further information and license
+            texts please refer to:</p>
+
+            <p><a href=
+            "https://raw.github.com/projexsys/Jolt/master/LICENSES">
+            https://raw.github.com/projexsys/Jolt/master/LICENSES</a></p>
+          </td>
+
+          <td class="code">
+            <div class="highlight"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
