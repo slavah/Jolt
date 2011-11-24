@@ -257,7 +257,8 @@ Jolt.sendEvent = sendEvent = (estream, vals...) ->
   pClass = estream.PulseClass()
   length = vals.length
   P = new pClass length, false, sendCall, nextStamp(), vals
-  pClass.prototype.propagate P, P.sender, estream, high
+  P.propagate P.sender, estream, high
+  #pClass.prototype.propagate P, P.sender, estream, high
   undefined
  
  

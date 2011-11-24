@@ -38,7 +38,7 @@ sendCall = name: (-> 'Jolt.sendEvent'), removeWeakReference: ->
 
 
 # keep in mind the following when composing functions to call via defer
-# https://bugzilla.mozilla.org/show_bug.cgi?id=394769
+# [https://bugzilla.mozilla.org/show_bug.cgi?id=394769](https://bugzilla.mozilla.org/show_bug.cgi?id=394769)
 if isNodeJS
   Jolt.defer_high = defer_high = (func, args...) -> process.nextTick -> func args...
   Jolt.delay = delay = (func, ms, args...) -> setTimeout (-> func args...), ms
@@ -112,31 +112,26 @@ Jolt.Pulse = class Pulse
   # stamp is unique and gives us a key with which to pair heaps and estreams
   constructor: (@arity, @junction, @sender, @stamp, @value, @heap = new HeapStore @stamp) ->
 
-  propagate: (pulse, sender, receiver, high, more...) ->
+  copy: (PulseClass) ->
+    PulseClass ?= @constructor
+    new PulseClass @arity, @junction, @sender, @stamp, (@value.slice 0), @heap
+
+  propagate: (sender, receiver, high, more...) ->
 
     if not receiver.weaklyHeld
       if beforeQ.length and not high then (beforeQ.shift())() while beforeQ.length
 
       setPropagating true
-
       queue = new PriorityQueue
-
-      queue.push estream: receiver, pulse: pulse, rank: receiver.rank
+      queue.push estream: receiver, pulse: this, rank: receiver.rank
 
       while queue.size()
         qv = queue.pop()
 
-        P = new (qv.estream.PulseClass()) qv.pulse.arity, \
-        qv.pulse.junction, \
-        qv.pulse.sender, \
-        qv.pulse.stamp, \
-        (qv.pulse.value.slice 0), \
-        qv.pulse.heap
+        PULSE = qv.pulse.copy qv.estream.PulseClass()
+        PULSE.heap.nodes.push qv.estream
 
-        P.heap.nodes.push qv.estream
-
-        nextPulse = qv.estream.PulseClass().prototype.PROPAGATE P, \
-        P.sender, \
+        nextPulse = PULSE.PROPAGATE PULSE.sender, \
         qv.estream, \
         high, \
         more...
@@ -158,23 +153,21 @@ Jolt.Pulse = class Pulse
             scheduleCleanup cleanupQ, qv.pulse.sender, qv.estream
 
       setPropagating false
-
-      P.heap
+      PULSE.heap
 
     else
       scheduleCleanup cleanupQ, sender, receiver
+      @heap
 
-      pulse.heap
 
-
-  PROPAGATE: (pulse, sender, receiver, high, more...) ->
+  PROPAGATE: (sender, receiver, high, more...) ->
 
     # in non-catching scenarios (i.e. _PulseClass isnt Pulse_cat) in
     # catching/finally branches, if this step results in an error being thrown
     # then isPropagating will be "stuck true", so it's important that estreams
     # attached to CATCH_E and FINALLY_E bet set to use Pulse_cat
 
-    PULSE = receiver.UPDATER pulse
+    PULSE = receiver.UPDATER this
 
     if PULSE isnt doNotPropagate and not (isP PULSE)
       setPropagating false
