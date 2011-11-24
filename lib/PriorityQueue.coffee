@@ -4,7 +4,7 @@
 
 Jolt.PriorityQueue = class PriorityQueue extends BinaryHeap
 
-  # `BinaryHeap`'s constructor has been overrided so that the scoring method
+  # `BinaryHeap`'s constructor has been overriden so that the scoring method
   # can be affixed to the extension's prototype.
 
   constructor: ->
