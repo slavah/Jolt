@@ -125,13 +125,24 @@ Jolt.scheduleBefore = scheduleBefore = (beforeQ, func, args...) ->
 
 
 # Event propagation order among `EventStream` instances (estreams) that form a
-# propagation graph is governed a binary heap algorithm. As an event propagates
-# through the graph, each step is recorded along the way in an instance of
-# `HeapStore`.
+# propagation graph is governed by a binary heap algorithm. As an event
+# propagates through the graph, each step is recorded along the way in an
+# instance of `HeapStore`.
 
 Jolt.HeapStore = class HeapStore
   constructor: (@stamp, @cont) ->
     @nodes = []
+
+# Some `EventStream` transformers involve asynchronous event propagation,
+# referred to as a "continuation". This results in disjointed propagation graphs
+# since behind the scenes it involves two separate calls to `Jolt.sendEvent`.
+# However, the constructor for Jolt's `Pulse` class allows an instance of
+# `Jolt.ContInfo` ("continuation information") to be passed into the instance of
+# `Jolt.HeapStore` which is constructed and stored in the returned instance of
+# `Pulse` (or a subclass). The `ContInfo` instance tracks which heap/s
+# (referenced by `stamp`) and estream/s were the origin of the continued
+# propagation. The recorded information does not directly affect the program's
+# operation, but is useful for runtime analysis.
 
 Jolt.ContInfo = class ContInfo
   constructor: (@stamps, @nodes) ->
@@ -156,8 +167,7 @@ Jolt.Pulse = class Pulse
   # sending estream (or `Jolt.sendEvent` call). `stamp` is a unique value, an
   # integer, which is incremented before each propagation cycle. `value` is an
   # array (of length `arity`) which contains the data mediated by the pulse.
-  # `heap` is an instance of `HeapStore` and records the propagation steps; as
-  # `stamp` is unique, it gives us a key with which to pair heaps and estreams.
+  # `heap` is an instance of `HeapStore` and records the propagation steps.
 
   constructor: (@arity, @junction, @sender, @stamp, @value = [], @heap = (new HeapStore @stamp, cont), cont) ->
 

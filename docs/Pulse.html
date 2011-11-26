@@ -85,20 +85,27 @@ that remain for the "drain all" step that precedes event propagation.</p>       
   <span class="k">if</span> <span class="o">not</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">draining</span>
     <span class="nv">beforeQ.draining = </span><span class="kc">true</span>
     <span class="nx">delay</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drain</span><span class="p">,</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">freq</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <p>Event propagation order among <code>EventStream</code> instances (estreams) that form a
-propagation graph is governed a binary heap algorithm. As an event propagates
-through the graph, each step is recorded along the way in an instance of
-<code>HeapStore</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.HeapStore = </span><span class="k">class</span> <span class="nx">HeapStore</span>
+propagation graph is governed by a binary heap algorithm. As an event
+propagates through the graph, each step is recorded along the way in an
+instance of <code>HeapStore</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.HeapStore = </span><span class="k">class</span> <span class="nx">HeapStore</span>
   <span class="nv">constructor: </span><span class="nf">(@stamp, @cont) -&gt;</span>
-    <span class="vi">@nodes = </span><span class="p">[]</span>
-
-<span class="nv">Jolt.ContInfo = </span><span class="k">class</span> <span class="nx">ContInfo</span>
-  <span class="nv">constructor: </span><span class="nf">(@stamps, @nodes) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <p>Propagation is mediated by instances of <code>Jolt.Pulse</code>, and <code>Jolt.isP</code> helps
+    <span class="vi">@nodes = </span><span class="p">[]</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <p>Some <code>EventStream</code> transformers involve asynchronous event propagation,
+referred to as a "continuation". This results in disjointed propagation graphs
+since behind the scenes it involves two separate calls to <code>Jolt.sendEvent</code>.
+However, the constructor for Jolt's <code>Pulse</code> class allows an instance of
+<code>Jolt.ContInfo</code> ("continuation information") to be passed into the instance of
+<code>Jolt.HeapStore</code> which is constructed and stored in the returned instance of
+<code>Pulse</code> (or a subclass). The <code>ContInfo</code> instance tracks which heap/s
+(referenced by <code>stamp</code>) and estream/s were the origin of the continued
+propagation. The recorded information does not directly affect the program's
+operation, but is useful for runtime analysis.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.ContInfo = </span><span class="k">class</span> <span class="nx">ContInfo</span>
+  <span class="nv">constructor: </span><span class="nf">(@stamps, @nodes) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <p>Propagation is mediated by instances of <code>Jolt.Pulse</code>, and <code>Jolt.isP</code> helps
 guarantee that objects passed between estreams during <code>propagate</code>/<code>update</code>
 cycles are such instances.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.isP = isP = </span><span class="nf">(pulse) -&gt;</span>
   <span class="nx">pulse</span> <span class="k">instanceof</span> <span class="nx">Pulse</span>
 
 
-<span class="nv">Jolt.Pulse = </span><span class="k">class</span> <span class="nx">Pulse</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <p>Instances of <code>Jolt.Pulse</code> have a set of properties which affect how they are
+<span class="nv">Jolt.Pulse = </span><span class="k">class</span> <span class="nx">Pulse</span></pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <p>Instances of <code>Jolt.Pulse</code> have a set of properties which affect how they are
 processed by recipient estreams, though some of them have a more forensic
 character. <code>arity</code> is an integer value which indicates how many discrete
 pieces of data are carried by a particular pulse, and likewise how many
@@ -108,8 +115,7 @@ arguments will be passed to a receiving estream's inner value transformer.
 sending estream (or <code>Jolt.sendEvent</code> call). <code>stamp</code> is a unique value, an
 integer, which is incremented before each propagation cycle. <code>value</code> is an
 array (of length <code>arity</code>) which contains the data mediated by the pulse.
-<code>heap</code> is an instance of <code>HeapStore</code> and records the propagation steps; as
-<code>stamp</code> is unique, it gives us a key with which to pair heaps and estreams.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">constructor: </span><span class="p">(</span><span class="nx">@arity</span><span class="p">,</span> <span class="nx">@junction</span><span class="p">,</span> <span class="nx">@sender</span><span class="p">,</span> <span class="nx">@stamp</span><span class="p">,</span> <span class="vi">@value = </span><span class="p">[],</span> <span class="vi">@heap = </span><span class="p">(</span><span class="k">new</span> <span class="nx">HeapStore</span> <span class="nx">@stamp</span><span class="p">,</span> <span class="nx">cont</span><span class="p">),</span> <span class="nx">cont</span><span class="p">)</span> <span class="o">-&gt;</span>
+<code>heap</code> is an instance of <code>HeapStore</code> and records the propagation steps.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">constructor: </span><span class="p">(</span><span class="nx">@arity</span><span class="p">,</span> <span class="nx">@junction</span><span class="p">,</span> <span class="nx">@sender</span><span class="p">,</span> <span class="nx">@stamp</span><span class="p">,</span> <span class="vi">@value = </span><span class="p">[],</span> <span class="vi">@heap = </span><span class="p">(</span><span class="k">new</span> <span class="nx">HeapStore</span> <span class="nx">@stamp</span><span class="p">,</span> <span class="nx">cont</span><span class="p">),</span> <span class="nx">cont</span><span class="p">)</span> <span class="o">-&gt;</span>
 
   <span class="nv">copy: </span><span class="nf">(PulseClass) -&gt;</span>
     <span class="nx">PulseClass</span> <span class="o">?=</span> <span class="nx">@constructor</span>
@@ -159,7 +165,7 @@ array (of length <code>arity</code>) which contains the data mediated by the pul
       <span class="nx">@heap</span>
 
 
-  <span class="nv">PROPAGATE: </span><span class="nf">(sender, receiver, high, more...) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <p>in non-catching scenarios (i.e. <em>PulseClass isnt Pulse</em>cat) in
+  <span class="nv">PROPAGATE: </span><span class="nf">(sender, receiver, high, more...) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <p>in non-catching scenarios (i.e. <em>PulseClass isnt Pulse</em>cat) in
 catching/finally branches, if this step results in an error being thrown
 then isPropagating will be "stuck true", so it's important that estreams
 attached to CATCH<em>E and FINALLY</em>E bet set to use Pulse_cat</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">PULSE = </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">UPDATER</span> <span class="k">this</span>
@@ -188,7 +194,7 @@ attached to CATCH<em>E and FINALLY</em>E bet set to use Pulse_cat</p>           
  
  
  
- </pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
+ </pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
 
 <p>Jolt - Reactive Objects for JavaScript</p>
 
