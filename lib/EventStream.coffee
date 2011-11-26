@@ -249,16 +249,22 @@ Jolt.EventStream = class EventStream
 # --- #
 
 Jolt.sendEvent = sendEvent = (estream, vals...) ->
+  cont = undefined
+  cont_maybe = vals[vals.length - 1]
+  if cont_maybe instanceof ContInfo
+    cont = cont_maybe
+    vals.pop()
   high = false
-  high_maybe = vals[vals.length - 1]
+  if cont
+    high_maybe = vals[vals.length - 1]
+  else
+    high_maybe = cont_maybe
   if high_maybe is propagateHigh
     high = true
     vals.pop()
-  pClass = estream.PulseClass()
-  length = vals.length
-  P = new pClass length, false, sendCall, nextStamp(), vals
-  P.propagate P.sender, estream, high
-  #pClass.prototype.propagate P, P.sender, estream, high
+  PulseClass = estream.PulseClass()
+  pulse = new PulseClass vals.length, false, sendCall, nextStamp(), vals, cont
+  pulse.propagate sendCall, estream, high
   undefined
  
  

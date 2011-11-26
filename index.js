@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var BinaryHeap, Continuation, EventStream, HeapStore, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, genericAttachListener, genericRemoveListener, genericRemoveWeakReference, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, _say, _say_helper;
+  var BinaryHeap, ContInfo, EventStream, HeapStore, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, genericAttachListener, genericRemoveListener, genericRemoveWeakReference, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -1867,7 +1867,7 @@
     }
   };
   
-  HeapStore = (function() {
+  Jolt.HeapStore = HeapStore = (function() {
   
     function HeapStore(stamp, cont) {
       this.stamp = stamp;
@@ -1879,14 +1879,14 @@
   
   })();
   
-  Continuation = (function() {
+  Jolt.ContInfo = ContInfo = (function() {
   
-    function Continuation(stamps, nodes) {
+    function ContInfo(stamps, nodes) {
       this.stamps = stamps;
       this.nodes = nodes;
     }
   
-    return Continuation;
+    return ContInfo;
   
   })();
   
@@ -2327,18 +2327,27 @@
   })();
   
   Jolt.sendEvent = sendEvent = function() {
-    var P, estream, high, high_maybe, length, pClass, vals;
+    var PulseClass, cont, cont_maybe, estream, high, high_maybe, pulse, vals;
     estream = arguments[0], vals = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    cont = void 0;
+    cont_maybe = vals[vals.length - 1];
+    if (cont_maybe instanceof ContInfo) {
+      cont = cont_maybe;
+      vals.pop();
+    }
     high = false;
-    high_maybe = vals[vals.length - 1];
+    if (cont) {
+      high_maybe = vals[vals.length - 1];
+    } else {
+      high_maybe = cont_maybe;
+    }
     if (high_maybe === propagateHigh) {
       high = true;
       vals.pop();
     }
-    pClass = estream.PulseClass();
-    length = vals.length;
-    P = new pClass(length, false, sendCall, nextStamp(), vals);
-    P.propagate(P.sender, estream, high);
+    PulseClass = estream.PulseClass();
+    pulse = new PulseClass(vals.length, false, sendCall, nextStamp(), vals, cont);
+    pulse.propagate(sendCall, estream, high);
     return;
   };
   

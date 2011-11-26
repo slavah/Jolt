@@ -1059,9 +1059,9 @@ describe 'Jolt.sendEvent', ->
     checkIt = []
 
     class Pulse_ext extends Pulse
-      PROPAGATE: (pulse, sender, receiver, high, isCatch, isFinally) ->
+      PROPAGATE: (sender, receiver, high, more...) ->
         checkIt.push high
-        receiver.UPDATER pulse
+        super
 
     myE = new EventStream
     myE.PulseClass Pulse_ext
@@ -1127,8 +1127,8 @@ describe 'Jolt.sendEvent', ->
     checkProps = ['arity', 'junction', 'stamp', 'value']
 
     class Pulse_ext extends Pulse
-      PROPAGATE: (pulse, args...) ->
-        heap_save = pulse.heap
+      PROPAGATE: (args...) ->
+        heap_save = this.heap
         super
 
     class EventStream_ext extends EventStream
@@ -1284,12 +1284,12 @@ describe 'Jolt.sendEvent', ->
 
     runs ->
       ( expect heap_save.nodes ).toEqual [
-        myE[0]
-        myE[1]
-        myE[2]
-        myE[4]
-        myE[5]
-        myE[7]
+        [ Jolt.sendCall, myE[0] ]
+        [ myE[0], myE[1] ]
+        [ myE[1], myE[2] ]
+        [ myE[1], myE[4] ]
+        [ myE[1], myE[5] ]
+        [ myE[4], myE[7] ]
       ]
 
       ( expect fin ).toEqual [

@@ -129,11 +129,11 @@ Jolt.scheduleBefore = scheduleBefore = (beforeQ, func, args...) ->
 # through the graph, each step is recorded along the way in an instance of
 # `HeapStore`.
 
-class HeapStore
+Jolt.HeapStore = class HeapStore
   constructor: (@stamp, @cont) ->
     @nodes = []
 
-class Continuation
+Jolt.ContInfo = class ContInfo
   constructor: (@stamps, @nodes) ->
 
 # Propagation is mediated by instances of `Jolt.Pulse`, and `Jolt.isP` helps
@@ -158,6 +158,7 @@ Jolt.Pulse = class Pulse
   # array (of length `arity`) which contains the data mediated by the pulse.
   # `heap` is an instance of `HeapStore` and records the propagation steps; as
   # `stamp` is unique, it gives us a key with which to pair heaps and estreams.
+
   constructor: (@arity, @junction, @sender, @stamp, @value = [], @heap = (new HeapStore @stamp, cont), cont) ->
 
   copy: (PulseClass) ->
