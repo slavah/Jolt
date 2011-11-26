@@ -201,10 +201,7 @@ Jolt.Pulse = class Pulse
 
         PULSE = qv.pulse.copy qv.estream.PulseClass()
 
-        nextPulse = PULSE.PROPAGATE PULSE.sender, \
-        qv.estream, \
-        high, \
-        more...
+        nextPulse = PULSE.PROPAGATE PULSE.sender, qv.estream, high, more...
 
         weaklyHeld = true
 
