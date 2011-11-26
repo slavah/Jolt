@@ -115,9 +115,9 @@ arguments will be passed to a receiving estream's inner value transformer.
 sending estream (or <code>Jolt.sendEvent</code> call). <code>stamp</code> is a unique value, an
 integer, which is incremented before each propagation cycle. <code>value</code> is an
 array (of length <code>arity</code>) which contains the data mediated by the pulse.
-<code>heap</code> is an instance of <code>HeapStore</code> and records the propagation steps.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">constructor: </span><span class="p">(</span><span class="nx">@arity</span><span class="p">,</span> <span class="nx">@junction</span><span class="p">,</span> <span class="nx">@sender</span><span class="p">,</span> <span class="nx">@stamp</span><span class="p">,</span> <span class="vi">@value = </span><span class="p">[],</span> <span class="vi">@heap = </span><span class="p">(</span><span class="k">new</span> <span class="nx">HeapStore</span> <span class="nx">@stamp</span><span class="p">,</span> <span class="nx">cont</span><span class="p">),</span> <span class="nx">cont</span><span class="p">)</span> <span class="o">-&gt;</span>
-
-  <span class="nv">copy: </span><span class="nf">(PulseClass) -&gt;</span>
+<code>heap</code> is an instance of <code>HeapStore</code> and records the propagation steps.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">constructor: </span><span class="p">(</span><span class="nx">@arity</span><span class="p">,</span> <span class="nx">@junction</span><span class="p">,</span> <span class="nx">@sender</span><span class="p">,</span> <span class="nx">@stamp</span><span class="p">,</span> <span class="vi">@value = </span><span class="p">[],</span> <span class="vi">@heap = </span><span class="p">(</span><span class="k">new</span> <span class="nx">HeapStore</span> <span class="nx">@stamp</span><span class="p">,</span> <span class="nx">cont</span><span class="p">),</span> <span class="nx">cont</span><span class="p">)</span> <span class="o">-&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <p><code>Pulse.prototype.copy</code> clones the properties of a <code>Pulse</code> instance to a new
+instance, with the option that a derived class/constructor is used instead
+of the old instance's constructor.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">copy: </span><span class="nf">(PulseClass) -&gt;</span>
     <span class="nx">PulseClass</span> <span class="o">?=</span> <span class="nx">@constructor</span>
     <span class="k">new</span> <span class="nx">PulseClass</span> <span class="nx">@arity</span><span class="p">,</span> <span class="nx">@junction</span><span class="p">,</span> <span class="nx">@sender</span><span class="p">,</span> <span class="nx">@stamp</span><span class="p">,</span> <span class="p">(</span><span class="nx">@value</span><span class="p">.</span><span class="nx">slice</span> <span class="mi">0</span><span class="p">),</span> <span class="nx">@heap</span>
 
@@ -133,8 +133,11 @@ array (of length <code>arity</code>) which contains the data mediated by the pul
       <span class="k">while</span> <span class="nx">queue</span><span class="p">.</span><span class="nx">size</span><span class="p">()</span>
         <span class="nv">qv = </span><span class="nx">queue</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
 
-        <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">heap</span><span class="p">.</span><span class="nx">nodes</span><span class="p">.</span><span class="nx">push</span> <span class="p">[</span><span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">]</span>
-        <span class="nv">PULSE = </span><span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">copy</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">()</span>
+        <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">heap</span><span class="p">.</span><span class="nx">nodes</span><span class="p">.</span><span class="nx">push</span> <span class="p">[</span><span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">]</span></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <p>To avoid unwanted side effects during event propagation, each receiving
+estream is passed a new instance of <code>Pulse</code> (or a subclass) with the
+properties copied from the old one. The choice of <code>&lt;PulseClass&gt;</code> for
+the <code>copy</code> operation is determined by the <code>_PulseClass</code> property of
+the receiving estream.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nv">PULSE = </span><span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">copy</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">()</span>
 
         <span class="nv">nextPulse = </span><span class="nx">PULSE</span><span class="p">.</span><span class="nx">PROPAGATE</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
         <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">,</span> <span class="o">\</span>
@@ -165,7 +168,7 @@ array (of length <code>arity</code>) which contains the data mediated by the pul
       <span class="nx">@heap</span>
 
 
-  <span class="nv">PROPAGATE: </span><span class="nf">(sender, receiver, high, more...) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <p>in non-catching scenarios (i.e. <em>PulseClass isnt Pulse</em>cat) in
+  <span class="nv">PROPAGATE: </span><span class="nf">(sender, receiver, high, more...) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-15">&#182;</a>               </div>               <p>in non-catching scenarios (i.e. <em>PulseClass isnt Pulse</em>cat) in
 catching/finally branches, if this step results in an error being thrown
 then isPropagating will be "stuck true", so it's important that estreams
 attached to CATCH<em>E and FINALLY</em>E bet set to use Pulse_cat</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">PULSE = </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">UPDATER</span> <span class="k">this</span>
@@ -194,7 +197,7 @@ attached to CATCH<em>E and FINALLY</em>E bet set to use Pulse_cat</p>           
  
  
  
- </pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
+ </pre></div>             </td>           </tr>                               <tr id="section-16">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-16">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
 
 <p>Jolt - Reactive Objects for JavaScript</p>
 

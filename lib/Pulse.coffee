@@ -171,6 +171,10 @@ Jolt.Pulse = class Pulse
 
   constructor: (@arity, @junction, @sender, @stamp, @value = [], @heap = (new HeapStore @stamp, cont), cont) ->
 
+  # `Pulse.prototype.copy` clones the properties of a `Pulse` instance to a new
+  # instance, with the option that a derived class/constructor is used instead
+  # of the old instance's constructor.
+
   copy: (PulseClass) ->
     PulseClass ?= @constructor
     new PulseClass @arity, @junction, @sender, @stamp, (@value.slice 0), @heap
@@ -188,6 +192,13 @@ Jolt.Pulse = class Pulse
         qv = queue.pop()
 
         qv.pulse.heap.nodes.push [qv.pulse.sender, qv.estream]
+
+        # To avoid unwanted side effects during event propagation, each receiving
+        # estream is passed a new instance of `Pulse` (or a subclass) with the
+        # properties copied from the old one. The choice of `<PulseClass>` for
+        # the `copy` operation is determined by the `_PulseClass` property of
+        # the receiving estream.
+
         PULSE = qv.pulse.copy qv.estream.PulseClass()
 
         nextPulse = PULSE.PROPAGATE PULSE.sender, \
