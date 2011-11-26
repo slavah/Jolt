@@ -52,7 +52,7 @@ async.parallel(
     'helpers/say.coffee'
     'PriorityQueue.coffee'
     'Pulse.coffee'
-    #'EventStream.coffee'
+    'EventStream.coffee'
     #'EventStream/EventStream_api.coffee'
     #'EventStream/InternalE.coffee'
 

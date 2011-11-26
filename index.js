@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var BinaryHeap, HeapStore, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, isNodeJS, isP, isPropagating, lastStamp, nextStamp, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, setPropagating, _say, _say_helper;
+  var BinaryHeap, Continuation, EventStream, HeapStore, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, genericAttachListener, genericRemoveListener, genericRemoveWeakReference, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -1767,7 +1767,7 @@
   
   Jolt.propagateHigh = propagateHigh = {};
   
-  sendCall = {
+  Jolt.sendCall = sendCall = {
     name: (function() {
       return 'Jolt.sendEvent';
     }),
@@ -1869,12 +1869,24 @@
   
   HeapStore = (function() {
   
-    function HeapStore(stamp) {
+    function HeapStore(stamp, cont) {
       this.stamp = stamp;
+      this.cont = cont;
       this.nodes = [];
     }
   
     return HeapStore;
+  
+  })();
+  
+  Continuation = (function() {
+  
+    function Continuation(stamps, nodes) {
+      this.stamps = stamps;
+      this.nodes = nodes;
+    }
+  
+    return Continuation;
   
   })();
   
@@ -1884,13 +1896,13 @@
   
   Jolt.Pulse = Pulse = (function() {
   
-    function Pulse(arity, junction, sender, stamp, value, heap) {
+    function Pulse(arity, junction, sender, stamp, value, heap, cont) {
       this.arity = arity;
       this.junction = junction;
       this.sender = sender;
       this.stamp = stamp;
-      this.value = value;
-      this.heap = heap != null ? heap : new HeapStore(this.stamp);
+      this.value = value != null ? value : [];
+      this.heap = heap != null ? heap : new HeapStore(this.stamp, cont);
     }
   
     Pulse.prototype.copy = function(PulseClass) {
@@ -1916,8 +1928,8 @@
         });
         while (queue.size()) {
           qv = queue.pop();
+          qv.pulse.heap.nodes.push([qv.pulse.sender, qv.estream]);
           PULSE = qv.pulse.copy(qv.estream.PulseClass());
-          PULSE.heap.nodes.push(qv.estream);
           nextPulse = PULSE.PROPAGATE.apply(PULSE, [PULSE.sender, qv.estream, high].concat(__slice.call(more)));
           weaklyHeld = true;
           if (nextPulse !== doNotPropagate) {
@@ -1965,6 +1977,370 @@
     return Pulse;
   
   })();
+  
+  lastRank = 0;
+  
+  nextRank = function() {
+    return ++lastRank;
+  };
+  
+  Jolt.isE = isE = function(estream) {
+    return estream instanceof EventStream;
+  };
+  
+  genericAttachListener = function(sender, receiver) {
+    var cur, doNextRank, estream, i, q, sentinel, _i, _len, _results;
+    if (!isPropagating()) {
+      if (sender.rank === receiver.rank) {
+        throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph';
+      }
+      i = _.indexOf(sender.sendTo, receiver);
+      if (!(i + 1)) {
+        sender.sendTo.push(receiver);
+        if (sender.rank > receiver.rank) {
+          doNextRank = [];
+          sentinel = {};
+          sender.__cycleSentinel__ = sentinel;
+          q = [receiver];
+          while (q.length) {
+            cur = q.shift();
+            if (cur.__cycleSentinel__ === sentinel) {
+              sender.sendTo.pop();
+              throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph';
+            }
+            doNextRank.push(cur);
+            cur.__cycleSentinel__ = sentinel;
+            q.push.apply(q, cur.sendTo);
+          }
+          _results = [];
+          for (_i = 0, _len = doNextRank.length; _i < _len; _i++) {
+            estream = doNextRank[_i];
+            _results.push(estream.rank = nextRank());
+          }
+          return _results;
+        }
+      }
+    } else {
+      return scheduleBefore(beforeQ, genericAttachListener, sender, receiver);
+    }
+  };
+  
+  genericRemoveListener = function(sender, receiver) {
+    var i;
+    if (!isPropagating()) {
+      i = _.indexOf(sender.sendTo, receiver);
+      if (i + 1) return sender.sendTo.splice(i, 1);
+    } else {
+      return scheduleBefore(beforeQ, genericRemoveListener, sender, receiver);
+    }
+  };
+  
+  genericRemoveWeakReference = function(sender, weakReference) {
+    var i;
+    weakReference.cleanupScheduled = false;
+    if (!weakReference.cleanupCanceled) {
+      if (!isPropagating()) {
+        i = _.indexOf(sender.sendTo, weakReference);
+        if (i + 1) sender.sendTo.splice(i, 1);
+        if (!sender.sendTo.length) return sender.weaklyHeld = true;
+      } else {
+        return scheduleCleanup(cleanupQ, sender, weakReference);
+      }
+    } else {
+      return weakReference.cleanupCanceled = null;
+    }
+  };
+  
+  Jolt.EventStream = EventStream = (function() {
+  
+    function EventStream() {
+      var recvFrom;
+      var _this = this;
+      recvFrom = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      this.rank = nextRank();
+      this.absRank = this.rank;
+      this.sendTo = [];
+      if (recvFrom.length) {
+        _(_.flatten(__slice.call(recvFrom))).map(function(estream) {
+          return estream.attachListener(_this);
+        });
+      }
+    }
+  
+    EventStream.prototype.attachListener = function(receiver) {
+      if (!isE(receiver)) {
+        throw '<' + this.ClassName + '>.attachListener: expected an EventStream';
+      }
+      genericAttachListener(this, receiver);
+      return this;
+    };
+  
+    EventStream.prototype.removeListener = function(receiver) {
+      if (!isE(receiver)) {
+        throw '<' + this.ClassName + '>.removeListener: expected an EventStream';
+      }
+      genericRemoveListener(this, receiver);
+      return this;
+    };
+  
+    EventStream.prototype.removeWeakReference = function(weakReference) {
+      if (!isE(weakReference)) {
+        throw '<' + this.ClassName + '>.removeWeakReference: expected an EventStream';
+      }
+      genericRemoveWeakReference(this, weakReference);
+      return this;
+    };
+  
+    EventStream.prototype.ClassName = 'EventStream';
+  
+    EventStream.prototype.cleanupCanceled = null;
+  
+    EventStream.prototype.cleanupScheduled = false;
+  
+    EventStream.prototype._mode = null;
+  
+    EventStream.prototype.mode = function(mode) {
+      if (!arguments.length) return this._mode;
+      if (!(mode != null)) {
+        this._mode = null;
+        return this;
+      }
+      switch (mode) {
+        case 'sequenced':
+        case 's':
+          this._mode = 'sequenced';
+          break;
+        case 'vectored':
+        case 'v':
+          this._mode = 'vectored';
+          break;
+        case 'zipped':
+        case 'z':
+          this._mode = 'zipped';
+          break;
+        default:
+          throw '<' + this.ClassName + '>.mode: ' + JSON.stringify(mode) + ' is not a valid mode';
+      }
+      return this;
+    };
+  
+    EventStream.prototype["null"] = function() {
+      return this.mode(null);
+    };
+  
+    EventStream.prototype.s = function() {
+      return this.mode('sequenced');
+    };
+  
+    EventStream.prototype.sequenced = function() {
+      return this.s();
+    };
+  
+    EventStream.prototype.v = function() {
+      return this.mode('vectored');
+    };
+  
+    EventStream.prototype.vectored = function() {
+      return this.v();
+    };
+  
+    EventStream.prototype.z = function() {
+      return this.mode('zipped');
+    };
+  
+    EventStream.prototype.zipped = function() {
+      return this.z();
+    };
+  
+    EventStream.prototype._name = null;
+  
+    EventStream.prototype.name = function(str) {
+      if (!arguments.length) return this._name;
+      if (!_.isString(str)) {
+        throw '<' + this.ClassName + '>.name: argument must be a string';
+      }
+      this._name = str;
+      return this;
+    };
+  
+    EventStream.prototype._nary = false;
+  
+    EventStream.prototype.nary = function() {
+      this._nary = true;
+      return this;
+    };
+  
+    EventStream.prototype.isNary = function(bool) {
+      if (!arguments.length) return this._nary;
+      this._nary = Boolean(bool);
+      return this;
+    };
+  
+    EventStream.prototype.no_null_junc = false;
+  
+    EventStream.prototype._PulseClass = Pulse;
+  
+    EventStream.prototype.PulseClass = function(klass) {
+      if (!arguments.length) return this._PulseClass;
+      if (!(_.isFunction(klass))) {
+        throw '<' + this.ClassName + '>.PulseClass: argument must be a function';
+      }
+      if (!(isP(new klass))) {
+        throw '<' + this.ClassName + '>.PulseClass: argument does not construct an instanceof Pulse';
+      }
+      this._PulseClass = klass;
+      return this;
+    };
+  
+    EventStream.prototype.seq_junc_helper = function(pulse) {
+      var ret, thisClass;
+      thisClass = this;
+      ret = [];
+      _(pulse.value).each(function(jp) {
+        if (jp.junction) {
+          return ret = ret.concat(thisClass.seq_junc_helper(jp));
+        } else {
+          return ret = ret.concat(jp.value);
+        }
+      });
+      return ret;
+    };
+  
+    EventStream.prototype.vec_junc_helper = function(pulse) {
+      var ret, thisClass;
+      thisClass = this;
+      ret = [];
+      _(pulse.value).each(function(jp) {
+        if (jp.junction) {
+          return ret = ret.concat(thisClass.vec_junc_helper(jp));
+        } else {
+          return ret.push(jp.value);
+        }
+      });
+      return ret;
+    };
+  
+    EventStream.prototype.zip_junc_helper = function(pulse) {
+      return _.zip.apply(_, this.vec_junc_helper(pulse));
+    };
+  
+    EventStream.prototype.tranRCV = function(pulse) {
+      switch (this.mode()) {
+        case 'sequenced':
+          if (pulse.junction) {
+            pulse.value = this.seq_junc_helper(pulse);
+          } else {
+            return pulse;
+          }
+          break;
+        case 'vectored':
+          if (pulse.junction) {
+            pulse.value = this.vec_junc_helper(pulse);
+          } else {
+            pulse.value = [pulse.value];
+            pulse.arity = 1;
+            return pulse;
+          }
+          break;
+        case 'zipped':
+          if (pulse.junction) {
+            pulse.value = this.zip_junc_helper(pulse);
+          } else {
+            pulse.value = _(pulse.value).zip();
+            return pulse;
+          }
+          break;
+        case null:
+          if (pulse.junction && this.no_null_junc) {
+            throw '<' + this.ClassName + '>.transRCV: does not support null mode for pulse junctions';
+          } else {
+            return pulse;
+          }
+          break;
+        default:
+          throw '<' + this.ClassName + '>.transRCV: bad mode value ' + (JSON.stringify(this.mode()));
+      }
+      pulse.arity = pulse.value.length;
+      pulse.junction = false;
+      return pulse;
+    };
+  
+    EventStream.prototype.tranOUT = function(pulse) {
+      var ret;
+      if ((pulse !== doNotPropagate) && this.isNary()) {
+        ret = [];
+        _(pulse.value).each(function(val) {
+          return ret = ret.concat(val);
+        });
+        pulse.value = ret;
+      }
+      return pulse;
+    };
+  
+    EventStream.prototype.tranVAL = function(pulse) {
+      var ret, thisClass;
+      switch (this.mode()) {
+        case null:
+        case 'sequenced':
+          ret = this.updater.apply(this, pulse.value);
+          if (ret === doNotPropagate) {
+            pulse = ret;
+          } else {
+            pulse.value = ret;
+          }
+          break;
+        case 'vectored':
+        case 'zipped':
+          thisClass = this;
+          ret = [];
+          _(pulse.value).each(function(value) {
+            var iret;
+            iret = thisClass.updater.apply(thisClass, value);
+            if (iret !== doNotPropagate) return ret.push(iret);
+          });
+          if (ret.length === 0) {
+            pulse = doNotPropagate;
+          } else {
+            pulse.value = ret;
+          }
+          break;
+        default:
+          throw '<' + this.ClassName + '>.UPDATER: bad mode value ' + (JSON.stringify(this.mode()));
+      }
+      return pulse;
+    };
+  
+    EventStream.prototype.updater = function() {
+      var value;
+      value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return value;
+    };
+  
+    EventStream.prototype.UPDATER = function(pulse) {
+      return this.tranOUT(this.tranVAL(this.tranRCV(pulse)));
+    };
+  
+    EventStream.prototype.weaklyHeld = false;
+  
+    return EventStream;
+  
+  })();
+  
+  Jolt.sendEvent = sendEvent = function() {
+    var P, estream, high, high_maybe, length, pClass, vals;
+    estream = arguments[0], vals = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    high = false;
+    high_maybe = vals[vals.length - 1];
+    if (high_maybe === propagateHigh) {
+      high = true;
+      vals.pop();
+    }
+    pClass = estream.PulseClass();
+    length = vals.length;
+    P = new pClass(length, false, sendCall, nextStamp(), vals);
+    P.propagate(P.sender, estream, high);
+    return;
+  };
   
   exporter = function(ns, target) {
     var key, value, _results;

@@ -343,12 +343,12 @@ describe 'Jolt.Pulse.prototype.propagate', ->
 
     runs ->
       ( expect heap_save.nodes ).toEqual [
-        me[0]
-        me[1]
-        me[2]
-        me[4]
-        me[5]
-        me[7]
+        [ mockSender, me[0] ]
+        [ me[0], me[1] ]
+        [ me[1], me[2] ]
+        [ me[1], me[4] ]
+        [ me[1], me[5] ]
+        [ me[4], me[7] ]
       ]
 
       ( expect fin ).toEqual [

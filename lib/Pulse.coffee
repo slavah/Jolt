@@ -38,7 +38,7 @@ Jolt.propagateHigh  = propagateHigh  = {}
 # being named and treated as the first node in a propagation cycle, though it's not
 # properly a node in the graph.
 
-sendCall = name: (-> 'Jolt.sendEvent'), removeWeakReference: ->
+Jolt.sendCall = sendCall = name: (-> 'Jolt.sendEvent'), removeWeakReference: ->
 
 
 # Various graph modification and linking operations sometimes need to be delayed
@@ -130,8 +130,11 @@ Jolt.scheduleBefore = scheduleBefore = (beforeQ, func, args...) ->
 # `HeapStore`.
 
 class HeapStore
-  constructor: (@stamp) ->
+  constructor: (@stamp, @cont) ->
     @nodes = []
+
+class Continuation
+  constructor: (@stamps, @nodes) ->
 
 # Propagation is mediated by instances of `Jolt.Pulse`, and `Jolt.isP` helps
 # guarantee that objects passed between estreams during `propagate`/`update`
@@ -155,7 +158,7 @@ Jolt.Pulse = class Pulse
   # array (of length `arity`) which contains the data mediated by the pulse.
   # `heap` is an instance of `HeapStore` and records the propagation steps; as
   # `stamp` is unique, it gives us a key with which to pair heaps and estreams.
-  constructor: (@arity, @junction, @sender, @stamp, @value, @heap = new HeapStore @stamp) ->
+  constructor: (@arity, @junction, @sender, @stamp, @value = [], @heap = (new HeapStore @stamp, cont), cont) ->
 
   copy: (PulseClass) ->
     PulseClass ?= @constructor
@@ -173,8 +176,8 @@ Jolt.Pulse = class Pulse
       while queue.size()
         qv = queue.pop()
 
+        qv.pulse.heap.nodes.push [qv.pulse.sender, qv.estream]
         PULSE = qv.pulse.copy qv.estream.PulseClass()
-        PULSE.heap.nodes.push qv.estream
 
         nextPulse = PULSE.PROPAGATE PULSE.sender, \
         qv.estream, \
