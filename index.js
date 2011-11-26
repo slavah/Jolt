@@ -2327,7 +2327,7 @@
   })();
   
   Jolt.sendEvent = sendEvent = function() {
-    var PulseClass, cont, cont_maybe, estream, high, high_maybe, pulse, vals;
+    var PulseClass, cont, cont_maybe, estream, heap, high, high_maybe, pulse, vals;
     estream = arguments[0], vals = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
     cont = void 0;
     cont_maybe = vals[vals.length - 1];
@@ -2345,8 +2345,9 @@
       high = true;
       vals.pop();
     }
+    heap = void 0;
     PulseClass = estream.PulseClass();
-    pulse = new PulseClass(vals.length, false, sendCall, nextStamp(), vals, cont);
+    pulse = new PulseClass(vals.length, false, sendCall, nextStamp(), vals, heap, cont);
     pulse.propagate(sendCall, estream, high);
     return;
   };

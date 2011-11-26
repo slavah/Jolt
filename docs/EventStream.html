@@ -241,15 +241,24 @@
   <span class="nv">UPDATER: </span><span class="nf">(pulse) -&gt;</span> <span class="nx">@tranOUT</span> <span class="nx">@tranVAL</span> <span class="nx">@tranRCV</span> <span class="nx">pulse</span>
 
   <span class="nv">weaklyHeld: </span><span class="kc">false</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.sendEvent = sendEvent = </span><span class="nf">(estream, vals...) -&gt;</span>
+  <span class="nv">cont = </span><span class="kc">undefined</span>
+  <span class="nv">cont_maybe = </span><span class="nx">vals</span><span class="p">[</span><span class="nx">vals</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nx">cont_maybe</span> <span class="k">instanceof</span> <span class="nx">ContInfo</span>
+    <span class="nv">cont = </span><span class="nx">cont_maybe</span>
+    <span class="nx">vals</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
   <span class="nv">high = </span><span class="kc">false</span>
-  <span class="nv">high_maybe = </span><span class="nx">vals</span><span class="p">[</span><span class="nx">vals</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nx">cont</span>
+    <span class="nv">high_maybe = </span><span class="nx">vals</span><span class="p">[</span><span class="nx">vals</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+  <span class="k">else</span>
+    <span class="nv">high_maybe = </span><span class="nx">cont_maybe</span>
   <span class="k">if</span> <span class="nx">high_maybe</span> <span class="o">is</span> <span class="nx">propagateHigh</span>
     <span class="nv">high = </span><span class="kc">true</span>
     <span class="nx">vals</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
-  <span class="nv">pClass = </span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">()</span>
-  <span class="nv">length = </span><span class="nx">vals</span><span class="p">.</span><span class="nx">length</span>
-  <span class="nv">P = </span><span class="k">new</span> <span class="nx">pClass</span> <span class="nx">length</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">sendCall</span><span class="p">,</span> <span class="nx">nextStamp</span><span class="p">(),</span> <span class="nx">vals</span>
-  <span class="nx">P</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">P</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">estream</span><span class="p">,</span> <span class="nx">high</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>pClass.prototype.propagate P, P.sender, estream, high</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="kc">undefined</span>
+  <span class="nv">heap = </span><span class="kc">undefined</span>
+  <span class="nv">PulseClass = </span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">()</span>
+  <span class="nv">pulse = </span><span class="k">new</span> <span class="nx">PulseClass</span> <span class="nx">vals</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">sendCall</span><span class="p">,</span> <span class="nx">nextStamp</span><span class="p">(),</span> <span class="nx">vals</span><span class="p">,</span> <span class="nx">heap</span><span class="p">,</span> <span class="nx">cont</span>
+  <span class="nx">pulse</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">sendCall</span><span class="p">,</span> <span class="nx">estream</span><span class="p">,</span> <span class="nx">high</span>
+  <span class="kc">undefined</span>
  
  
  
@@ -269,7 +278,7 @@
  
  
  
- </pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
+ </pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
 
 <p>Jolt - Reactive Objects for JavaScript</p>
 

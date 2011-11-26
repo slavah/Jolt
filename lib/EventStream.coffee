@@ -262,8 +262,9 @@ Jolt.sendEvent = sendEvent = (estream, vals...) ->
   if high_maybe is propagateHigh
     high = true
     vals.pop()
+  heap = undefined
   PulseClass = estream.PulseClass()
-  pulse = new PulseClass vals.length, false, sendCall, nextStamp(), vals, cont
+  pulse = new PulseClass vals.length, false, sendCall, nextStamp(), vals, heap, cont
   pulse.propagate sendCall, estream, high
   undefined
  
