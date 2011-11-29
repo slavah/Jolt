@@ -17,8 +17,6 @@ _say = (message, isError, styles...) ->
       throw clog_err
     else
       _say.okay =  1
-      if isNodeJS
-        _say.clc = require 'cli-color'
   if _say.okay is -1
     throw clog_err
   if not isNodeJS
@@ -36,6 +34,10 @@ _say = (message, isError, styles...) ->
       else
         message = _say.clc[styles[0]][styles[1]][styles[2]][styles[3]] message
     _say_helper message, isError
+
+
+if isNodeJS
+  _say.clc = require 'cli-color'
 
 
 clog_err = 'Jolt.say: console.log method is not available'

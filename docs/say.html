@@ -15,8 +15,6 @@ node.js runtime by way of the
       <span class="k">throw</span> <span class="nx">clog_err</span>
     <span class="k">else</span>
       <span class="nv">_say.okay = </span> <span class="mi">1</span>
-      <span class="k">if</span> <span class="nx">isNodeJS</span>
-        <span class="nv">_say.clc = </span><span class="nx">require</span> <span class="s">&#39;cli-color&#39;</span>
   <span class="k">if</span> <span class="nx">_say</span><span class="p">.</span><span class="nx">okay</span> <span class="o">is</span> <span class="o">-</span><span class="mi">1</span>
     <span class="k">throw</span> <span class="nx">clog_err</span>
   <span class="k">if</span> <span class="o">not</span> <span class="nx">isNodeJS</span>
@@ -34,6 +32,10 @@ node.js runtime by way of the
       <span class="k">else</span>
         <span class="nv">message = </span><span class="nx">_say</span><span class="p">.</span><span class="nx">clc</span><span class="p">[</span><span class="nx">styles</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="nx">styles</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="nx">styles</span><span class="p">[</span><span class="mi">2</span><span class="p">]][</span><span class="nx">styles</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="nx">message</span>
     <span class="nx">_say_helper</span> <span class="nx">message</span><span class="p">,</span> <span class="nx">isError</span>
+
+
+<span class="k">if</span> <span class="nx">isNodeJS</span>
+  <span class="nv">_say.clc = </span><span class="nx">require</span> <span class="s">&#39;cli-color&#39;</span>
 
 
 <span class="nv">clog_err = </span><span class="s">&#39;Jolt.say: console.log method is not available&#39;</span>

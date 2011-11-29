@@ -1681,7 +1681,6 @@
       throw clog_err;
     } else {
       _say.okay = 1;
-      if (isNodeJS) _say.clc = require('cli-color');
     }
     if (_say.okay === -1) throw clog_err;
     if (!isNodeJS) {
@@ -1706,6 +1705,8 @@
       return _say_helper(message, isError);
     }
   };
+  
+  if (isNodeJS) _say.clc = require('cli-color');
   
   clog_err = 'Jolt.say: console.log method is not available';
   
