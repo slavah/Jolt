@@ -3,7 +3,7 @@
 # value which is then passed to the `Pulse` or subclass constructor.
 
 lastStamp = 0
-nextStamp = -> ++lastStamp
+Jolt.nextStamp = nextStamp = -> ++lastStamp
 
 
 # `Pulse` propagation is, by design, a synchronous operation which in terms of

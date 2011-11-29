@@ -1749,7 +1749,7 @@
   
   lastStamp = 0;
   
-  nextStamp = function() {
+  Jolt.nextStamp = nextStamp = function() {
     return ++lastStamp;
   };
   
