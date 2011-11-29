@@ -182,7 +182,7 @@ Jolt.EventStream = class EventStream
         if pulse.junction
           pulse.value = @zip_junc_helper pulse
         else
-          pulse.value = _( pulse.value ).zip()
+          pulse.value = _.zip pulse.value
           return pulse
       when null
         if pulse.junction and @no_null_junc
@@ -200,9 +200,7 @@ Jolt.EventStream = class EventStream
   tranOUT: (pulse) ->
     if (pulse isnt doNotPropagate) and @isNary()
       ret = []
-      _( pulse.value )
-      .each((val) ->
-        ret = ret.concat val)
+      (ret = ret.concat value) for value in pulse.value
       pulse.value = ret
 
     pulse
@@ -218,11 +216,10 @@ Jolt.EventStream = class EventStream
       when 'vectored', 'zipped'
         thisClass = this
         ret = []
-        _( pulse.value )
-        .each((value) ->
-          iret = thisClass.updater value...
+        for value in pulse.value
+          iret = @updater value...
           if iret isnt doNotPropagate
-            ret.push iret)
+            ret.push iret
         if ret.length is 0
           pulse = doNotPropagate
         else
