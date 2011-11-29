@@ -1,61 +1,45 @@
+# The source code for Jolt is contained in multiple `.coffee` and `.js` files
+# which are sewn together per the logic in its
+# [Bakefile.coffee](https://raw.github.com/projexsys/Jolt/master/Bakefile.coffee)
+# build script. Use the *JUMP TO ...* menu at the top right of this page to
+# navigate among the annotated component files.
+
+# Jolt is designed for use in both browser and server environments, but the
+# definition and execution of some methods can vary with the environment.
+# `isNodeJS` provides a reliable, if simple, means for determing whether the
+# runtime is node.js or not. If not, we assume Jolt is running in a browser.
+
 isNodeJS = Boolean process?.pid
 
+# All properties of the `Jolt` object will be exported, and constitute the
+# library's API.
+
 Jolt = {}
-
-
-Jolt.$$ = $$ = (args...) ->
-  if not $$.okay?
-    if Sizzle?
-      $$.okay =  1
-    else
-      $$.okay = -1
-  if $$.okay is -1
-    throw 'Jolt.$$: Sizzle is undefined, because the document object was undefined when Jolt was loaded'
-  Sizzle args...
-
-
-Jolt.say = say = (message, isError, color = 'white') ->
-  if not say.okay?
-    if not (console? or window?.console?)
-      say.okay = -1
-      throw 'console.log method is not available'
-    console ?= window?.console
-    say.console = console
-    say.error = console.error?
-    if not console.log?
-      say.okay = -1
-      throw 'console.log method is not available'
-    else
-      say.okay =  1
-      if isNodeJS
-        say.clc = require 'cli-color'
-      else
-        say.clc = {}
-        colors = [
-          'black'
-          'red'
-          'green'
-          'yellow'
-          'blue'
-          'magenta'
-          'cyan'
-          'white'
-          'gray'
-        ]
-        fn = (text) -> text
-        (say.clc[c] = fn ; say.clc[c].bold = fn) for c in colors
-  if say.okay is -1
-    throw 'console.log method is not available'
-  if isError and say.error?
-    say.console.error (say.clc['red'].bold message)
-    return
-  say.console.log (say.clc[color] message)
-#
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 # <<<>>>
 #
 # Jolt - Reactive Objects for JavaScript
 #
-# https://github.com/projexsys/Jolt
+# [https://github.com/projexsys/Jolt](https://github.com/projexsys/Jolt)
 #
 # This software is Copyright (c) 2011 by Projexsys, Inc.
 #
@@ -70,10 +54,10 @@ Jolt.say = say = (message, isError, color = 'white') ->
 # Foundation, either version 3 of the License, or (at your option) any
 # later version. The code is distributed WITHOUT ANY WARRANTY; without
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-# PARTICULAR PURPOSE. See the GNU GPL for more details.
+# PARTICULAR PURPOSE. See the GNU GPL for more details:
 #
-# https://raw.github.com/projexsys/Jolt/master/LICENSE
-# http://www.gnu.org/licenses/gpl-3.0.txt
+# [https://raw.github.com/projexsys/Jolt/master/LICENSE](https://raw.github.com/projexsys/Jolt/master/LICENSE)
+# [http://www.gnu.org/licenses/gpl-3.0.txt](http://www.gnu.org/licenses/gpl-3.0.txt)
 #
 # However, if you have executed an End User Software License and
 # Services Agreement or an OEM Software License and Support Services
@@ -86,4 +70,4 @@ Jolt.say = say = (message, isError, color = 'white') ->
 # This sofware is derived from and incorporates existing works. For
 # further information and license texts please refer to:
 #
-# https://raw.github.com/projexsys/Jolt/master/LICENSES
+# [https://raw.github.com/projexsys/Jolt/master/LICENSES](https://raw.github.com/projexsys/Jolt/master/LICENSES)

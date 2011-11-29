@@ -15,7 +15,7 @@
  * the Free Software Foundation, either version 3 of the License, or (at
  * your option) any later version. The code is distributed WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU GPL for more details.
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU GPL for more details:
  *
  * https://raw.github.com/projexsys/Jolt/master/LICENSE
  * http://www.gnu.org/licenses/gpl-3.0.txt
@@ -34,9 +34,7 @@
  *
  *  https://github.com/brownplt/flapjax
  *  https://github.com/hij1nx/EventEmitter2
- *  https://github.com/jquery/sizzle
  *  https://github.com/documentcloud/underscore
- *  https://github.com/epeli/underscore.string
  *  https://github.com/autotelicum/Smooth-CoffeeScript
  *
  * For further information and license texts please refer to:
@@ -572,1460 +570,6 @@
   
   // MYMOD - 15 Nov 2011
   })();
-  
-  /*!
-   * Sizzle CSS Selector Engine
-   *  Copyright 2011, The Dojo Foundation
-   *  Released under the MIT, BSD, and GPL Licenses.
-   *  More information: http://sizzlejs.com/
-   */
-  
-  // MYMOD - 14 Nov 2011
-  if (typeof document !== "undefined" && document !== null) {
-  
-    var Sizzle
-  
-    // MYMOD - 14 Nov 2011
-    ;(function(){
-  
-    var chunker = /((?:\((?:\([^()]+\)|[^()]+)+\)|\[(?:\[[^\[\]]*\]|['"][^'"]*['"]|[^\[\]'"]+)+\]|\\.|[^ >+~,(\[\\]+)+|[>+~])(\s*,\s*)?((?:.|\r|\n)*)/g,
-      expando = "sizcache" + (Math.random() + '').replace('.', ''),
-      done = 0,
-      toString = Object.prototype.toString,
-      hasDuplicate = false,
-      baseHasDuplicate = true,
-      rBackslash = /\\/g,
-      rReturn = /\r\n/g,
-      rNonWord = /\W/;
-  
-    // Here we check if the JavaScript engine is using some sort of
-    // optimization where it does not always call our comparision
-    // function. If that is the case, discard the hasDuplicate value.
-    //   Thus far that includes Google Chrome.
-    [0, 0].sort(function() {
-      baseHasDuplicate = false;
-      return 0;
-    });
-  
-    // MYMOD - 14 Nov 2011
-    Sizzle = function( selector, context, results, seed ) {
-      results = results || [];
-      context = context || document;
-  
-      var origContext = context;
-  
-      if ( context.nodeType !== 1 && context.nodeType !== 9 ) {
-        return [];
-      }
-      
-      if ( !selector || typeof selector !== "string" ) {
-        return results;
-      }
-  
-      var m, set, checkSet, extra, ret, cur, pop, i,
-        prune = true,
-        contextXML = Sizzle.isXML( context ),
-        parts = [],
-        soFar = selector;
-      
-      // Reset the position of the chunker regexp (start from head)
-      do {
-        chunker.exec( "" );
-        m = chunker.exec( soFar );
-  
-        if ( m ) {
-          soFar = m[3];
-        
-          parts.push( m[1] );
-        
-          if ( m[2] ) {
-            extra = m[3];
-            break;
-          }
-        }
-      } while ( m );
-  
-      if ( parts.length > 1 && origPOS.exec( selector ) ) {
-  
-        if ( parts.length === 2 && Expr.relative[ parts[0] ] ) {
-          set = posProcess( parts[0] + parts[1], context, seed );
-  
-        } else {
-          set = Expr.relative[ parts[0] ] ?
-            [ context ] :
-            Sizzle( parts.shift(), context );
-  
-          while ( parts.length ) {
-            selector = parts.shift();
-  
-            if ( Expr.relative[ selector ] ) {
-              selector += parts.shift();
-            }
-            
-            set = posProcess( selector, set, seed );
-          }
-        }
-  
-      } else {
-        // Take a shortcut and set the context if the root selector is an ID
-        // (but not if it'll be faster if the inner selector is an ID)
-        if ( !seed && parts.length > 1 && context.nodeType === 9 && !contextXML &&
-            Expr.match.ID.test(parts[0]) && !Expr.match.ID.test(parts[parts.length - 1]) ) {
-  
-          ret = Sizzle.find( parts.shift(), context, contextXML );
-          context = ret.expr ?
-            Sizzle.filter( ret.expr, ret.set )[0] :
-            ret.set[0];
-        }
-  
-        if ( context ) {
-          ret = seed ?
-            { expr: parts.pop(), set: makeArray(seed) } :
-            Sizzle.find( parts.pop(), parts.length === 1 && (parts[0] === "~" || parts[0] === "+") && context.parentNode ? context.parentNode : context, contextXML );
-  
-          set = ret.expr ?
-            Sizzle.filter( ret.expr, ret.set ) :
-            ret.set;
-  
-          if ( parts.length > 0 ) {
-            checkSet = makeArray( set );
-  
-          } else {
-            prune = false;
-          }
-  
-          while ( parts.length ) {
-            cur = parts.pop();
-            pop = cur;
-  
-            if ( !Expr.relative[ cur ] ) {
-              cur = "";
-            } else {
-              pop = parts.pop();
-            }
-  
-            if ( pop == null ) {
-              pop = context;
-            }
-  
-            Expr.relative[ cur ]( checkSet, pop, contextXML );
-          }
-  
-        } else {
-          checkSet = parts = [];
-        }
-      }
-  
-      if ( !checkSet ) {
-        checkSet = set;
-      }
-  
-      if ( !checkSet ) {
-        Sizzle.error( cur || selector );
-      }
-  
-      if ( toString.call(checkSet) === "[object Array]" ) {
-        if ( !prune ) {
-          results.push.apply( results, checkSet );
-  
-        } else if ( context && context.nodeType === 1 ) {
-          for ( i = 0; checkSet[i] != null; i++ ) {
-            if ( checkSet[i] && (checkSet[i] === true || checkSet[i].nodeType === 1 && Sizzle.contains(context, checkSet[i])) ) {
-              results.push( set[i] );
-            }
-          }
-  
-        } else {
-          for ( i = 0; checkSet[i] != null; i++ ) {
-            if ( checkSet[i] && checkSet[i].nodeType === 1 ) {
-              results.push( set[i] );
-            }
-          }
-        }
-  
-      } else {
-        makeArray( checkSet, results );
-      }
-  
-      if ( extra ) {
-        Sizzle( extra, origContext, results, seed );
-        Sizzle.uniqueSort( results );
-      }
-  
-      return results;
-    };
-  
-    Sizzle.uniqueSort = function( results ) {
-      if ( sortOrder ) {
-        hasDuplicate = baseHasDuplicate;
-        results.sort( sortOrder );
-  
-        if ( hasDuplicate ) {
-          for ( var i = 1; i < results.length; i++ ) {
-            if ( results[i] === results[ i - 1 ] ) {
-              results.splice( i--, 1 );
-            }
-          }
-        }
-      }
-  
-      return results;
-    };
-  
-    Sizzle.matches = function( expr, set ) {
-      return Sizzle( expr, null, null, set );
-    };
-  
-    Sizzle.matchesSelector = function( node, expr ) {
-      return Sizzle( expr, null, null, [node] ).length > 0;
-    };
-  
-    Sizzle.find = function( expr, context, isXML ) {
-      var set, i, len, match, type, left;
-  
-      if ( !expr ) {
-        return [];
-      }
-  
-      for ( i = 0, len = Expr.order.length; i < len; i++ ) {
-        type = Expr.order[i];
-        
-        if ( (match = Expr.leftMatch[ type ].exec( expr )) ) {
-          left = match[1];
-          match.splice( 1, 1 );
-  
-          if ( left.substr( left.length - 1 ) !== "\\" ) {
-            match[1] = (match[1] || "").replace( rBackslash, "" );
-            set = Expr.find[ type ]( match, context, isXML );
-  
-            if ( set != null ) {
-              expr = expr.replace( Expr.match[ type ], "" );
-              break;
-            }
-          }
-        }
-      }
-  
-      if ( !set ) {
-        set = typeof context.getElementsByTagName !== "undefined" ?
-          context.getElementsByTagName( "*" ) :
-          [];
-      }
-  
-      return { set: set, expr: expr };
-    };
-  
-    Sizzle.filter = function( expr, set, inplace, not ) {
-      var match, anyFound,
-        type, found, item, filter, left,
-        i, pass,
-        old = expr,
-        result = [],
-        curLoop = set,
-        isXMLFilter = set && set[0] && Sizzle.isXML( set[0] );
-  
-      while ( expr && set.length ) {
-        for ( type in Expr.filter ) {
-          if ( (match = Expr.leftMatch[ type ].exec( expr )) != null && match[2] ) {
-            filter = Expr.filter[ type ];
-            left = match[1];
-  
-            anyFound = false;
-  
-            match.splice(1,1);
-  
-            if ( left.substr( left.length - 1 ) === "\\" ) {
-              continue;
-            }
-  
-            if ( curLoop === result ) {
-              result = [];
-            }
-  
-            if ( Expr.preFilter[ type ] ) {
-              match = Expr.preFilter[ type ]( match, curLoop, inplace, result, not, isXMLFilter );
-  
-              if ( !match ) {
-                anyFound = found = true;
-  
-              } else if ( match === true ) {
-                continue;
-              }
-            }
-  
-            if ( match ) {
-              for ( i = 0; (item = curLoop[i]) != null; i++ ) {
-                if ( item ) {
-                  found = filter( item, match, i, curLoop );
-                  pass = not ^ found;
-  
-                  if ( inplace && found != null ) {
-                    if ( pass ) {
-                      anyFound = true;
-  
-                    } else {
-                      curLoop[i] = false;
-                    }
-  
-                  } else if ( pass ) {
-                    result.push( item );
-                    anyFound = true;
-                  }
-                }
-              }
-            }
-  
-            if ( found !== undefined ) {
-              if ( !inplace ) {
-                curLoop = result;
-              }
-  
-              expr = expr.replace( Expr.match[ type ], "" );
-  
-              if ( !anyFound ) {
-                return [];
-              }
-  
-              break;
-            }
-          }
-        }
-  
-        // Improper expression
-        if ( expr === old ) {
-          if ( anyFound == null ) {
-            Sizzle.error( expr );
-  
-          } else {
-            break;
-          }
-        }
-  
-        old = expr;
-      }
-  
-      return curLoop;
-    };
-  
-    Sizzle.error = function( msg ) {
-      throw new Error( "Syntax error, unrecognized expression: " + msg );
-    };
-  
-    /**
-     * Utility function for retreiving the text value of an array of DOM nodes
-     * @param {Array|Element} elem
-     */
-    var getText = Sizzle.getText = function( elem ) {
-        var i, node,
-        nodeType = elem.nodeType,
-        ret = "";
-  
-      if ( nodeType ) {
-        if ( nodeType === 1 || nodeType === 9 ) {
-          // Use textContent || innerText for elements
-          if ( typeof elem.textContent === 'string' ) {
-            return elem.textContent;
-          } else if ( typeof elem.innerText === 'string' ) {
-            // Replace IE's carriage returns
-            return elem.innerText.replace( rReturn, '' );
-          } else {
-            // Traverse it's children
-            for ( elem = elem.firstChild; elem; elem = elem.nextSibling) {
-              ret += getText( elem );
-            }
-          }
-        } else if ( nodeType === 3 || nodeType === 4 ) {
-          return elem.nodeValue;
-        }
-      } else {
-  
-        // If no nodeType, this is expected to be an array
-        for ( i = 0; (node = elem[i]); i++ ) {
-          // Do not traverse comment nodes
-          if ( node.nodeType !== 8 ) {
-            ret += getText( node );
-          }
-        }
-      }
-      return ret;
-    };
-  
-    var Expr = Sizzle.selectors = {
-      order: [ "ID", "NAME", "TAG" ],
-  
-      match: {
-        ID: /#((?:[\w\u00c0-\uFFFF\-]|\\.)+)/,
-        CLASS: /\.((?:[\w\u00c0-\uFFFF\-]|\\.)+)/,
-        NAME: /\[name=['"]*((?:[\w\u00c0-\uFFFF\-]|\\.)+)['"]*\]/,
-        ATTR: /\[\s*((?:[\w\u00c0-\uFFFF\-]|\\.)+)\s*(?:(\S?=)\s*(?:(['"])(.*?)\3|(#?(?:[\w\u00c0-\uFFFF\-]|\\.)*)|)|)\s*\]/,
-        TAG: /^((?:[\w\u00c0-\uFFFF\*\-]|\\.)+)/,
-        CHILD: /:(only|nth|last|first)-child(?:\(\s*(even|odd|(?:[+\-]?\d+|(?:[+\-]?\d*)?n\s*(?:[+\-]\s*\d+)?))\s*\))?/,
-        POS: /:(nth|eq|gt|lt|first|last|even|odd)(?:\((\d*)\))?(?=[^\-]|$)/,
-        PSEUDO: /:((?:[\w\u00c0-\uFFFF\-]|\\.)+)(?:\((['"]?)((?:\([^\)]+\)|[^\(\)]*)+)\2\))?/
-      },
-  
-      leftMatch: {},
-  
-      attrMap: {
-        "class": "className",
-        "for": "htmlFor"
-      },
-  
-      attrHandle: {
-        href: function( elem ) {
-          return elem.getAttribute( "href" );
-        },
-        type: function( elem ) {
-          return elem.getAttribute( "type" );
-        }
-      },
-  
-      relative: {
-        "+": function(checkSet, part){
-          var isPartStr = typeof part === "string",
-            isTag = isPartStr && !rNonWord.test( part ),
-            isPartStrNotTag = isPartStr && !isTag;
-  
-          if ( isTag ) {
-            part = part.toLowerCase();
-          }
-  
-          for ( var i = 0, l = checkSet.length, elem; i < l; i++ ) {
-            if ( (elem = checkSet[i]) ) {
-              while ( (elem = elem.previousSibling) && elem.nodeType !== 1 ) {}
-  
-              checkSet[i] = isPartStrNotTag || elem && elem.nodeName.toLowerCase() === part ?
-                elem || false :
-                elem === part;
-            }
-          }
-  
-          if ( isPartStrNotTag ) {
-            Sizzle.filter( part, checkSet, true );
-          }
-        },
-  
-        ">": function( checkSet, part ) {
-          var elem,
-            isPartStr = typeof part === "string",
-            i = 0,
-            l = checkSet.length;
-  
-          if ( isPartStr && !rNonWord.test( part ) ) {
-            part = part.toLowerCase();
-  
-            for ( ; i < l; i++ ) {
-              elem = checkSet[i];
-  
-              if ( elem ) {
-                var parent = elem.parentNode;
-                checkSet[i] = parent.nodeName.toLowerCase() === part ? parent : false;
-              }
-            }
-  
-          } else {
-            for ( ; i < l; i++ ) {
-              elem = checkSet[i];
-  
-              if ( elem ) {
-                checkSet[i] = isPartStr ?
-                  elem.parentNode :
-                  elem.parentNode === part;
-              }
-            }
-  
-            if ( isPartStr ) {
-              Sizzle.filter( part, checkSet, true );
-            }
-          }
-        },
-  
-        "": function(checkSet, part, isXML){
-          var nodeCheck,
-            doneName = done++,
-            checkFn = dirCheck;
-  
-          if ( typeof part === "string" && !rNonWord.test( part ) ) {
-            part = part.toLowerCase();
-            nodeCheck = part;
-            checkFn = dirNodeCheck;
-          }
-  
-          checkFn( "parentNode", part, doneName, checkSet, nodeCheck, isXML );
-        },
-  
-        "~": function( checkSet, part, isXML ) {
-          var nodeCheck,
-            doneName = done++,
-            checkFn = dirCheck;
-  
-          if ( typeof part === "string" && !rNonWord.test( part ) ) {
-            part = part.toLowerCase();
-            nodeCheck = part;
-            checkFn = dirNodeCheck;
-          }
-  
-          checkFn( "previousSibling", part, doneName, checkSet, nodeCheck, isXML );
-        }
-      },
-  
-      find: {
-        ID: function( match, context, isXML ) {
-          if ( typeof context.getElementById !== "undefined" && !isXML ) {
-            var m = context.getElementById(match[1]);
-            // Check parentNode to catch when Blackberry 4.6 returns
-            // nodes that are no longer in the document #6963
-            return m && m.parentNode ? [m] : [];
-          }
-        },
-  
-        NAME: function( match, context ) {
-          if ( typeof context.getElementsByName !== "undefined" ) {
-            var ret = [],
-              results = context.getElementsByName( match[1] );
-  
-            for ( var i = 0, l = results.length; i < l; i++ ) {
-              if ( results[i].getAttribute("name") === match[1] ) {
-                ret.push( results[i] );
-              }
-            }
-  
-            return ret.length === 0 ? null : ret;
-          }
-        },
-  
-        TAG: function( match, context ) {
-          if ( typeof context.getElementsByTagName !== "undefined" ) {
-            return context.getElementsByTagName( match[1] );
-          }
-        }
-      },
-      preFilter: {
-        CLASS: function( match, curLoop, inplace, result, not, isXML ) {
-          match = " " + match[1].replace( rBackslash, "" ) + " ";
-  
-          if ( isXML ) {
-            return match;
-          }
-  
-          for ( var i = 0, elem; (elem = curLoop[i]) != null; i++ ) {
-            if ( elem ) {
-              if ( not ^ (elem.className && (" " + elem.className + " ").replace(/[\t\n\r]/g, " ").indexOf(match) >= 0) ) {
-                if ( !inplace ) {
-                  result.push( elem );
-                }
-  
-              } else if ( inplace ) {
-                curLoop[i] = false;
-              }
-            }
-          }
-  
-          return false;
-        },
-  
-        ID: function( match ) {
-          return match[1].replace( rBackslash, "" );
-        },
-  
-        TAG: function( match, curLoop ) {
-          return match[1].replace( rBackslash, "" ).toLowerCase();
-        },
-  
-        CHILD: function( match ) {
-          if ( match[1] === "nth" ) {
-            if ( !match[2] ) {
-              Sizzle.error( match[0] );
-            }
-  
-            match[2] = match[2].replace(/^\+|\s*/g, '');
-  
-            // parse equations like 'even', 'odd', '5', '2n', '3n+2', '4n-1', '-n+6'
-            var test = /(-?)(\d*)(?:n([+\-]?\d*))?/.exec(
-              match[2] === "even" && "2n" || match[2] === "odd" && "2n+1" ||
-              !/\D/.test( match[2] ) && "0n+" + match[2] || match[2]);
-  
-            // calculate the numbers (first)n+(last) including if they are negative
-            match[2] = (test[1] + (test[2] || 1)) - 0;
-            match[3] = test[3] - 0;
-          }
-          else if ( match[2] ) {
-            Sizzle.error( match[0] );
-          }
-  
-          // TODO: Move to normal caching system
-          match[0] = done++;
-  
-          return match;
-        },
-  
-        ATTR: function( match, curLoop, inplace, result, not, isXML ) {
-          var name = match[1] = match[1].replace( rBackslash, "" );
-          
-          if ( !isXML && Expr.attrMap[name] ) {
-            match[1] = Expr.attrMap[name];
-          }
-  
-          // Handle if an un-quoted value was used
-          match[4] = ( match[4] || match[5] || "" ).replace( rBackslash, "" );
-  
-          if ( match[2] === "~=" ) {
-            match[4] = " " + match[4] + " ";
-          }
-  
-          return match;
-        },
-  
-        PSEUDO: function( match, curLoop, inplace, result, not ) {
-          if ( match[1] === "not" ) {
-            // If we're dealing with a complex expression, or a simple one
-            if ( ( chunker.exec(match[3]) || "" ).length > 1 || /^\w/.test(match[3]) ) {
-              match[3] = Sizzle(match[3], null, null, curLoop);
-  
-            } else {
-              var ret = Sizzle.filter(match[3], curLoop, inplace, true ^ not);
-  
-              if ( !inplace ) {
-                result.push.apply( result, ret );
-              }
-  
-              return false;
-            }
-  
-          } else if ( Expr.match.POS.test( match[0] ) || Expr.match.CHILD.test( match[0] ) ) {
-            return true;
-          }
-          
-          return match;
-        },
-  
-        POS: function( match ) {
-          match.unshift( true );
-  
-          return match;
-        }
-      },
-      
-      filters: {
-        enabled: function( elem ) {
-          return elem.disabled === false && elem.type !== "hidden";
-        },
-  
-        disabled: function( elem ) {
-          return elem.disabled === true;
-        },
-  
-        checked: function( elem ) {
-          return elem.checked === true;
-        },
-        
-        selected: function( elem ) {
-          // Accessing this property makes selected-by-default
-          // options in Safari work properly
-          if ( elem.parentNode ) {
-            elem.parentNode.selectedIndex;
-          }
-          
-          return elem.selected === true;
-        },
-  
-        parent: function( elem ) {
-          return !!elem.firstChild;
-        },
-  
-        empty: function( elem ) {
-          return !elem.firstChild;
-        },
-  
-        has: function( elem, i, match ) {
-          return !!Sizzle( match[3], elem ).length;
-        },
-  
-        header: function( elem ) {
-          return (/h\d/i).test( elem.nodeName );
-        },
-  
-        text: function( elem ) {
-          var attr = elem.getAttribute( "type" ), type = elem.type;
-          // IE6 and 7 will map elem.type to 'text' for new HTML5 types (search, etc) 
-          // use getAttribute instead to test this case
-          return elem.nodeName.toLowerCase() === "input" && "text" === type && ( attr === type || attr === null );
-        },
-  
-        radio: function( elem ) {
-          return elem.nodeName.toLowerCase() === "input" && "radio" === elem.type;
-        },
-  
-        checkbox: function( elem ) {
-          return elem.nodeName.toLowerCase() === "input" && "checkbox" === elem.type;
-        },
-  
-        file: function( elem ) {
-          return elem.nodeName.toLowerCase() === "input" && "file" === elem.type;
-        },
-  
-        password: function( elem ) {
-          return elem.nodeName.toLowerCase() === "input" && "password" === elem.type;
-        },
-  
-        submit: function( elem ) {
-          var name = elem.nodeName.toLowerCase();
-          return (name === "input" || name === "button") && "submit" === elem.type;
-        },
-  
-        image: function( elem ) {
-          return elem.nodeName.toLowerCase() === "input" && "image" === elem.type;
-        },
-  
-        reset: function( elem ) {
-          var name = elem.nodeName.toLowerCase();
-          return (name === "input" || name === "button") && "reset" === elem.type;
-        },
-  
-        button: function( elem ) {
-          var name = elem.nodeName.toLowerCase();
-          return name === "input" && "button" === elem.type || name === "button";
-        },
-  
-        input: function( elem ) {
-          return (/input|select|textarea|button/i).test( elem.nodeName );
-        },
-  
-        focus: function( elem ) {
-          return elem === elem.ownerDocument.activeElement;
-        }
-      },
-      setFilters: {
-        first: function( elem, i ) {
-          return i === 0;
-        },
-  
-        last: function( elem, i, match, array ) {
-          return i === array.length - 1;
-        },
-  
-        even: function( elem, i ) {
-          return i % 2 === 0;
-        },
-  
-        odd: function( elem, i ) {
-          return i % 2 === 1;
-        },
-  
-        lt: function( elem, i, match ) {
-          return i < match[3] - 0;
-        },
-  
-        gt: function( elem, i, match ) {
-          return i > match[3] - 0;
-        },
-  
-        nth: function( elem, i, match ) {
-          return match[3] - 0 === i;
-        },
-  
-        eq: function( elem, i, match ) {
-          return match[3] - 0 === i;
-        }
-      },
-      filter: {
-        PSEUDO: function( elem, match, i, array ) {
-          var name = match[1],
-            filter = Expr.filters[ name ];
-  
-          if ( filter ) {
-            return filter( elem, i, match, array );
-  
-          } else if ( name === "contains" ) {
-            return (elem.textContent || elem.innerText || getText([ elem ]) || "").indexOf(match[3]) >= 0;
-  
-          } else if ( name === "not" ) {
-            var not = match[3];
-  
-            for ( var j = 0, l = not.length; j < l; j++ ) {
-              if ( not[j] === elem ) {
-                return false;
-              }
-            }
-  
-            return true;
-  
-          } else {
-            Sizzle.error( name );
-          }
-        },
-  
-        CHILD: function( elem, match ) {
-          var first, last,
-            doneName, parent, cache,
-            count, diff,
-            type = match[1],
-            node = elem;
-  
-          switch ( type ) {
-            case "only":
-            case "first":
-              while ( (node = node.previousSibling) )	 {
-                if ( node.nodeType === 1 ) { 
-                  return false; 
-                }
-              }
-  
-              if ( type === "first" ) { 
-                return true; 
-              }
-  
-              node = elem;
-  
-            case "last":
-              while ( (node = node.nextSibling) )	 {
-                if ( node.nodeType === 1 ) { 
-                  return false; 
-                }
-              }
-  
-              return true;
-  
-            case "nth":
-              first = match[2];
-              last = match[3];
-  
-              if ( first === 1 && last === 0 ) {
-                return true;
-              }
-              
-              doneName = match[0];
-              parent = elem.parentNode;
-      
-              if ( parent && (parent[ expando ] !== doneName || !elem.nodeIndex) ) {
-                count = 0;
-                
-                for ( node = parent.firstChild; node; node = node.nextSibling ) {
-                  if ( node.nodeType === 1 ) {
-                    node.nodeIndex = ++count;
-                  }
-                } 
-  
-                parent[ expando ] = doneName;
-              }
-              
-              diff = elem.nodeIndex - last;
-  
-              if ( first === 0 ) {
-                return diff === 0;
-  
-              } else {
-                return ( diff % first === 0 && diff / first >= 0 );
-              }
-          }
-        },
-  
-        ID: function( elem, match ) {
-          return elem.nodeType === 1 && elem.getAttribute("id") === match;
-        },
-  
-        TAG: function( elem, match ) {
-          return (match === "*" && elem.nodeType === 1) || !!elem.nodeName && elem.nodeName.toLowerCase() === match;
-        },
-        
-        CLASS: function( elem, match ) {
-          return (" " + (elem.className || elem.getAttribute("class")) + " ")
-            .indexOf( match ) > -1;
-        },
-  
-        ATTR: function( elem, match ) {
-          var name = match[1],
-            result = Sizzle.attr ?
-              Sizzle.attr( elem, name ) :
-              Expr.attrHandle[ name ] ?
-              Expr.attrHandle[ name ]( elem ) :
-              elem[ name ] != null ?
-                elem[ name ] :
-                elem.getAttribute( name ),
-            value = result + "",
-            type = match[2],
-            check = match[4];
-  
-          return result == null ?
-            type === "!=" :
-            !type && Sizzle.attr ?
-            result != null :
-            type === "=" ?
-            value === check :
-            type === "*=" ?
-            value.indexOf(check) >= 0 :
-            type === "~=" ?
-            (" " + value + " ").indexOf(check) >= 0 :
-            !check ?
-            value && result !== false :
-            type === "!=" ?
-            value !== check :
-            type === "^=" ?
-            value.indexOf(check) === 0 :
-            type === "$=" ?
-            value.substr(value.length - check.length) === check :
-            type === "|=" ?
-            value === check || value.substr(0, check.length + 1) === check + "-" :
-            false;
-        },
-  
-        POS: function( elem, match, i, array ) {
-          var name = match[2],
-            filter = Expr.setFilters[ name ];
-  
-          if ( filter ) {
-            return filter( elem, i, match, array );
-          }
-        }
-      }
-    };
-  
-    var origPOS = Expr.match.POS,
-      fescape = function(all, num){
-        return "\\" + (num - 0 + 1);
-      };
-  
-    for ( var type in Expr.match ) {
-      Expr.match[ type ] = new RegExp( Expr.match[ type ].source + (/(?![^\[]*\])(?![^\(]*\))/.source) );
-      Expr.leftMatch[ type ] = new RegExp( /(^(?:.|\r|\n)*?)/.source + Expr.match[ type ].source.replace(/\\(\d+)/g, fescape) );
-    }
-  
-    var makeArray = function( array, results ) {
-      array = Array.prototype.slice.call( array, 0 );
-  
-      if ( results ) {
-        results.push.apply( results, array );
-        return results;
-      }
-      
-      return array;
-    };
-  
-    // Perform a simple check to determine if the browser is capable of
-    // converting a NodeList to an array using builtin methods.
-    // Also verifies that the returned array holds DOM nodes
-    // (which is not the case in the Blackberry browser)
-    try {
-      Array.prototype.slice.call( document.documentElement.childNodes, 0 )[0].nodeType;
-  
-    // Provide a fallback method if it does not work
-    } catch( e ) {
-      makeArray = function( array, results ) {
-        var i = 0,
-          ret = results || [];
-  
-        if ( toString.call(array) === "[object Array]" ) {
-          Array.prototype.push.apply( ret, array );
-  
-        } else {
-          if ( typeof array.length === "number" ) {
-            for ( var l = array.length; i < l; i++ ) {
-              ret.push( array[i] );
-            }
-  
-          } else {
-            for ( ; array[i]; i++ ) {
-              ret.push( array[i] );
-            }
-          }
-        }
-  
-        return ret;
-      };
-    }
-  
-    var sortOrder, siblingCheck;
-  
-    if ( document.documentElement.compareDocumentPosition ) {
-      sortOrder = function( a, b ) {
-        if ( a === b ) {
-          hasDuplicate = true;
-          return 0;
-        }
-  
-        if ( !a.compareDocumentPosition || !b.compareDocumentPosition ) {
-          return a.compareDocumentPosition ? -1 : 1;
-        }
-  
-        return a.compareDocumentPosition(b) & 4 ? -1 : 1;
-      };
-  
-    } else {
-      sortOrder = function( a, b ) {
-        // The nodes are identical, we can exit early
-        if ( a === b ) {
-          hasDuplicate = true;
-          return 0;
-  
-        // Fallback to using sourceIndex (in IE) if it's available on both nodes
-        } else if ( a.sourceIndex && b.sourceIndex ) {
-          return a.sourceIndex - b.sourceIndex;
-        }
-  
-        var al, bl,
-          ap = [],
-          bp = [],
-          aup = a.parentNode,
-          bup = b.parentNode,
-          cur = aup;
-  
-        // If the nodes are siblings (or identical) we can do a quick check
-        if ( aup === bup ) {
-          return siblingCheck( a, b );
-  
-        // If no parents were found then the nodes are disconnected
-        } else if ( !aup ) {
-          return -1;
-  
-        } else if ( !bup ) {
-          return 1;
-        }
-  
-        // Otherwise they're somewhere else in the tree so we need
-        // to build up a full list of the parentNodes for comparison
-        while ( cur ) {
-          ap.unshift( cur );
-          cur = cur.parentNode;
-        }
-  
-        cur = bup;
-  
-        while ( cur ) {
-          bp.unshift( cur );
-          cur = cur.parentNode;
-        }
-  
-        al = ap.length;
-        bl = bp.length;
-  
-        // Start walking down the tree looking for a discrepancy
-        for ( var i = 0; i < al && i < bl; i++ ) {
-          if ( ap[i] !== bp[i] ) {
-            return siblingCheck( ap[i], bp[i] );
-          }
-        }
-  
-        // We ended someplace up the tree so do a sibling check
-        return i === al ?
-          siblingCheck( a, bp[i], -1 ) :
-          siblingCheck( ap[i], b, 1 );
-      };
-  
-      siblingCheck = function( a, b, ret ) {
-        if ( a === b ) {
-          return ret;
-        }
-  
-        var cur = a.nextSibling;
-  
-        while ( cur ) {
-          if ( cur === b ) {
-            return -1;
-          }
-  
-          cur = cur.nextSibling;
-        }
-  
-        return 1;
-      };
-    }
-  
-    // Check to see if the browser returns elements by name when
-    // querying by getElementById (and provide a workaround)
-    (function(){
-      // We're going to inject a fake input element with a specified name
-      var form = document.createElement("div"),
-        id = "script" + (new Date()).getTime(),
-        root = document.documentElement;
-  
-      form.innerHTML = "<a name='" + id + "'/>";
-  
-      // Inject it into the root element, check its status, and remove it quickly
-      root.insertBefore( form, root.firstChild );
-  
-      // The workaround has to do additional checks after a getElementById
-      // Which slows things down for other browsers (hence the branching)
-      if ( document.getElementById( id ) ) {
-        Expr.find.ID = function( match, context, isXML ) {
-          if ( typeof context.getElementById !== "undefined" && !isXML ) {
-            var m = context.getElementById(match[1]);
-  
-            return m ?
-              m.id === match[1] || typeof m.getAttributeNode !== "undefined" && m.getAttributeNode("id").nodeValue === match[1] ?
-                [m] :
-                undefined :
-              [];
-          }
-        };
-  
-        Expr.filter.ID = function( elem, match ) {
-          var node = typeof elem.getAttributeNode !== "undefined" && elem.getAttributeNode("id");
-  
-          return elem.nodeType === 1 && node && node.nodeValue === match;
-        };
-      }
-  
-      root.removeChild( form );
-  
-      // release memory in IE
-      root = form = null;
-    })();
-  
-    (function(){
-      // Check to see if the browser returns only elements
-      // when doing getElementsByTagName("*")
-  
-      // Create a fake element
-      var div = document.createElement("div");
-      div.appendChild( document.createComment("") );
-  
-      // Make sure no comments are found
-      if ( div.getElementsByTagName("*").length > 0 ) {
-        Expr.find.TAG = function( match, context ) {
-          var results = context.getElementsByTagName( match[1] );
-  
-          // Filter out possible comments
-          if ( match[1] === "*" ) {
-            var tmp = [];
-  
-            for ( var i = 0; results[i]; i++ ) {
-              if ( results[i].nodeType === 1 ) {
-                tmp.push( results[i] );
-              }
-            }
-  
-            results = tmp;
-          }
-  
-          return results;
-        };
-      }
-  
-      // Check to see if an attribute returns normalized href attributes
-      div.innerHTML = "<a href='#'></a>";
-  
-      if ( div.firstChild && typeof div.firstChild.getAttribute !== "undefined" &&
-          div.firstChild.getAttribute("href") !== "#" ) {
-  
-        Expr.attrHandle.href = function( elem ) {
-          return elem.getAttribute( "href", 2 );
-        };
-      }
-  
-      // release memory in IE
-      div = null;
-    })();
-  
-    if ( document.querySelectorAll ) {
-      (function(){
-        var oldSizzle = Sizzle,
-          div = document.createElement("div"),
-          id = "__sizzle__";
-  
-        div.innerHTML = "<p class='TEST'></p>";
-  
-        // Safari can't handle uppercase or unicode characters when
-        // in quirks mode.
-        if ( div.querySelectorAll && div.querySelectorAll(".TEST").length === 0 ) {
-          return;
-        }
-      
-        Sizzle = function( query, context, extra, seed ) {
-          context = context || document;
-  
-          // Only use querySelectorAll on non-XML documents
-          // (ID selectors don't work in non-HTML documents)
-          if ( !seed && !Sizzle.isXML(context) ) {
-            // See if we find a selector to speed up
-            var match = /^(\w+$)|^\.([\w\-]+$)|^#([\w\-]+$)/.exec( query );
-            
-            if ( match && (context.nodeType === 1 || context.nodeType === 9) ) {
-              // Speed-up: Sizzle("TAG")
-              if ( match[1] ) {
-                return makeArray( context.getElementsByTagName( query ), extra );
-              
-              // Speed-up: Sizzle(".CLASS")
-              } else if ( match[2] && Expr.find.CLASS && context.getElementsByClassName ) {
-                return makeArray( context.getElementsByClassName( match[2] ), extra );
-              }
-            }
-            
-            if ( context.nodeType === 9 ) {
-              // Speed-up: Sizzle("body")
-              // The body element only exists once, optimize finding it
-              if ( query === "body" && context.body ) {
-                return makeArray( [ context.body ], extra );
-                
-              // Speed-up: Sizzle("#ID")
-              } else if ( match && match[3] ) {
-                var elem = context.getElementById( match[3] );
-  
-                // Check parentNode to catch when Blackberry 4.6 returns
-                // nodes that are no longer in the document #6963
-                if ( elem && elem.parentNode ) {
-                  // Handle the case where IE and Opera return items
-                  // by name instead of ID
-                  if ( elem.id === match[3] ) {
-                    return makeArray( [ elem ], extra );
-                  }
-                  
-                } else {
-                  return makeArray( [], extra );
-                }
-              }
-              
-              try {
-                return makeArray( context.querySelectorAll(query), extra );
-              } catch(qsaError) {}
-  
-            // qSA works strangely on Element-rooted queries
-            // We can work around this by specifying an extra ID on the root
-            // and working up from there (Thanks to Andrew Dupont for the technique)
-            // IE 8 doesn't work on object elements
-            } else if ( context.nodeType === 1 && context.nodeName.toLowerCase() !== "object" ) {
-              var oldContext = context,
-                old = context.getAttribute( "id" ),
-                nid = old || id,
-                hasParent = context.parentNode,
-                relativeHierarchySelector = /^\s*[+~]/.test( query );
-  
-              if ( !old ) {
-                context.setAttribute( "id", nid );
-              } else {
-                nid = nid.replace( /'/g, "\\$&" );
-              }
-              if ( relativeHierarchySelector && hasParent ) {
-                context = context.parentNode;
-              }
-  
-              try {
-                if ( !relativeHierarchySelector || hasParent ) {
-                  return makeArray( context.querySelectorAll( "[id='" + nid + "'] " + query ), extra );
-                }
-  
-              } catch(pseudoError) {
-              } finally {
-                if ( !old ) {
-                  oldContext.removeAttribute( "id" );
-                }
-              }
-            }
-          }
-        
-          return oldSizzle(query, context, extra, seed);
-        };
-  
-        for ( var prop in oldSizzle ) {
-          Sizzle[ prop ] = oldSizzle[ prop ];
-        }
-  
-        // release memory in IE
-        div = null;
-      })();
-    }
-  
-    (function(){
-      var html = document.documentElement,
-        matches = html.matchesSelector || html.mozMatchesSelector || html.webkitMatchesSelector || html.msMatchesSelector;
-  
-      if ( matches ) {
-        // Check to see if it's possible to do matchesSelector
-        // on a disconnected node (IE 9 fails this)
-        var disconnectedMatch = !matches.call( document.createElement( "div" ), "div" ),
-          pseudoWorks = false;
-  
-        try {
-          // This should fail with an exception
-          // Gecko does not error, returns false instead
-          matches.call( document.documentElement, "[test!='']:sizzle" );
-      
-        } catch( pseudoError ) {
-          pseudoWorks = true;
-        }
-  
-        Sizzle.matchesSelector = function( node, expr ) {
-          // Make sure that attribute selectors are quoted
-          expr = expr.replace(/\=\s*([^'"\]]*)\s*\]/g, "='$1']");
-  
-          if ( !Sizzle.isXML( node ) ) {
-            try { 
-              if ( pseudoWorks || !Expr.match.PSEUDO.test( expr ) && !/!=/.test( expr ) ) {
-                var ret = matches.call( node, expr );
-  
-                // IE 9's matchesSelector returns false on disconnected nodes
-                if ( ret || !disconnectedMatch ||
-                    // As well, disconnected nodes are said to be in a document
-                    // fragment in IE 9, so check for that
-                    node.document && node.document.nodeType !== 11 ) {
-                  return ret;
-                }
-              }
-            } catch(e) {}
-          }
-  
-          return Sizzle(expr, null, null, [node]).length > 0;
-        };
-      }
-    })();
-  
-    (function(){
-      var div = document.createElement("div");
-  
-      div.innerHTML = "<div class='test e'></div><div class='test'></div>";
-  
-      // Opera can't find a second classname (in 9.6)
-      // Also, make sure that getElementsByClassName actually exists
-      if ( !div.getElementsByClassName || div.getElementsByClassName("e").length === 0 ) {
-        return;
-      }
-  
-      // Safari caches class attributes, doesn't catch changes (in 3.2)
-      div.lastChild.className = "e";
-  
-      if ( div.getElementsByClassName("e").length === 1 ) {
-        return;
-      }
-      
-      Expr.order.splice(1, 0, "CLASS");
-      Expr.find.CLASS = function( match, context, isXML ) {
-        if ( typeof context.getElementsByClassName !== "undefined" && !isXML ) {
-          return context.getElementsByClassName(match[1]);
-        }
-      };
-  
-      // release memory in IE
-      div = null;
-    })();
-  
-    function dirNodeCheck( dir, cur, doneName, checkSet, nodeCheck, isXML ) {
-      for ( var i = 0, l = checkSet.length; i < l; i++ ) {
-        var elem = checkSet[i];
-  
-        if ( elem ) {
-          var match = false;
-  
-          elem = elem[dir];
-  
-          while ( elem ) {
-            if ( elem[ expando ] === doneName ) {
-              match = checkSet[elem.sizset];
-              break;
-            }
-  
-            if ( elem.nodeType === 1 && !isXML ){
-              elem[ expando ] = doneName;
-              elem.sizset = i;
-            }
-  
-            if ( elem.nodeName.toLowerCase() === cur ) {
-              match = elem;
-              break;
-            }
-  
-            elem = elem[dir];
-          }
-  
-          checkSet[i] = match;
-        }
-      }
-    }
-  
-    function dirCheck( dir, cur, doneName, checkSet, nodeCheck, isXML ) {
-      for ( var i = 0, l = checkSet.length; i < l; i++ ) {
-        var elem = checkSet[i];
-  
-        if ( elem ) {
-          var match = false;
-          
-          elem = elem[dir];
-  
-          while ( elem ) {
-            if ( elem[ expando ] === doneName ) {
-              match = checkSet[elem.sizset];
-              break;
-            }
-  
-            if ( elem.nodeType === 1 ) {
-              if ( !isXML ) {
-                elem[ expando ] = doneName;
-                elem.sizset = i;
-              }
-  
-              if ( typeof cur !== "string" ) {
-                if ( elem === cur ) {
-                  match = true;
-                  break;
-                }
-  
-              } else if ( Sizzle.filter( cur, [elem] ).length > 0 ) {
-                match = elem;
-                break;
-              }
-            }
-  
-            elem = elem[dir];
-          }
-  
-          checkSet[i] = match;
-        }
-      }
-    }
-  
-    if ( document.documentElement.contains ) {
-      Sizzle.contains = function( a, b ) {
-        return a !== b && (a.contains ? a.contains(b) : true);
-      };
-  
-    } else if ( document.documentElement.compareDocumentPosition ) {
-      Sizzle.contains = function( a, b ) {
-        return !!(a.compareDocumentPosition(b) & 16);
-      };
-  
-    } else {
-      Sizzle.contains = function() {
-        return false;
-      };
-    }
-  
-    Sizzle.isXML = function( elem ) {
-      // documentElement is verified for cases where it doesn't yet exist
-      // (such as loading iframes in IE - #4833) 
-      var documentElement = (elem ? elem.ownerDocument || elem : 0).documentElement;
-  
-      return documentElement ? documentElement.nodeName !== "HTML" : false;
-    };
-  
-    var posProcess = function( selector, context, seed ) {
-      var match,
-        tmpSet = [],
-        later = "",
-        root = context.nodeType ? [context] : context;
-  
-      // Position selectors must be done after the filter
-      // And so must :not(positional) so we move all PSEUDOs to the end
-      while ( (match = Expr.match.PSEUDO.exec( selector )) ) {
-        later += match[0];
-        selector = selector.replace( Expr.match.PSEUDO, "" );
-      }
-  
-      selector = Expr.relative[selector] ? selector + "*" : selector;
-  
-      for ( var i = 0, l = root.length; i < l; i++ ) {
-        Sizzle( selector, root[i], tmpSet, seed );
-      }
-  
-      return Sizzle.filter( later, tmpSet );
-    };
-  
-    // EXPOSE
-  
-    // MYMOD - 14 Nov 2011
-    //window.Sizzle = Sizzle;
-  
-    })();
-  
-  // MYMOD - 14 Nov 2011
-  }
   
   //     Underscore.js 1.2.2
   //     (c) 2011 Jeremy Ashkenas, DocumentCloud Inc.
@@ -3012,498 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  // Underscore.string
-  // (c) 2010 Esa-Matti Suuronen <esa-matti aet suuronen dot org>
-  // Underscore.strings is freely distributable under the terms of the MIT license.
-  // Documentation: https://github.com/epeli/underscore.string
-  // Some code is borrowed from MooTools and Alexandru Marasteanu.
-  
-  // Version 1.2.0
-  
-  // MYMOD - 14 Nov 2011
-  var _s
-  
-  // MYMOD - 14 Nov 2011
-  ;(function(){
-    'use strict';
-  
-    // Defining helper functions.
-  
-    var nativeTrim = String.prototype.trim;
-  
-    var parseNumber = function(source) { return source * 1 || 0; };
-  
-    var strRepeat = function(i, m) {
-      for (var o = []; m > 0; o[--m] = i) {}
-      return o.join('');
-    };
-  
-    var slice = function(a){
-      return Array.prototype.slice.call(a);
-    };
-  
-    var defaultToWhiteSpace = function(characters){
-      if (characters) {
-        return _s.escapeRegExp(characters);
-      }
-      return '\\s';
-    };
-  
-    var sArgs = function(method){
-      return function(){
-        var args = slice(arguments);
-        for(var i=0; i<args.length; i++)
-          args[i] = args[i] == null ? '' : '' + args[i];
-        return method.apply(null, args);
-      };
-    };
-  
-    // sprintf() for JavaScript 0.7-beta1
-    // http://www.diveintojavascript.com/projects/javascript-sprintf
-    //
-    // Copyright (c) Alexandru Marasteanu <alexaholic [at) gmail (dot] com>
-    // All rights reserved.
-  
-    var sprintf = (function() {
-      function get_type(variable) {
-        return Object.prototype.toString.call(variable).slice(8, -1).toLowerCase();
-      }
-  
-      var str_repeat = strRepeat;
-  
-      var str_format = function() {
-        if (!str_format.cache.hasOwnProperty(arguments[0])) {
-          str_format.cache[arguments[0]] = str_format.parse(arguments[0]);
-        }
-        return str_format.format.call(null, str_format.cache[arguments[0]], arguments);
-      };
-  
-      str_format.format = function(parse_tree, argv) {
-        var cursor = 1, tree_length = parse_tree.length, node_type = '', arg, output = [], i, k, match, pad, pad_character, pad_length;
-        for (i = 0; i < tree_length; i++) {
-          node_type = get_type(parse_tree[i]);
-          if (node_type === 'string') {
-            output.push(parse_tree[i]);
-          }
-          else if (node_type === 'array') {
-            match = parse_tree[i]; // convenience purposes only
-            if (match[2]) { // keyword argument
-              arg = argv[cursor];
-              for (k = 0; k < match[2].length; k++) {
-                if (!arg.hasOwnProperty(match[2][k])) {
-                  throw(sprintf('[_.sprintf] property "%s" does not exist', match[2][k]));
-                }
-                arg = arg[match[2][k]];
-              }
-            } else if (match[1]) { // positional argument (explicit)
-              arg = argv[match[1]];
-            }
-            else { // positional argument (implicit)
-              arg = argv[cursor++];
-            }
-  
-            if (/[^s]/.test(match[8]) && (get_type(arg) != 'number')) {
-              throw(sprintf('[_.sprintf] expecting number but found %s', get_type(arg)));
-            }
-            switch (match[8]) {
-              case 'b': arg = arg.toString(2); break;
-              case 'c': arg = String.fromCharCode(arg); break;
-              case 'd': arg = parseInt(arg, 10); break;
-              case 'e': arg = match[7] ? arg.toExponential(match[7]) : arg.toExponential(); break;
-              case 'f': arg = match[7] ? parseFloat(arg).toFixed(match[7]) : parseFloat(arg); break;
-              case 'o': arg = arg.toString(8); break;
-              case 's': arg = ((arg = String(arg)) && match[7] ? arg.substring(0, match[7]) : arg); break;
-              case 'u': arg = Math.abs(arg); break;
-              case 'x': arg = arg.toString(16); break;
-              case 'X': arg = arg.toString(16).toUpperCase(); break;
-            }
-            arg = (/[def]/.test(match[8]) && match[3] && arg >= 0 ? '+'+ arg : arg);
-            pad_character = match[4] ? match[4] == '0' ? '0' : match[4].charAt(1) : ' ';
-            pad_length = match[6] - String(arg).length;
-            pad = match[6] ? str_repeat(pad_character, pad_length) : '';
-            output.push(match[5] ? arg + pad : pad + arg);
-          }
-        }
-        return output.join('');
-      };
-  
-      str_format.cache = {};
-  
-      str_format.parse = function(fmt) {
-        var _fmt = fmt, match = [], parse_tree = [], arg_names = 0;
-        while (_fmt) {
-          if ((match = /^[^\x25]+/.exec(_fmt)) !== null) {
-            parse_tree.push(match[0]);
-          }
-          else if ((match = /^\x25{2}/.exec(_fmt)) !== null) {
-            parse_tree.push('%');
-          }
-          else if ((match = /^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(_fmt)) !== null) {
-            if (match[2]) {
-              arg_names |= 1;
-              var field_list = [], replacement_field = match[2], field_match = [];
-              if ((field_match = /^([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
-                field_list.push(field_match[1]);
-                while ((replacement_field = replacement_field.substring(field_match[0].length)) !== '') {
-                  if ((field_match = /^\.([a-z_][a-z_\d]*)/i.exec(replacement_field)) !== null) {
-                    field_list.push(field_match[1]);
-                  }
-                  else if ((field_match = /^\[(\d+)\]/.exec(replacement_field)) !== null) {
-                    field_list.push(field_match[1]);
-                  }
-                  else {
-                    throw('[_.sprintf] huh?');
-                  }
-                }
-              }
-              else {
-                throw('[_.sprintf] huh?');
-              }
-              match[2] = field_list;
-            }
-            else {
-              arg_names |= 2;
-            }
-            if (arg_names === 3) {
-              throw('[_.sprintf] mixing positional and named placeholders is not (yet) supported');
-            }
-            parse_tree.push(match);
-          }
-          else {
-            throw('[_.sprintf] huh?');
-          }
-          _fmt = _fmt.substring(match[0].length);
-        }
-        return parse_tree;
-      };
-  
-      return str_format;
-    })();
-  
-  
-  
-    // Defining underscore.string
-  
-    // MYMOD - 14 Nov 2011
-    _s = {
-  
-      VERSION: '1.2.0',
-  
-      isBlank: sArgs(function(str){
-        return (/^\s*$/).test(str);
-      }),
-  
-      stripTags: sArgs(function(str){
-        return str.replace(/<\/?[^>]+>/ig, '');
-      }),
-  
-      capitalize : sArgs(function(str) {
-        return str.charAt(0).toUpperCase() + str.substring(1).toLowerCase();
-      }),
-  
-      chop: sArgs(function(str, step){
-        step = parseNumber(step) || str.length;
-        var arr = [];
-        for (var i = 0; i < str.length;) {
-          arr.push(str.slice(i,i + step));
-          i = i + step;
-        }
-        return arr;
-      }),
-  
-      clean: sArgs(function(str){
-        return _s.strip(str.replace(/\s+/g, ' '));
-      }),
-  
-      count: sArgs(function(str, substr){
-        var count = 0, index;
-        for (var i=0; i < str.length;) {
-          index = str.indexOf(substr, i);
-          index >= 0 && count++;
-          i = i + (index >= 0 ? index : 0) + substr.length;
-        }
-        return count;
-      }),
-  
-      chars: sArgs(function(str) {
-        return str.split('');
-      }),
-  
-      escapeHTML: sArgs(function(str) {
-        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-                              .replace(/"/g, '&quot;').replace(/'/g, "&apos;");
-      }),
-  
-      unescapeHTML: sArgs(function(str) {
-        return str.replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-                              .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
-      }),
-  
-      escapeRegExp: sArgs(function(str){
-        // From MooTools core 1.2.4
-        return str.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
-      }),
-  
-      insert: sArgs(function(str, i, substr){
-        var arr = str.split('');
-        arr.splice(parseNumber(i), 0, substr);
-        return arr.join('');
-      }),
-  
-      include: sArgs(function(str, needle){
-        return str.indexOf(needle) !== -1;
-      }),
-  
-      join: sArgs(function(sep) {
-        var args = slice(arguments);
-        return args.join(args.shift());
-      }),
-  
-      lines: sArgs(function(str) {
-        return str.split("\n");
-      }),
-  
-      reverse: sArgs(function(str){
-          return Array.prototype.reverse.apply(String(str).split('')).join('');
-      }),
-  
-      splice: sArgs(function(str, i, howmany, substr){
-        var arr = str.split('');
-        arr.splice(parseNumber(i), parseNumber(howmany), substr);
-        return arr.join('');
-      }),
-  
-      startsWith: sArgs(function(str, starts){
-        return str.length >= starts.length && str.substring(0, starts.length) === starts;
-      }),
-  
-      endsWith: sArgs(function(str, ends){
-        return str.length >= ends.length && str.substring(str.length - ends.length) === ends;
-      }),
-  
-      succ: sArgs(function(str){
-        var arr = str.split('');
-        arr.splice(str.length-1, 1, String.fromCharCode(str.charCodeAt(str.length-1) + 1));
-        return arr.join('');
-      }),
-  
-      titleize: sArgs(function(str){
-        var arr = str.split(' '),
-            word;
-        for (var i=0; i < arr.length; i++) {
-          word = arr[i].split('');
-          if(typeof word[0] !== 'undefined') word[0] = word[0].toUpperCase();
-          i+1 === arr.length ? arr[i] = word.join('') : arr[i] = word.join('') + ' ';
-        }
-        return arr.join('');
-      }),
-  
-      camelize: sArgs(function(str){
-        return _s.trim(str).replace(/(\-|_|\s)+(.)?/g, function(match, separator, chr) {
-          return chr ? chr.toUpperCase() : '';
-        });
-      }),
-  
-      underscored: function(str){
-        return _s.trim(str).replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/\-|\s+/g, '_').toLowerCase();
-      },
-  
-      dasherize: function(str){
-        return _s.trim(str).replace(/([a-z\d])([A-Z]+)/g, '$1-$2').replace(/^([A-Z]+)/, '-$1').replace(/\_|\s+/g, '-').toLowerCase();
-      },
-  
-      humanize: function(str){
-        return _s.capitalize(this.underscored(str).replace(/_id$/,'').replace(/_/g, ' '));
-      },
-  
-      trim: sArgs(function(str, characters){
-        if (!characters && nativeTrim) {
-          return nativeTrim.call(str);
-        }
-        characters = defaultToWhiteSpace(characters);
-        return str.replace(new RegExp('\^[' + characters + ']+|[' + characters + ']+$', 'g'), '');
-      }),
-  
-      ltrim: sArgs(function(str, characters){
-        characters = defaultToWhiteSpace(characters);
-        return str.replace(new RegExp('\^[' + characters + ']+', 'g'), '');
-      }),
-  
-      rtrim: sArgs(function(str, characters){
-        characters = defaultToWhiteSpace(characters);
-        return str.replace(new RegExp('[' + characters + ']+$', 'g'), '');
-      }),
-  
-      truncate: sArgs(function(str, length, truncateStr){
-        truncateStr = truncateStr || '...';
-        length = parseNumber(length);
-        return str.length > length ? str.slice(0,length) + truncateStr : str;
-      }),
-  
-      /**
-       * _s.prune: a more elegant version of truncate
-       * prune extra chars, never leaving a half-chopped word.
-       * @author github.com/sergiokas
-       */
-      prune: sArgs(function(str, length, pruneStr){
-        // Function to check word/digit chars including non-ASCII encodings. 
-        var isWordChar = function(c) { return ((c.toUpperCase() != c.toLowerCase()) || /[-_\d]/.test(c)); }
-        
-        var template = '';
-        var pruned = '';
-        var i = 0;
-        
-        // Set default values
-        pruneStr = pruneStr || '...';
-        length = parseNumber(length);
-        
-        // Convert to an ASCII string to avoid problems with unicode chars.
-        for (i in str) {
-          template += (isWordChar(str[i]))?'A':' ';
-        } 
-  
-        // Check if we're in the middle of a word
-        if( template.substring(length-1, length+1).search(/^\w\w$/) === 0 )
-          pruned = _s.rtrim(template.slice(0,length).replace(/([\W][\w]*)$/,''));
-        else
-          pruned = _s.rtrim(template.slice(0,length));
-  
-        pruned = pruned.replace(/\W+$/,'');
-  
-        return (pruned.length+pruneStr.length>str.length) ? str : str.substring(0, pruned.length)+pruneStr;
-      }),
-  
-      words: function(str, delimiter) {
-        return String(str).split(delimiter || " ");
-      },
-  
-      pad: sArgs(function(str, length, padStr, type) {
-        var padding = '',
-            padlen  = 0;
-  
-        length = parseNumber(length);
-  
-        if (!padStr) { padStr = ' '; }
-        else if (padStr.length > 1) { padStr = padStr.charAt(0); }
-        switch(type) {
-          case 'right':
-            padlen = (length - str.length);
-            padding = strRepeat(padStr, padlen);
-            str = str+padding;
-            break;
-          case 'both':
-            padlen = (length - str.length);
-            padding = {
-              'left' : strRepeat(padStr, Math.ceil(padlen/2)),
-              'right': strRepeat(padStr, Math.floor(padlen/2))
-            };
-            str = padding.left+str+padding.right;
-            break;
-          default: // 'left'
-            padlen = (length - str.length);
-            padding = strRepeat(padStr, padlen);;
-            str = padding+str;
-          }
-        return str;
-      }),
-  
-      lpad: function(str, length, padStr) {
-        return _s.pad(str, length, padStr);
-      },
-  
-      rpad: function(str, length, padStr) {
-        return _s.pad(str, length, padStr, 'right');
-      },
-  
-      lrpad: function(str, length, padStr) {
-        return _s.pad(str, length, padStr, 'both');
-      },
-  
-      sprintf: sprintf,
-  
-      vsprintf: function(fmt, argv){
-        argv.unshift(fmt);
-        return sprintf.apply(null, argv);
-      },
-  
-      toNumber: function(str, decimals) {
-        var num = parseNumber(parseNumber(str).toFixed(parseNumber(decimals)));
-        return (!(num === 0 && (str !== "0" && str !== 0))) ? num : Number.NaN;
-      },
-  
-      strRight: sArgs(function(sourceStr, sep){
-        var pos =  (!sep) ? -1 : sourceStr.indexOf(sep);
-        return (pos != -1) ? sourceStr.slice(pos+sep.length, sourceStr.length) : sourceStr;
-      }),
-  
-      strRightBack: sArgs(function(sourceStr, sep){
-        var pos =  (!sep) ? -1 : sourceStr.lastIndexOf(sep);
-        return (pos != -1) ? sourceStr.slice(pos+sep.length, sourceStr.length) : sourceStr;
-      }),
-  
-      strLeft: sArgs(function(sourceStr, sep){
-        var pos = (!sep) ? -1 : sourceStr.indexOf(sep);
-        return (pos != -1) ? sourceStr.slice(0, pos) : sourceStr;
-      }),
-  
-      strLeftBack: sArgs(function(sourceStr, sep){
-        var pos = sourceStr.lastIndexOf(sep);
-        return (pos != -1) ? sourceStr.slice(0, pos) : sourceStr;
-      }),
-  
-      exports: function() {
-        var result = {};
-  
-        for (var prop in this) {
-          if (!this.hasOwnProperty(prop) || prop == 'include' || prop == 'contains' || prop == 'reverse') continue;
-          result[prop] = this[prop];
-        }
-  
-        return result;
-      }
-  
-    };
-  
-    // Aliases
-  
-    _s.strip    = _s.trim;
-    _s.lstrip   = _s.ltrim;
-    _s.rstrip   = _s.rtrim;
-    _s.center   = _s.lrpad;
-    _s.ljust    = _s.lpad;
-    _s.rjust    = _s.rpad;
-    _s.contains = _s.include;
-  
-    // MYMOD - 14 Nov 2011
-    // CommonJS module is defined
-    //if (typeof exports !== 'undefined') {
-    //  if (typeof module !== 'undefined' && module.exports) {
-    //    // Export module
-    //    module.exports = _s;
-    //  }
-    //  exports._s = _s;
-    //
-    // Integrate with Underscore.js
-    //} else if (typeof root._ !== 'undefined') {
-    //  // root._.mixin(_s);
-    //  root._.string = _s;
-    //  root._.str = root._.string;
-    //
-    // Or define it
-    //} else {
-    //  root._ = {
-    //    string: _s,
-    //    str: _s
-    //  };
-    //}
-  
-  // MYMOD - 14 Nov 2011
-  })();
-  
-  _.string = _s
-  _.str = _s
-  
-  var $$, $B, Behavior, BinaryHeap, CATCH_E, ChangesE, ConcatE, EventStream, EventStream_api, FINALLY_E, HEAP_E, HeapStore, InternalE, Jolt, MappedE, PriorityQueue, Pulse, Pulse_cat, Pulse_catch_and_trace, Reactor, beforeNextPulse, beforeQ, changesE, cleanupQ, cleanupWeakReference, concatE, defaultCatchE, defaultFinallyE, defaultHeapE, defer, defer_high, delay, doNotPropagate, exporter, extractB, genericAttachListener, genericRemoveListener, genericRemoveWeakReference, internalE, isB, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, mapE, nextRank, nextStamp, propagateHigh, say, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, valueNow;
+  var Behavior, BinaryHeap, ContInfo, EventStream, HeapStore, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, isB, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -3609,62 +1662,74 @@
   
   Jolt = {};
   
-  Jolt.$$ = $$ = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    if (!($$.okay != null)) {
-      if (typeof Sizzle !== "undefined" && Sizzle !== null) {
-        $$.okay = 1;
-      } else {
-        $$.okay = -1;
-      }
-    }
-    if ($$.okay === -1) {
-      throw 'Jolt.$$: Sizzle is undefined, because the document object was undefined when Jolt was loaded';
-    }
-    return Sizzle.apply(null, args);
-  };
-  
-  Jolt.say = say = function(message, isError, color) {
-    var c, colors, fn, _i, _len;
-    if (color == null) color = 'white';
-    if (!(say.okay != null)) {
+  _say = function() {
+    var isError, message, styles;
+    message = arguments[0], isError = arguments[1], styles = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
+    if (!(_say.okay != null)) {
       if (!((typeof console !== "undefined" && console !== null) || ((typeof window !== "undefined" && window !== null ? window.console : void 0) != null))) {
-        say.okay = -1;
-        throw 'console.log method is not available';
+        _say.okay = -1;
+        throw clog_err;
       }
       if (typeof console === "undefined" || console === null) {
         console = typeof window !== "undefined" && window !== null ? window.console : void 0;
       }
-      say.console = console;
-      say.error = console.error != null;
-      if (!(console.log != null)) {
-        say.okay = -1;
-        throw 'console.log method is not available';
-      } else {
-        say.okay = 1;
-        if (isNodeJS) {
-          say.clc = require('cli-color');
-        } else {
-          say.clc = {};
-          colors = ['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white', 'gray'];
-          fn = function(text) {
-            return text;
-          };
-          for (_i = 0, _len = colors.length; _i < _len; _i++) {
-            c = colors[_i];
-            say.clc[c] = fn;
-            say.clc[c].bold = fn;
-          }
-        }
+      _say.console = console;
+      _say.error = console.error != null;
+    }
+    if (!(console.log != null)) {
+      _say.okay = -1;
+      throw clog_err;
+    } else {
+      _say.okay = 1;
+    }
+    if (_say.okay === -1) throw clog_err;
+    if (!isNodeJS) {
+      return _say_helper(message, isError);
+    } else {
+      switch (styles.length) {
+        case 0:
+          message = message;
+          break;
+        case 1:
+          message = _say.clc[styles[0]](message);
+          break;
+        case 2:
+          message = _say.clc[styles[0]][styles[1]](message);
+          break;
+        case 3:
+          message = _say.clc[styles[0]][styles[1]][styles[2]](message);
+          break;
+        default:
+          message = _say.clc[styles[0]][styles[1]][styles[2]][styles[3]](message);
+      }
+      return _say_helper(message, isError);
+    }
+  };
+  
+  if (isNodeJS) _say.clc = require('cli-color');
+  
+  clog_err = 'Jolt.say: console.log method is not available';
+  
+  _say_helper = function(message, isError) {
+    if (isError) {
+      if (_say.error != null) {
+        _say.console.error(message);
+        return;
       }
     }
-    if (say.okay === -1) throw 'console.log method is not available';
-    if (isError && (say.error != null)) {
-      say.console.error(say.clc['red'].bold(message));
-      return;
-    }
-    return say.console.log(say.clc[color](message));
+    return _say.console.log(message);
+  };
+  
+  Jolt.say = say = function() {
+    var message, styles;
+    message = arguments[0], styles = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    return _say.apply(null, [message, false].concat(__slice.call(styles)));
+  };
+  
+  Jolt.sayError = Jolt.sayErr = sayError = sayErr = function() {
+    var message, styles;
+    message = arguments[0], styles = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    return _say.apply(null, [message, true].concat(__slice.call(styles)));
   };
   
   Jolt.PriorityQueue = PriorityQueue = (function() {
@@ -3685,21 +1750,25 @@
   
   lastStamp = 0;
   
-  nextStamp = function() {
+  Jolt.nextStamp = nextStamp = function() {
     return ++lastStamp;
   };
   
-  Jolt.isPropagating = isPropagating = false;
+  propagating = false;
+  
+  Jolt.isPropagating = isPropagating = function() {
+    return propagating;
+  };
   
   Jolt.setPropagating = setPropagating = function(bool) {
-    return isPropagating = Boolean(bool);
+    return propagating = Boolean(bool);
   };
   
   Jolt.doNotPropagate = doNotPropagate = {};
   
   Jolt.propagateHigh = propagateHigh = {};
   
-  sendCall = {
+  Jolt.sendCall = sendCall = {
     name: (function() {
       return 'Jolt.sendEvent';
     }),
@@ -3799,14 +1868,26 @@
     }
   };
   
-  HeapStore = (function() {
+  Jolt.HeapStore = HeapStore = (function() {
   
-    function HeapStore(stamp) {
+    function HeapStore(stamp, cont) {
       this.stamp = stamp;
+      this.cont = cont;
       this.nodes = [];
     }
   
     return HeapStore;
+  
+  })();
+  
+  Jolt.ContInfo = ContInfo = (function() {
+  
+    function ContInfo(stamps, nodes) {
+      this.stamps = stamps;
+      this.nodes = nodes;
+    }
+  
+    return ContInfo;
   
   })();
   
@@ -3816,18 +1897,23 @@
   
   Jolt.Pulse = Pulse = (function() {
   
-    function Pulse(arity, junction, sender, stamp, value, heap) {
+    function Pulse(arity, junction, sender, stamp, value, heap, cont) {
       this.arity = arity;
       this.junction = junction;
       this.sender = sender;
       this.stamp = stamp;
-      this.value = value;
-      this.heap = heap != null ? heap : new HeapStore(this.stamp);
+      this.value = value != null ? value : [];
+      this.heap = heap != null ? heap : new HeapStore(this.stamp, cont);
     }
   
+    Pulse.prototype.copy = function(PulseClass) {
+      if (PulseClass == null) PulseClass = this.constructor;
+      return new PulseClass(this.arity, this.junction, this.sender, this.stamp, this.value.slice(0), this.heap);
+    };
+  
     Pulse.prototype.propagate = function() {
-      var P, high, more, nextPulse, pulse, queue, qv, receiver, sender, weaklyHeld, _ref;
-      pulse = arguments[0], sender = arguments[1], receiver = arguments[2], high = arguments[3], more = 5 <= arguments.length ? __slice.call(arguments, 4) : [];
+      var PULSE, high, more, nextPulse, queue, qv, receiver, sender, weaklyHeld, _i, _len, _ref;
+      sender = arguments[0], receiver = arguments[1], high = arguments[2], more = 4 <= arguments.length ? __slice.call(arguments, 3) : [];
       if (!receiver.weaklyHeld) {
         if (beforeQ.length && !high) {
           while (beforeQ.length) {
@@ -3838,29 +1924,31 @@
         queue = new PriorityQueue;
         queue.push({
           estream: receiver,
-          pulse: pulse,
+          pulse: this,
           rank: receiver.rank
         });
         while (queue.size()) {
           qv = queue.pop();
-          P = new (qv.estream.PulseClass())(qv.pulse.arity, qv.pulse.junction, qv.pulse.sender, qv.pulse.stamp, qv.pulse.value.slice(0), qv.pulse.heap);
-          P.heap.nodes.push(qv.estream);
-          nextPulse = (_ref = qv.estream.PulseClass().prototype).PROPAGATE.apply(_ref, [P, P.sender, qv.estream, high].concat(__slice.call(more)));
+          qv.pulse.heap.nodes.push([qv.pulse.sender, qv.estream]);
+          PULSE = qv.pulse.copy(qv.estream.PulseClass());
+          nextPulse = PULSE.PROPAGATE.apply(PULSE, [PULSE.sender, qv.estream, high].concat(__slice.call(more)));
           weaklyHeld = true;
           if (nextPulse !== doNotPropagate) {
             nextPulse.sender = qv.estream;
-            _(qv.estream.sendTo).map(function(receiver) {
+            _ref = qv.estream.sendTo;
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              receiver = _ref[_i];
               weaklyHeld = weaklyHeld && receiver.weaklyHeld;
               if (receiver.weaklyHeld) {
-                return scheduleCleanup(cleanupQ, qv.estream, receiver);
+                scheduleCleanup(cleanupQ, qv.estream, receiver);
               } else {
-                return queue.push({
+                queue.push({
                   estream: receiver,
                   pulse: nextPulse,
                   rank: receiver.rank
                 });
               }
-            });
+            }
             if (qv.estream.sendTo.length && weaklyHeld) {
               qv.estream.weaklyHeld = true;
               scheduleCleanup(cleanupQ, qv.pulse.sender, qv.estream);
@@ -3868,17 +1956,17 @@
           }
         }
         setPropagating(false);
-        return P.heap;
+        return PULSE.heap;
       } else {
         scheduleCleanup(cleanupQ, sender, receiver);
-        return pulse.heap;
+        return this.heap;
       }
     };
   
     Pulse.prototype.PROPAGATE = function() {
-      var PULSE, high, more, pulse, receiver, sender;
-      pulse = arguments[0], sender = arguments[1], receiver = arguments[2], high = arguments[3], more = 5 <= arguments.length ? __slice.call(arguments, 4) : [];
-      PULSE = receiver.UPDATER(pulse);
+      var PULSE, high, more, receiver, sender;
+      sender = arguments[0], receiver = arguments[1], high = arguments[2], more = 4 <= arguments.length ? __slice.call(arguments, 3) : [];
+      PULSE = receiver.UPDATER(this);
       if (PULSE !== doNotPropagate && !(isP(PULSE))) {
         setPropagating(false);
         throw 'receiver\'s UPDATER did not return a pulse object';
@@ -3898,70 +1986,7 @@
   };
   
   Jolt.isE = isE = function(estream) {
-    return estream instanceof EventStream;
-  };
-  
-  genericAttachListener = function(sender, receiver) {
-    var cur, doNextRank, estream, i, q, sentinel, _i, _len, _results;
-    if (!isPropagating) {
-      if (sender.rank === receiver.rank) {
-        throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph';
-      }
-      i = _.indexOf(sender.sendTo, receiver);
-      if (!(i + 1)) {
-        sender.sendTo.push(receiver);
-        if (sender.rank > receiver.rank) {
-          doNextRank = [];
-          sentinel = {};
-          sender.__cycleSentinel__ = sentinel;
-          q = [receiver];
-          while (q.length) {
-            cur = q.shift();
-            if (cur.__cycleSentinel__ === sentinel) {
-              sender.sendTo.pop();
-              throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph';
-            }
-            doNextRank.push(cur);
-            cur.__cycleSentinel__ = sentinel;
-            q.push.apply(q, cur.sendTo);
-          }
-          _results = [];
-          for (_i = 0, _len = doNextRank.length; _i < _len; _i++) {
-            estream = doNextRank[_i];
-            _results.push(estream.rank = nextRank());
-          }
-          return _results;
-        }
-      }
-    } else {
-      return scheduleBefore(beforeQ, genericAttachListener, sender, receiver);
-    }
-  };
-  
-  genericRemoveListener = function(sender, receiver) {
-    var i;
-    if (!isPropagating) {
-      i = _.indexOf(sender.sendTo, receiver);
-      if (i + 1) return sender.sendTo.splice(i, 1);
-    } else {
-      return scheduleBefore(beforeQ, genericRemoveListener, sender, receiver);
-    }
-  };
-  
-  genericRemoveWeakReference = function(sender, weakReference) {
-    var i;
-    weakReference.cleanupScheduled = false;
-    if (!weakReference.cleanupCanceled) {
-      if (!isPropagating) {
-        i = _.indexOf(sender.sendTo, weakReference);
-        if (i + 1) sender.sendTo.splice(i, 1);
-        if (!sender.sendTo.length) return sender.weaklyHeld = true;
-      } else {
-        return scheduleCleanup(cleanupQ, sender, weakReference);
-      }
-    } else {
-      return weakReference.cleanupCanceled = null;
-    }
+    return (estream instanceof EventStream) && !(isB(estream));
   };
   
   Jolt.EventStream = EventStream = (function() {
@@ -3984,7 +2009,7 @@
       if (!isE(receiver)) {
         throw '<' + this.ClassName + '>.attachListener: expected an EventStream';
       }
-      genericAttachListener(this, receiver);
+      this.constructor.genericAttachListener(this, receiver);
       return this;
     };
   
@@ -3992,7 +2017,7 @@
       if (!isE(receiver)) {
         throw '<' + this.ClassName + '>.removeListener: expected an EventStream';
       }
-      genericRemoveListener(this, receiver);
+      this.constructor.genericRemoveListener(this, receiver);
       return this;
     };
   
@@ -4000,7 +2025,7 @@
       if (!isE(weakReference)) {
         throw '<' + this.ClassName + '>.removeWeakReference: expected an EventStream';
       }
-      genericRemoveWeakReference(this, weakReference);
+      this.constructor.genericRemoveWeakReference(this, weakReference);
       return this;
     };
   
@@ -4009,6 +2034,75 @@
     EventStream.prototype.cleanupCanceled = null;
   
     EventStream.prototype.cleanupScheduled = false;
+  
+    EventStream.genericAttachListener = function(sender, receiver) {
+      var cur, doNextRank, estream, i, q, sentinel, thisClass, _i, _len, _results;
+      if (!isPropagating()) {
+        if (sender.rank === receiver.rank) {
+          throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph';
+        }
+        i = _.indexOf(sender.sendTo, receiver);
+        if (!(i + 1)) {
+          sender.sendTo.push(receiver);
+          if (sender.rank > receiver.rank) {
+            doNextRank = [];
+            sentinel = {};
+            sender.__cycleSentinel__ = sentinel;
+            q = [receiver];
+            while (q.length) {
+              cur = q.shift();
+              if (cur.__cycleSentinel__ === sentinel) {
+                sender.sendTo.pop();
+                throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph';
+              }
+              doNextRank.push(cur);
+              cur.__cycleSentinel__ = sentinel;
+              q.push.apply(q, cur.sendTo);
+            }
+            _results = [];
+            for (_i = 0, _len = doNextRank.length; _i < _len; _i++) {
+              estream = doNextRank[_i];
+              _results.push(estream.rank = nextRank());
+            }
+            return _results;
+          }
+        }
+      } else {
+        thisClass = this;
+        return scheduleBefore(beforeQ, (function(sender, receiver) {
+          return thisClass.genericAttachListener(sender, receiver);
+        }), sender, receiver);
+      }
+    };
+  
+    EventStream.genericRemoveListener = function(sender, receiver) {
+      var i, thisClass;
+      if (!isPropagating()) {
+        i = _.indexOf(sender.sendTo, receiver);
+        if (i + 1) return sender.sendTo.splice(i, 1);
+      } else {
+        thisClass = this;
+        return scheduleBefore(beforeQ, (function(sender, receiver) {
+          return thisClass.genericRemoveListener(sender, receiver);
+        }), sender, receiver);
+      }
+    };
+  
+    EventStream.genericRemoveWeakReference = function(sender, weakReference) {
+      var i;
+      weakReference.cleanupScheduled = false;
+      if (!weakReference.cleanupCanceled) {
+        if (!isPropagating()) {
+          i = _.indexOf(sender.sendTo, weakReference);
+          if (i + 1) sender.sendTo.splice(i, 1);
+          if (!sender.sendTo.length) return sender.weaklyHeld = true;
+        } else {
+          return scheduleCleanup(cleanupQ, sender, weakReference);
+        }
+      } else {
+        return weakReference.cleanupCanceled = null;
+      }
+    };
   
     EventStream.prototype._mode = null;
   
@@ -4240,350 +2334,29 @@
   })();
   
   Jolt.sendEvent = sendEvent = function() {
-    var P, estream, high, high_maybe, length, pClass, vals;
+    var PulseClass, cont, cont_maybe, estream, heap, high, high_maybe, pulse, vals;
     estream = arguments[0], vals = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    cont = void 0;
+    cont_maybe = vals[vals.length - 1];
+    if (cont_maybe instanceof ContInfo) {
+      cont = cont_maybe;
+      vals.pop();
+    }
     high = false;
-    high_maybe = vals[vals.length - 1];
+    if (cont) {
+      high_maybe = vals[vals.length - 1];
+    } else {
+      high_maybe = cont_maybe;
+    }
     if (high_maybe === propagateHigh) {
       high = true;
       vals.pop();
     }
-    pClass = estream.PulseClass();
-    length = vals.length;
-    P = new pClass(length, false, sendCall, nextStamp(), vals);
-    pClass.prototype.propagate(P, P.sender, estream, high);
+    heap = void 0;
+    PulseClass = estream.PulseClass();
+    pulse = new PulseClass(vals.length, false, sendCall, nextStamp(), vals, heap, cont);
+    pulse.propagate(sendCall, estream, high);
     return;
-  };
-  
-  Jolt.EventStream_api = EventStream_api = (function() {
-  
-    __extends(EventStream_api, EventStream);
-  
-    function EventStream_api() {
-      EventStream_api.__super__.constructor.apply(this, arguments);
-    }
-  
-    return EventStream_api;
-  
-  })();
-  
-  Jolt.InternalE = InternalE = (function() {
-  
-    __extends(InternalE, EventStream_api);
-  
-    function InternalE() {
-      InternalE.__super__.constructor.apply(this, arguments);
-    }
-  
-    InternalE.prototype.ClassName = 'InternalE';
-  
-    InternalE.factory = function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (function(func, args, ctor) {
-        ctor.prototype = func.prototype;
-        var child = new ctor, result = func.apply(child, args);
-        return typeof result === "object" ? result : child;
-      })(this, args, function() {});
-    };
-  
-    return InternalE;
-  
-  })();
-  
-  Jolt.internalE = internalE = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return InternalE.factory.apply(InternalE, args);
-  };
-  
-  EventStream_api.prototype.internalE = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return internalE.apply(null, __slice.call(args).concat([this]));
-  };
-  
-  Jolt.ConcatE = ConcatE = (function() {
-  
-    __extends(ConcatE, EventStream_api);
-  
-    function ConcatE() {
-      ConcatE.__super__.constructor.apply(this, arguments);
-    }
-  
-    ConcatE.prototype.ClassName = 'ConcatE';
-  
-    ConcatE.factory = function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (function(func, args, ctor) {
-        ctor.prototype = func.prototype;
-        var child = new ctor, result = func.apply(child, args);
-        return typeof result === "object" ? result : child;
-      })(this, args, function() {});
-    };
-  
-    ConcatE.prototype.updater = function() {
-      var value, _ref;
-      value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (_ref = []).concat.apply(_ref, value);
-    };
-  
-    return ConcatE;
-  
-  })();
-  
-  Jolt.concatE = concatE = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return ConcatE.factory.apply(ConcatE, args);
-  };
-  
-  EventStream_api.prototype.concatE = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return concatE.apply(null, (args.push(this), args));
-  };
-  
-  Jolt.MappedE = MappedE = (function() {
-  
-    __extends(MappedE, EventStream_api);
-  
-    function MappedE() {
-      var args, fn;
-      fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      this.fn = fn;
-      MappedE.__super__.constructor.apply(this, args);
-    }
-  
-    MappedE.prototype.ClassName = 'MappedE';
-  
-    MappedE.factory = function() {
-      var args, fn;
-      fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      if (!(_.isFunction(fn))) {
-        throw '<' + this.prototype.ClassName + '>.factory: 1st argument must be a function';
-      }
-      return (function(func, args, ctor) {
-        ctor.prototype = func.prototype;
-        var child = new ctor, result = func.apply(child, args);
-        return typeof result === "object" ? result : child;
-      })(this, [fn].concat(__slice.call(args)), function() {});
-    };
-  
-    MappedE.prototype.updater = function() {
-      var fn, value;
-      value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      fn = this.fn;
-      return [fn.apply(null, value)];
-    };
-  
-    return MappedE;
-  
-  })();
-  
-  Jolt.mapE = mapE = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return MappedE.factory.apply(MappedE, args);
-  };
-  
-  EventStream_api.prototype.mapE = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return mapE.apply(null, (args.push(this), args));
-  };
-  
-  Jolt.Pulse_cat = Jolt.Pulse_catch_and_trace = Pulse_cat = Pulse_catch_and_trace = (function() {
-  
-    __extends(Pulse_catch_and_trace, Pulse);
-  
-    function Pulse_catch_and_trace() {
-      Pulse_catch_and_trace.__super__.constructor.apply(this, arguments);
-    }
-  
-    Pulse_catch_and_trace.prototype.propagate = function(pulse, sender, receiver, high, isHeap, isCatch, isFinally) {
-      var HEAP, caught, heapP, stamp, timeEnd, timeStart, traceTime;
-      HEAP = pulse.heap;
-      traceTime = 123;
-      if ((!isHeap) && (!isCatch) && (!isFinally)) {
-        timeStart = new Date;
-        stamp = pulse.stamp;
-        heapP = new Pulse_cat(2, false, sender, stamp, ['start', timeStart], new HeapStore(stamp));
-        this.constructor.prototype.propagate(heapP, heapP.sender, HEAP_E, true, true, false, false);
-        setPropagating(true);
-      } else {
-        'do';
-      }
-      caught = null;
-      try {
-        HEAP = Pulse_catch_and_trace.__super__.propagate.call(this, pulse, sender, receiver, high, isHeap, isCatch, isFinally);
-      } catch (error) {
-        caught = error;
-      } finally {
-        if ((!isHeap) && (!isCatch) && (!isFinally)) {
-          timeEnd = new Date;
-          heapP = new Pulse_cat(5, false, sender, stamp, ['end', timeEnd, timeEnd - timeStart, traceTime, HEAP], new HeapStore(stamp));
-          this.constructor.prototype.propagate(heapP, heapP.sender, HEAP_E, true, true, false, false);
-        } else {
-          'do';
-        }
-        if (caught) throw caught;
-      }
-      return HEAP;
-    };
-  
-    Pulse_catch_and_trace.prototype.PROPAGATE = function(pulse, sender, receiver, high, isHeap, isCatch, isFinally) {
-      var PULSE, caught, doSub, errP, finP, fn, fnames, prePulse, stamp, subs, timeNow, times, _i, _j, _k, _len, _len2, _len3;
-      caught = false;
-      PULSE = null;
-      timeNow = new Date;
-      fnames = ['tranRCV', 'tranVAL', 'tranOUT'];
-      times = {};
-      try {
-        prePulse = {
-          arity: pulse.arity,
-          junction: pulse.junction,
-          stamp: pulse.stamp,
-          value: pulse.value.slice(0)
-        };
-        subs = {};
-        for (_i = 0, _len = fnames.length; _i < _len; _i++) {
-          fn = fnames[_i];
-          subs[fn] = receiver[fn];
-        }
-        doSub = function(fn) {
-          return receiver[fn] = function(pulse) {
-            var P, t1;
-            t1 = (new Date).valueOf();
-            P = subs[fn].call(receiver, pulse);
-            times[fn] = (new Date).valueOf() - t1;
-            return P;
-          };
-        };
-        for (_j = 0, _len2 = fnames.length; _j < _len2; _j++) {
-          fn = fnames[_j];
-          doSub(fn);
-        }
-        PULSE = receiver.UPDATER(pulse);
-        if (PULSE !== doNotPropagate && !(isP(PULSE))) {
-          PULSE = null;
-          throw 'receiver\'s UPDATER did not return a pulse object';
-        }
-      } catch (error) {
-        if ((!isHeap) && (!isCatch) && (!isFinally)) {
-          caught = true;
-          stamp = pulse.stamp;
-          errP = new Pulse_cat(5, false, receiver, stamp, [error, prePulse, sender, receiver, timeNow], new HeapStore(stamp));
-          this.constructor.prototype.propagate(errP, errP.sender, CATCH_E, true, false, true, false);
-          setPropagating(true);
-        } else {
-          setPropagating(false);
-          throw error;
-        }
-      } finally {
-        for (_k = 0, _len3 = fnames.length; _k < _len3; _k++) {
-          fn = fnames[_k];
-          receiver[fn] = subs[fn];
-        }
-        if ((!isHeap) && (!isCatch) && (!isFinally) && (!caught)) {
-          stamp = pulse.stamp;
-          finP = new Pulse_cat(4, false, receiver, stamp, [prePulse, PULSE, sender, receiver, timeNow, times], new HeapStore(stamp));
-          this.constructor.prototype.propagate(finP, finP.sender, FINALLY_E, true, false, false, true);
-          setPropagating(true);
-        }
-      }
-      return PULSE != null ? PULSE : PULSE = doNotPropagate;
-    };
-  
-    return Pulse_catch_and_trace;
-  
-  })();
-  
-  Jolt.HEAP_E = HEAP_E = internalE().name('Jolt.HEAP_E').PulseClass(Pulse_cat);
-  
-  Jolt.CATCH_E = CATCH_E = internalE().name('Jolt.CATCH_E').PulseClass(Pulse_cat);
-  
-  Jolt.FINALLY_E = FINALLY_E = internalE().name('Jolt.FINALLY_E').PulseClass(Pulse_cat);
-  
-  Jolt.defaultHeapE = defaultHeapE = HEAP_E.mapE(function(where, timeNow, timeElapsed, traceTime, HEAP) {
-    var message;
-    switch (where) {
-      case 'start':
-        message = "----HEAP-START----\n" + timeNow + "\nepoch: " + (timeNow.valueOf());
-        return say(message, false, 'green');
-      case 'end':
-        message = "----HEAP-END-----\n" + timeNow + "\nepoch:   " + (timeNow.valueOf()) + "\n  (time in ms)\nelapsed:  " + timeElapsed + "\ntrace:    " + 0 + "\nest. net: " + 0;
-        return say(message, false, 'blue');
-    }
-  }).name('Jolt.defaultHeapE').PulseClass(Pulse_cat);
-  
-  Jolt.defaultCatchE = defaultCatchE = CATCH_E.mapE(function(error, prePulse, sender, receiver, timeNow) {
-    var emsg, message, rClass, rName, sClass, sName;
-    if ((typeof error) === 'string') {
-      emsg = error;
-    } else if (error.message != null) {
-      emsg = error.message;
-    } else {
-      emsg = JSON.stringify(error);
-    }
-    if (emsg === '') emsg = 'undefined';
-    if (emsg == null) emsg = 'undefined';
-    sName = sender.name();
-    if (sName == null) sName = 'unnamed';
-    sClass = '(' + sender.ClassName + ')';
-    if (sClass === '(undefined)') sClass = '';
-    rName = receiver.name();
-    if (rName == null) rName = 'unnamed';
-    rClass = '(' + receiver.ClassName + ')';
-    message = "------ERROR------\nsender:    " + sName + "  " + sClass + "\n  rank:    " + (sender.rank || 'n/a') + "\n  absRank: " + (sender.absRank || 'n/a') + "\nreceiver:  " + rName + "  " + rClass + "\n  mode:    " + (receiver.mode()) + "\n  nary:    " + (receiver.isNary()) + "\n  rank:    " + receiver.rank + "\n  absRank: " + receiver.absRank + "\nerror:     " + emsg + "\n----RECV-PULSE---\narity:     " + prePulse.arity + "\njunction:  " + prePulse.junction + "\nstamp:     " + prePulse.stamp + "\nvalue:     " + (JSON.stringify(prePulse.value));
-    return say(message, true);
-  }).name('Jolt.defaultCatchE').PulseClass(Pulse_cat);
-  
-  Jolt.defaultFinallyE = defaultFinallyE = FINALLY_E.mapE(function(prePulse, PULSE, sender, receiver, timeNow, times) {
-    var message, rClass, rName, sClass, sName;
-    sName = sender.name();
-    if (sName == null) sName = 'unnamed';
-    sClass = '(' + sender.ClassName + ')';
-    if (sClass === '(undefined)') sClass = '';
-    rName = receiver.name();
-    if (rName == null) rName = 'unnamed';
-    rClass = '(' + receiver.ClassName + ')';
-    message = "------TRACE------\nsender:    " + sName + "  " + sClass + "\n  rank:    " + (sender.rank || 'n/a') + "\n  absRank: " + (sender.absRank || 'n/a') + "\nreceiver:  " + rName + "  " + rClass + "\n  mode:    " + (receiver.mode()) + "\n  nary:    " + (receiver.isNary()) + "\n  rank:    " + receiver.rank + "\n  absRank: " + receiver.absRank + "\n----RCV-PULSE----\narity:     " + prePulse.arity + "\njunction:  " + prePulse.junction + "\nstamp:     " + prePulse.stamp + "\nvalue:     " + (JSON.stringify(prePulse.value)) + "\n----OUT-PULSE----\narity:     " + PULSE.arity + "\njunction:  " + PULSE.junction + "\nstamp:     " + PULSE.stamp + "\nvalue:     " + (JSON.stringify(PULSE.value)) + "\n-----PROFILE-----\n  (time in ms)\ntranRCV: " + times.tranRCV + "\ntranVAL: " + times.tranVAL + "\ntranOUT: " + times.tranOUT;
-    return say(message);
-  }).name('Jolt.defaultFinallyE').PulseClass(Pulse_cat);
-  
-  Jolt.isB = isB = function(behavior) {
-    return behavior instanceof Behavior;
-  };
-  
-  ChangesE = (function() {
-  
-    __extends(ChangesE, InternalE);
-  
-    function ChangesE(behavior) {
-      var name;
-      ChangesE.__super__.constructor.call(this, behavior);
-      name = behavior.name();
-      if (name) {
-        this._name = name + ' changes';
-      } else {
-        this._name = 'absRank ' + behavior.absRank + ' changes';
-      }
-    }
-  
-    ChangesE.prototype.ClassName = 'ChangesE';
-  
-    ChangesE.factory = function(behavior) {
-      return new this(behavior);
-    };
-  
-    return ChangesE;
-  
-  })();
-  
-  changesE = function(behavior) {
-    return ChangesE.factory(behavior);
   };
   
   Jolt.Behavior = Behavior = (function() {
@@ -4591,82 +2364,16 @@
     __extends(Behavior, EventStream);
   
     function Behavior() {
-      var init, length, recvFrom;
-      recvFrom = arguments[0], init = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      Behavior.__super__.constructor.call(this, recvFrom);
-      length = init.length;
-      this.last = {
-        arity: !length ? (init.push(void 0), length += 1) : length,
-        value: init
-      };
-      this._changes = null;
+      Behavior.__super__.constructor.apply(this, arguments);
     }
-  
-    Behavior.prototype.changes = function() {
-      if (!(this._changes != null)) this._changes = changesE(this);
-      return this._changes;
-    };
-  
-    Behavior.prototype.ClassName = 'Behavior';
-  
-    Behavior.prototype.no_null_junc = true;
-  
-    Behavior.prototype.UPDATER = function(pulse) {
-      var value;
-      Behavior.__super__.UPDATER.apply(this, arguments);
-      value = pulse.value;
-      this.last = {
-        arity: value.length,
-        value: value
-      };
-      return pulse;
-    };
-  
-    Behavior.factory = function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (function(func, args, ctor) {
-        ctor.prototype = func.prototype;
-        var child = new ctor, result = func.apply(child, args);
-        return typeof result === "object" ? result : child;
-      })(this, args, function() {});
-    };
   
     return Behavior;
   
   })();
   
-  Jolt.valueNow = valueNow = function(behavior) {
-    return behavior.last.value;
+  Jolt.isB = isB = function(behavior) {
+    return behavior instanceof Behavior;
   };
-  
-  Behavior.prototype.valueNow = function(behavior) {
-    return valueNow(this);
-  };
-  
-  Jolt.$B = Jolt.extractB = $B = extractB = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return Behavior.factory.apply(Behavior, args);
-  };
-  
-  EventStream_api.prototype.$B = EventStream_api.prototype.extractB = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return extractB.apply(null, [this].concat(__slice.call(args)));
-  };
-  
-  Jolt.Reactor = Reactor = (function() {
-  
-    __extends(Reactor, EventEmitter);
-  
-    function Reactor() {
-      Reactor.__super__.constructor.apply(this, arguments);
-    }
-  
-    return Reactor;
-  
-  })();
   
   exporter = function(ns, target) {
     var key, value, _results;
@@ -4681,11 +2388,9 @@
     return _results;
   };
   
-  Jolt._ = _;
-  
-  Jolt._s = _s;
-  
   Jolt.EventEmitter2 = EventEmitter;
+  
+  Jolt._ = _;
   
   Jolt.globalize = function() {
     var namespaces, ns, which, _i, _len;

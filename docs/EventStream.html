@@ -1,55 +1,9 @@
-<!DOCTYPE html>  <html> <head>   <title>EventStream.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               EventStream.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="nv">lastRank = </span><span class="mi">0</span>
+<!DOCTYPE html>  <html> <head>   <title>EventStream.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="LiftedB.html">                 LiftedB.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="ConcatE.html">                 ConcatE.coffee               </a>                                           <a class="source" href="EventStream_api.html">                 EventStream_api.coffee               </a>                                           <a class="source" href="InternalE.html">                 InternalE.coffee               </a>                                           <a class="source" href="MappedE.html">                 MappedE.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Pulse_cat.html">                 Pulse_cat.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                                           <a class="source" href="say.html">                 say.coffee               </a>                                           <a class="source" href="exporter.html">                 exporter.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               EventStream.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="nv">lastRank = </span><span class="mi">0</span>
 <span class="nv">nextRank = </span><span class="o">-&gt;</span> <span class="o">++</span><span class="nx">lastRank</span>
 
 
 <span class="nv">Jolt.isE = isE = </span><span class="nf">(estream) -&gt;</span>
-  <span class="nx">estream</span> <span class="k">instanceof</span> <span class="nx">EventStream</span>
-
-
-<span class="nv">genericAttachListener = </span><span class="nf">(sender, receiver) -&gt;</span>
-  <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span>
-    <span class="k">if</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">rank</span> <span class="o">is</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
-      <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: cycle detected in propagation graph&#39;</span>
-    <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">receiver</span>
-    <span class="k">if</span> <span class="o">not</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-      <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">push</span> <span class="nx">receiver</span>
-      <span class="k">if</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">rank</span> <span class="o">&gt;</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
-        <span class="nv">doNextRank = </span><span class="p">[]</span>
-        <span class="nv">sentinel = </span><span class="p">{}</span>
-        <span class="nv">sender.__cycleSentinel__ = </span><span class="nx">sentinel</span>
-        <span class="nv">q = </span><span class="p">[</span> <span class="nx">receiver</span> <span class="p">]</span>
-        <span class="k">while</span> <span class="nx">q</span><span class="p">.</span><span class="nx">length</span>
-          <span class="nv">cur = </span><span class="nx">q</span><span class="p">.</span><span class="nx">shift</span><span class="p">()</span>
-          <span class="k">if</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">__cycleSentinel__</span> <span class="o">is</span> <span class="nx">sentinel</span>
-            <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
-            <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: cycle detected in propagation graph&#39;</span>
-          <span class="nx">doNextRank</span><span class="p">.</span><span class="nx">push</span> <span class="nx">cur</span>
-          <span class="nv">cur.__cycleSentinel__ = </span><span class="nx">sentinel</span>
-          <span class="nx">q</span><span class="p">.</span><span class="nx">push</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">...</span>
-        <span class="p">(</span><span class="nv">estream.rank = </span><span class="nx">nextRank</span><span class="p">())</span> <span class="k">for</span> <span class="nx">estream</span> <span class="k">in</span> <span class="nx">doNextRank</span>
-  <span class="k">else</span>
-    <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="nx">genericAttachListener</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span>
-
-
-<span class="nv">genericRemoveListener = </span><span class="nf">(sender, receiver) -&gt;</span>
-  <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span>
-    <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">receiver</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">splice</span> <span class="nx">i</span><span class="p">,</span> <span class="mi">1</span>
-  <span class="k">else</span>
-    <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="nx">genericRemoveListener</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span>
-
-
-<span class="nv">genericRemoveWeakReference = </span><span class="nf">(sender, weakReference) -&gt;</span>
-  <span class="nv">weakReference.cleanupScheduled = </span><span class="kc">false</span>
-  <span class="k">if</span> <span class="o">not</span> <span class="nx">weakReference</span><span class="p">.</span><span class="nx">cleanupCanceled</span>
-    <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span>
-      <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">weakReference</span>
-      <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">splice</span> <span class="nx">i</span><span class="p">,</span> <span class="mi">1</span>
-      <span class="k">if</span> <span class="o">not</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">length</span> <span class="k">then</span> <span class="nv">sender.weaklyHeld = </span><span class="kc">true</span>
-    <span class="k">else</span>
-      <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">weakReference</span>
-  <span class="k">else</span>
-    <span class="nv">weakReference.cleanupCanceled = </span><span class="kc">null</span>
+  <span class="p">(</span><span class="nx">estream</span> <span class="k">instanceof</span> <span class="nx">EventStream</span><span class="p">)</span> <span class="o">and</span> <span class="o">not</span> <span class="p">(</span><span class="nx">isB</span> <span class="nx">estream</span><span class="p">)</span>
 
 
 <span class="nv">Jolt.EventStream = </span><span class="k">class</span> <span class="nx">EventStream</span>
@@ -63,22 +17,24 @@
 
     <span class="k">if</span> <span class="nx">recvFrom</span><span class="p">.</span><span class="nx">length</span>
       <span class="nx">_</span><span class="p">(</span> <span class="nx">_</span><span class="p">.</span><span class="nx">flatten</span> <span class="p">[</span> <span class="nx">recvFrom</span><span class="p">...</span> <span class="p">]</span> <span class="p">).</span><span class="nx">map</span> <span class="p">(</span><span class="nx">estream</span><span class="p">)</span> <span class="o">=&gt;</span>
-        <span class="nx">estream</span><span class="p">.</span><span class="nx">attachListener</span> <span class="k">this</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">attachListener: </span><span class="nf">(receiver) -&gt;</span>
+        <span class="nx">estream</span><span class="p">.</span><span class="nx">attachListener</span> <span class="k">this</span>
+
+  <span class="nv">attachListener: </span><span class="nf">(receiver) -&gt;</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">receiver</span>
       <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: expected an EventStream&#39;</span>
-    <span class="nx">genericAttachListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
+    <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericAttachListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
     <span class="k">this</span>
 
   <span class="nv">removeListener: </span><span class="nf">(receiver) -&gt;</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">receiver</span>
       <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.removeListener: expected an EventStream&#39;</span>
-    <span class="nx">genericRemoveListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
+    <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericRemoveListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
     <span class="k">this</span>
 
   <span class="nv">removeWeakReference: </span><span class="nf">(weakReference) -&gt;</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">weakReference</span>
       <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.removeWeakReference: expected an EventStream&#39;</span>
-    <span class="nx">genericRemoveWeakReference</span> <span class="k">this</span><span class="p">,</span> <span class="nx">weakReference</span>
+    <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericRemoveWeakReference</span> <span class="k">this</span><span class="p">,</span> <span class="nx">weakReference</span>
     <span class="k">this</span>
 
   <span class="nv">ClassName: </span><span class="s">&#39;EventStream&#39;</span>
@@ -86,6 +42,51 @@
   <span class="nv">cleanupCanceled: </span><span class="kc">null</span>
 
   <span class="nv">cleanupScheduled: </span><span class="kc">false</span>
+
+  <span class="vi">@genericAttachListener = </span><span class="nf">(sender, receiver) -&gt;</span>
+    <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span><span class="p">()</span>
+      <span class="k">if</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">rank</span> <span class="o">is</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
+        <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: cycle detected in propagation graph&#39;</span>
+      <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">receiver</span>
+      <span class="k">if</span> <span class="o">not</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">push</span> <span class="nx">receiver</span>
+        <span class="k">if</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">rank</span> <span class="o">&gt;</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
+          <span class="nv">doNextRank = </span><span class="p">[]</span>
+          <span class="nv">sentinel = </span><span class="p">{}</span>
+          <span class="nv">sender.__cycleSentinel__ = </span><span class="nx">sentinel</span>
+          <span class="nv">q = </span><span class="p">[</span> <span class="nx">receiver</span> <span class="p">]</span>
+          <span class="k">while</span> <span class="nx">q</span><span class="p">.</span><span class="nx">length</span>
+            <span class="nv">cur = </span><span class="nx">q</span><span class="p">.</span><span class="nx">shift</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">__cycleSentinel__</span> <span class="o">is</span> <span class="nx">sentinel</span>
+              <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
+              <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: cycle detected in propagation graph&#39;</span>
+            <span class="nx">doNextRank</span><span class="p">.</span><span class="nx">push</span> <span class="nx">cur</span>
+            <span class="nv">cur.__cycleSentinel__ = </span><span class="nx">sentinel</span>
+            <span class="nx">q</span><span class="p">.</span><span class="nx">push</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">...</span>
+          <span class="p">(</span><span class="nv">estream.rank = </span><span class="nx">nextRank</span><span class="p">())</span> <span class="k">for</span> <span class="nx">estream</span> <span class="k">in</span> <span class="nx">doNextRank</span>
+    <span class="k">else</span>
+      <span class="nv">thisClass = </span><span class="k">this</span>
+      <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="p">(</span><span class="nf">(sender, receiver) -&gt;</span> <span class="nx">thisClass</span><span class="p">.</span><span class="nx">genericAttachListener</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span><span class="p">),</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span>
+
+  <span class="vi">@genericRemoveListener = </span><span class="nf">(sender, receiver) -&gt;</span>
+    <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span><span class="p">()</span>
+      <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">receiver</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">splice</span> <span class="nx">i</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="k">else</span>
+      <span class="nv">thisClass = </span><span class="k">this</span>
+      <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="p">(</span><span class="nf">(sender, receiver) -&gt;</span> <span class="nx">thisClass</span><span class="p">.</span><span class="nx">genericRemoveListener</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span><span class="p">),</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span>
+
+  <span class="vi">@genericRemoveWeakReference = </span><span class="nf">(sender, weakReference) -&gt;</span>
+    <span class="nv">weakReference.cleanupScheduled = </span><span class="kc">false</span>
+    <span class="k">if</span> <span class="o">not</span> <span class="nx">weakReference</span><span class="p">.</span><span class="nx">cleanupCanceled</span>
+      <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span><span class="p">()</span>
+        <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">weakReference</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">splice</span> <span class="nx">i</span><span class="p">,</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="o">not</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">length</span> <span class="k">then</span> <span class="nv">sender.weaklyHeld = </span><span class="kc">true</span>
+      <span class="k">else</span>
+        <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">weakReference</span>
+    <span class="k">else</span>
+      <span class="nv">weakReference.cleanupCanceled = </span><span class="kc">null</span>
 
   <span class="nv">_mode: </span><span class="kc">null</span>
   <span class="nv">mode: </span><span class="nf">(mode) -&gt;</span>
@@ -240,21 +241,55 @@
 
   <span class="nv">UPDATER: </span><span class="nf">(pulse) -&gt;</span> <span class="nx">@tranOUT</span> <span class="nx">@tranVAL</span> <span class="nx">@tranRCV</span> <span class="nx">pulse</span>
 
-  <span class="nv">weaklyHeld: </span><span class="kc">false</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.sendEvent = sendEvent = </span><span class="nf">(estream, vals...) -&gt;</span>
+  <span class="nv">weaklyHeld: </span><span class="kc">false</span>
+
+
+<span class="nv">Jolt.sendEvent = sendEvent = </span><span class="nf">(estream, vals...) -&gt;</span>
+  <span class="nv">cont = </span><span class="kc">undefined</span>
+  <span class="nv">cont_maybe = </span><span class="nx">vals</span><span class="p">[</span><span class="nx">vals</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nx">cont_maybe</span> <span class="k">instanceof</span> <span class="nx">ContInfo</span>
+    <span class="nv">cont = </span><span class="nx">cont_maybe</span>
+    <span class="nx">vals</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
   <span class="nv">high = </span><span class="kc">false</span>
-  <span class="nv">high_maybe = </span><span class="nx">vals</span><span class="p">[</span><span class="nx">vals</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nx">cont</span>
+    <span class="nv">high_maybe = </span><span class="nx">vals</span><span class="p">[</span><span class="nx">vals</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+  <span class="k">else</span>
+    <span class="nv">high_maybe = </span><span class="nx">cont_maybe</span>
   <span class="k">if</span> <span class="nx">high_maybe</span> <span class="o">is</span> <span class="nx">propagateHigh</span>
     <span class="nv">high = </span><span class="kc">true</span>
     <span class="nx">vals</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
-  <span class="nv">pClass = </span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">()</span>
-  <span class="nv">length = </span><span class="nx">vals</span><span class="p">.</span><span class="nx">length</span>
-  <span class="nv">P = </span><span class="k">new</span> <span class="nx">pClass</span> <span class="nx">length</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">sendCall</span><span class="p">,</span> <span class="nx">nextStamp</span><span class="p">(),</span> <span class="nx">vals</span>
-  <span class="nx">pClass</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">P</span><span class="p">,</span> <span class="nx">P</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">estream</span><span class="p">,</span> <span class="nx">high</span>
-  <span class="kc">undefined</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
+  <span class="nv">heap = </span><span class="kc">undefined</span>
+  <span class="nv">PulseClass = </span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">()</span>
+  <span class="nv">pulse = </span><span class="k">new</span> <span class="nx">PulseClass</span> <span class="nx">vals</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">sendCall</span><span class="p">,</span> <span class="nx">nextStamp</span><span class="p">(),</span> <span class="nx">vals</span><span class="p">,</span> <span class="nx">heap</span><span class="p">,</span> <span class="nx">cont</span>
+  <span class="nx">pulse</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">sendCall</span><span class="p">,</span> <span class="nx">estream</span><span class="p">,</span> <span class="nx">high</span>
+  <span class="kc">undefined</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p><code>Jolt.Behavior</code> is stubbed in here, though the working re/definition is given
+in <a href="Behavior.html">Behavior.cofee</a></p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.Behavior = </span><span class="k">class</span> <span class="nx">Behavior</span> <span class="k">extends</span> <span class="nx">EventStream</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>For <code>Jolt.isE</code> to operate prior to the working definition of <code>Jolt.Behavior</code>,
+<code>Jolt.isB</code> needs its own working definition.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.isB = isB = </span><span class="nf">(behavior) -&gt;</span>
+  <span class="nx">behavior</span> <span class="k">instanceof</span> <span class="nx">Behavior</span>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
 
 <p>Jolt - Reactive Objects for JavaScript</p>
 
-<p>https://github.com/projexsys/Jolt</p>
+<p><a href="https://github.com/projexsys/Jolt">https://github.com/projexsys/Jolt</a></p>
 
 <p>This software is Copyright (c) 2011 by Projexsys, Inc.</p>
 
@@ -269,10 +304,10 @@ Public License (GNU GPL) as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any
 later version. The code is distributed WITHOUT ANY WARRANTY; without
 even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU GPL for more details.</p>
+PARTICULAR PURPOSE. See the GNU GPL for more details:</p>
 
-<p>https://raw.github.com/projexsys/Jolt/master/LICENSE
-http://www.gnu.org/licenses/gpl-3.0.txt</p>
+<p><a href="https://raw.github.com/projexsys/Jolt/master/LICENSE">https://raw.github.com/projexsys/Jolt/master/LICENSE</a>
+<a href="http://www.gnu.org/licenses/gpl-3.0.txt">http://www.gnu.org/licenses/gpl-3.0.txt</a></p>
 
 <p>However, if you have executed an End User Software License and
 Services Agreement or an OEM Software License and Support Services
@@ -285,4 +320,4 @@ terms of the relevant Commercial Agreement.</p>
 <p>This sofware is derived from and incorporates existing works. For
 further information and license texts please refer to:</p>
 
-<p>https://raw.github.com/projexsys/Jolt/master/LICENSES</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
+<p><a href="https://raw.github.com/projexsys/Jolt/master/LICENSES">https://raw.github.com/projexsys/Jolt/master/LICENSES</a></p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

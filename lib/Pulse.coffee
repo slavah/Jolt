@@ -1,28 +1,56 @@
-# it would NOT be necessary to pass the queues as arguments, nor to export the
-# defer/delay methods, if my build-test tool allowed me to create coupled
-# bundles and test specs, whereby I could take components of the Jolt library,
-# prefix them with "mocks" (and in a node.js context postfix them with the
-# contents of the specs, thereby avoiding the use of require so as to get the
-# "mocks" and the specs into the same scope); when my next-gen build-test tool
-# (built *with* Jolt) is ready, I should bundle it with a specific Jolt release
-# and then work on a new version of Jolt and test specs which have the then
-# unnecessary test-enabling workarounds removed; then in turn a new version of
-# the build-test tool can be tested and bundled with the new version of Jolt
+# Each propagation cycle is (supposed to be) "stamped" with a unique value. In
+# practice this means using `nextStamp` to generate an always-increasing integer
+# value which is then passed to the `Pulse` or subclass constructor.
 
 lastStamp = 0
-nextStamp = -> ++lastStamp
+Jolt.nextStamp = nextStamp = -> ++lastStamp
 
-Jolt.isPropagating  = isPropagating = false
-Jolt.setPropagating = setPropagating = (bool) -> isPropagating = Boolean bool
+
+# `Pulse` propagation is, by design, a synchronous operation which in terms of
+# Jolt's own algorightms should always be computationally finite. Practically,
+# this means disallowing modification of event propagation graphs during
+# propagation. The `propagating` flag is therefore toggled at the beginning
+# and end of propagation cycles, by way of its setter function
+# `Jolt.setPropagating`. `EventStream` methods which affect node-relationships
+# use the getter function `Jolt.isPropagating` to determine whether they should
+# proceed or schedule themselves for execution outside of a popagation cycle.
+
+propagating = false
+
+Jolt.isPropagating  = isPropagating  = -> propagating
+Jolt.setPropagating = setPropagating = (bool) -> propagating = Boolean bool
+
+
+# `Jolt.doNotPropagate` is a sentinel value which signals that event propagation
+# should be halted in the emitting node's branch of a propagation graph.
 
 Jolt.doNotPropagate = doNotPropagate = {}
+
+
+# `Jolt.propagateHigh` is a unique value which when passed as the last argument
+# to `Jolt.sendEvent` signals the `<Pulse>.propagate` method to invoke its
+# `high` logic.
+
 Jolt.propagateHigh  = propagateHigh  = {}
 
-sendCall = name: (-> 'Jolt.sendEvent'), removeWeakReference: ->
+
+# `sendCall` facilitates the always imperatively called method `Jolt.sendEvent`
+# being named and treated as the first node in a propagation cycle, though it's not
+# properly a node in the graph.
+
+Jolt.sendCall = sendCall = name: (-> 'Jolt.sendEvent'), removeWeakReference: ->
 
 
-# keep in mind the following when composing functions to call via defer
-# https://bugzilla.mozilla.org/show_bug.cgi?id=394769
+# Various graph modification and linking operations sometimes need to be delayed
+# across a trip around the runtime's event loop. And some of these operations
+# are queued and may be executed at a later time, and over time, to avoid
+# unecessarily completing them all at once, thus freeing up the CPU.
+# `Jolt.delay`, `Jolt.defer`, and `Jolt.defer_high` act as simple wrappers
+# around the runtime's `setTimeout` facility, and `process.nextTick` in the case
+# of node.js. The following "bug" affecting mozilla-derived runtimes should be
+# kept in mind when composing functions to call through `Jolt.defer`:
+# [https://bugzilla.mozilla.org/show_bug.cgi?id=394769](https://bugzilla.mozilla.org/show_bug.cgi?id=394769)
+
 if isNodeJS
   Jolt.defer_high = defer_high = (func, args...) -> process.nextTick -> func args...
   Jolt.delay = delay = (func, ms, args...) -> setTimeout (-> func args...), ms
@@ -33,11 +61,15 @@ else
 Jolt.defer = defer = (func, args...) -> delay func, 0, args...
 
 
-# this queue should be adjusted so that it is drained more quickly/slowly, both
-# in terms of the delay ms value and how many tasks are shifted/exec'd in one
-# step, if the queue length grows beyond a certain upper threshold; research
-# should be conducted to find a robust algorithm, as certainly this project
-# is not the first with such a need
+# If an `EventStream` instance is flagged as "weaklyHeld", as observed during
+# event propagation, it should be pruned from the `sendTo` array-property of the
+# node in the propagation graph which referenced it. Such "cleanup" operations
+# are queued in `Jolt.cleanupQ`. The current implementation of the queue's
+# "drain" method is a bit naive. A future implementation should self-adjust its
+# timing so the queue is drained more quickly/slowly, both in terms of the
+# delay `ms` value and how many tasks are shifted/exec'd in one step, if the
+# queue length grows beyond a certain upper threshold.
+
 Jolt.cleanupQ = cleanupQ = cleanupWeakReference = []
 cleanupQ.draining = false
 cleanupQ.freq = 100
@@ -59,10 +91,20 @@ Jolt.scheduleCleanup = scheduleCleanup = (cleanupQ, sender, weakReference) ->
       delay cleanupQ.drain, cleanupQ.freq
 
 
-# this queue should be adjusted so that it is drained more quickly/slowly, both
-# in terms of the delay ms value and how many tasks are shifted/exec'd in one
-# step, with respect to the average number of tasks that remain for a "drain
-# all" step that precedes pulse propagation; again, research is needed.......
+# Propagation graph modifications are disallowed during propagation, and any
+# such operations attempted during propagation are automatically deferred by
+# queueing them in `Jolt.beforeQ`. The "before" in the name is related to the
+# design whereby all operations queued in `beforeQ` will be completed prior
+# the first step in the next event propagation cycle. The queue will attempt
+# to drain itself, one op at a time, and over time, prior to the next
+# propagation. But if any ops remain in the queue when a propagation is
+# initiated, the queue will be fully drained synchronously beforehand. The
+# current implementation of this queue's "drain" method is also a bit naive. A
+# future implementation should self-adjust its timing so the queue is drained
+# more quickly/slowly, both in terms of the delay `ms` value and how many tasks
+# are shifted/exec'd in one step, with respect to the average number of tasks
+# that remain for the "drain all" step that precedes event propagation.
+
 Jolt.beforeQ = beforeQ = beforeNextPulse = []
 beforeQ.draining = false
 beforeQ.freq = 10
@@ -82,10 +124,32 @@ Jolt.scheduleBefore = scheduleBefore = (beforeQ, func, args...) ->
     delay beforeQ.drain, beforeQ.freq
 
 
-class HeapStore
-  constructor: (@stamp) ->
+# Event propagation order among `EventStream` instances (estreams) that form a
+# propagation graph is governed by a binary heap algorithm. As an event
+# propagates through the graph, each step is recorded along the way in an
+# instance of `HeapStore`.
+
+Jolt.HeapStore = class HeapStore
+  constructor: (@stamp, @cont) ->
     @nodes = []
 
+# Some `EventStream` transformers involve asynchronous *continuations* of event
+# propagation. This results in disjointed propagation graphs since behind the
+# scenes it involves at least two separate calls to `Jolt.sendEvent`. However,
+# the constructor for Jolt's `Pulse` class allows an instance of `Jolt.ContInfo`
+# ("continuation information") to be passed into the instance of
+# `Jolt.HeapStore` which is constructed and stored in the returned instance of
+# `Pulse` (or a subclass). The `ContInfo` instance tracks which heap/s
+# (referenced by `stamp`) and estream/s were the origin of the continued
+# propagation. The recorded information does not directly affect the program's
+# operation, but is useful for runtime analysis.
+
+Jolt.ContInfo = class ContInfo
+  constructor: (@stamps, @nodes) ->
+
+# Propagation is mediated by instances of `Jolt.Pulse`, and `Jolt.isP` helps
+# guarantee that objects passed between estreams during `propagate`/`update`
+# cycles are such instances.
 
 Jolt.isP = isP = (pulse) ->
   pulse instanceof Pulse
@@ -93,86 +157,200 @@ Jolt.isP = isP = (pulse) ->
 
 Jolt.Pulse = class Pulse
 
-  # stamp is unique and gives us a key with which to pair heaps and estreams
-  constructor: (@arity, @junction, @sender, @stamp, @value, @heap = new HeapStore @stamp) ->
+  # Instances of `Jolt.Pulse` have a set of properties which affect how they are
+  # processed by recipient estreams, though some of them have a more forensic
+  # character. `arity` is an integer value which indicates how many discrete
+  # pieces of data are carried by a particular pulse, and likewise how many
+  # arguments will be passed to a receiving estream's inner value transformer.
+  # `junction` is a boolean which indicates whether a `Pulse` instance is a
+  # "plain" pulse or a "junction of pulses". `sender` is a reference to the
+  # sending estream (or `Jolt.sendEvent` call). `stamp` is a unique value, an
+  # integer, which is incremented before each propagation cycle. `value` is an
+  # array (of length `arity`) which contains the data mediated by the pulse.
+  # `heap` is an instance of `HeapStore` and records the propagation steps.
 
-  # --- #
+  constructor: (@arity, @junction, @sender, @stamp, @value = [], @heap = (new HeapStore @stamp, cont), cont) ->
 
-  propagate: (pulse, sender, receiver, high, more...) ->
+  # `Pulse.prototype.copy` clones the properties of a `Pulse` instance to a new
+  # instance, with the option that a derived class/constructor is used instead
+  # of the old instance's constructor.
+
+  copy: (PulseClass) ->
+    PulseClass ?= @constructor
+    new PulseClass @arity, @junction, @sender, @stamp, (@value.slice 0), @heap
+
+  # The invocation of `Pulse.prototype.propagate` is the first step in an event
+  # propagation cycle. Though `sender` could be extracted from a well-formed
+  # `Pulse` instance, having it as a named argument lends clarity, particularly
+  # in more "advanced" dertivates of the `Pulse` class. The arguments splat
+  # `more...` also facilitates derivate implementations which need additional
+  # control flags.
+
+  propagate: (sender, receiver, high, more...) ->
+
+    # If an estream is flagged as `weaklyHeld` then propagation will halt
+    # immediately and a cleanup op gets scheduled (in the corresponding `else`
+    # clause near the bottom of the script). Tasks which remain queued in
+    # `Jolt.beforeQ` (e.g. graph modifications) need to be drained and executed
+    # before propagation can proceed, though this step is skipped if the `high`
+    # argument is true.
 
     if not receiver.weaklyHeld
       if beforeQ.length and not high then (beforeQ.shift())() while beforeQ.length
 
+      # Having flipped the `propagating` flag (described above) to true, the
+      # next step is to make an instance of `Jolt.PriorityQueue` and populate
+      # it with the initial receiver. Queue members are hashes with keys
+      # `estream`, `pulse`, and `rank`.
+
       setPropagating true
-
       queue = new PriorityQueue
+      queue.push estream: receiver, pulse: this, rank: receiver.rank
 
-      queue.push estream: receiver, pulse: pulse, rank: receiver.rank
+      # The bulk of the work done by `propagate` takes the form a while loop
+      # which alternately drains and populates the queue with the estream nodes
+      # that make up the event propagation graph.
 
       while queue.size()
         qv = queue.pop()
 
-        P = new (qv.estream.PulseClass()) qv.pulse.arity, \
-        qv.pulse.junction, \
-        qv.pulse.sender, \
-        qv.pulse.stamp, \
-        (qv.pulse.value.slice 0), \
-        qv.pulse.heap
+        # For each step of the propagation cycle, the `sender` and `receiver`
+        # are recorded as a tuple in the instance of `Jolt.HeapStore`.
 
-        P.heap.nodes.push qv.estream
+        qv.pulse.heap.nodes.push [qv.pulse.sender, qv.estream]
 
-        nextPulse = qv.estream.PulseClass().prototype.PROPAGATE P, \
-        P.sender, \
-        qv.estream, \
-        high, \
-        more...
+        # To avoid unwanted side effects during event propagation, each receiving
+        # estream is passed a new instance of `Pulse` (or a subclass) with the
+        # properties copied from the old one. The choice of constructor
+        # (`PulseClass`) for the `copy` operation is determined by the
+        # `_PulseClass` property of the receiving estream.
+
+        PULSE = qv.pulse.copy qv.estream.PulseClass()
+
+        # The next major step in the propagation cycle is the hand-off to the
+        # "inner propagation" method, `Pulse.prototype.PROPAGATE`. The return
+        # value, which is the result of transformations performed by the
+        # receiving estream, forms the basis of the succeeding steps in the
+        # cycle.
+
+        nextPulse = PULSE.PROPAGATE PULSE.sender, qv.estream, high, more...
+
+        # Certain estream transformers rely on logic whereby parent nodes in a
+        # propagation graph should be flagged as `weaklyHeld` if all their child
+        # nodes become so flagged. Using some combinatorial logic, we can detect
+        # such conditions without having to iterate an estream's `sendTo` array
+        # explicitly for this purpose. The variable `weaklyHeld` lets us do
+        # this.
 
         weaklyHeld = true
+
+        # If `PROPAGATE` returned the sentinel value `Jolt.doNotPropagate`, then
+        # popagation will not continue with members (if any) of the receiver's
+        # `sendTo` array property.
 
         if nextPulse isnt doNotPropagate
           nextPulse.sender = qv.estream
 
-          _( qv.estream.sendTo ).map (receiver) ->
+          # If `PROPAGATE` returned a `Pulse` instance, then the next step
+          # involves pushing members of the receiver's `sendTo` array-property
+          # into the instance of `PriorityQueue` created at the beginning of the
+          # cycle.
+
+          for receiver in qv.estream.sendTo
+
+            # If any members of the receiver's child nodes are not flagged as
+            # `weaklyHeld` then we know to not flag the receiver, since the
+            # `weaklyHeld` variable will have been set to false.
+
             weaklyHeld = weaklyHeld and receiver.weaklyHeld
+
+            # If an estream is flagged as `weaklyHeld`, it's not added to the
+            # queue, and a "cleanup" operation is scheduled
+
             if receiver.weaklyHeld
               scheduleCleanup cleanupQ, qv.estream, receiver
             else
+
+              # Each child receiver is paired with `nextPulse`, though note that
+              # `Pulse` instance has been modified so that its `sender` value
+              # references the parent node which transformed the original
+              # `Pulse` instance.
+
               queue.push estream: receiver, pulse: nextPulse, rank: receiver.rank
+
+          # If the original receiver had been flagged as `weaklyHeld` the
+          # `propagate` logic would not have proceeded this far. Since it did,
+          # we should only consider the `weaklyHeld` variable's having a true
+          # value to indicate the original receiver should be so flagged if it
+          # has a non-empty `sendTo` array property, i.e. it has child nodes
+          # that were all flagged as `weaklyHeld`. If it does end up flagged,
+          # then a "cleanup" op is scheduled for it.
 
           if qv.estream.sendTo.length and weaklyHeld
             qv.estream.weaklyHeld = true
             scheduleCleanup cleanupQ, qv.pulse.sender, qv.estream
 
-      setPropagating false
+      # The propagation cycle is ended by setting the `propagate` flag to false
+      # and returning the instance of `HeapStore`
 
-      P.heap
+      setPropagating false
+      PULSE.heap
 
     else
       scheduleCleanup cleanupQ, sender, receiver
+      @heap
 
-      pulse.heap
 
+  PROPAGATE: (sender, receiver, high, more...) ->
 
-  PROPAGATE: (pulse, sender, receiver, high, more...) ->
+    # The "inner propagation" method, `Pulse.prototype.PROPAGATE`, invokes the
+    # "transformation" steps (for each receiving estream) of the propagation
+    # cycle -- the `Pulse` instance is passed to the receiving estream's "outer
+    # updater" method, `EventStream.prototype.UPDATER`.
 
-    # in non-catching scenarios (i.e. _PulseClass isnt Pulse_cat) in
-    # catching/finally branches, if this step results in an error being thrown
-    # then isPropagating will be "stuck true", so it's important that estreams
-    # attached to CATCH_E and FINALLY_E bet set to use Pulse_cat
+    PULSE = receiver.UPDATER this
 
-    PULSE = receiver.UPDATER pulse
+    # The value returned by `UPDATER` should be either an instance of `Pulse` or
+    # the sentinel value `Jolt.doNotPropagate`. If that's not the case, an error
+    # is thrown. Otherwise, the transformed `Pulse` instance is returned into
+    # the continued logic of `Pulse.prototype.propagate`.
 
     if PULSE isnt doNotPropagate and not (isP PULSE)
       setPropagating false
       throw 'receiver\'s UPDATER did not return a pulse object'
     else
       PULSE
-#
+
+    # (NOTE: In non-catching scenarios in catching/finally branches (see the
+    # implementation of [Pulse_cat.coffee](Pulse_cat.html)), if this step
+    # results in an error being thrown then `propagating` will be "stuck true",
+    # so it's important that estreams attached to `Jolt.CATCH_E` and
+    # `Jolt.FINALLY_E` have their `_PulseClass` properties set to `Pulse_cat`.)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 # <<<>>>
 #
 # Jolt - Reactive Objects for JavaScript
 #
-# https://github.com/projexsys/Jolt
+# [https://github.com/projexsys/Jolt](https://github.com/projexsys/Jolt)
 #
 # This software is Copyright (c) 2011 by Projexsys, Inc.
 #
@@ -187,10 +365,10 @@ Jolt.Pulse = class Pulse
 # Foundation, either version 3 of the License, or (at your option) any
 # later version. The code is distributed WITHOUT ANY WARRANTY; without
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-# PARTICULAR PURPOSE. See the GNU GPL for more details.
+# PARTICULAR PURPOSE. See the GNU GPL for more details:
 #
-# https://raw.github.com/projexsys/Jolt/master/LICENSE
-# http://www.gnu.org/licenses/gpl-3.0.txt
+# [https://raw.github.com/projexsys/Jolt/master/LICENSE](https://raw.github.com/projexsys/Jolt/master/LICENSE)
+# [http://www.gnu.org/licenses/gpl-3.0.txt](http://www.gnu.org/licenses/gpl-3.0.txt)
 #
 # However, if you have executed an End User Software License and
 # Services Agreement or an OEM Software License and Support Services
@@ -203,4 +381,4 @@ Jolt.Pulse = class Pulse
 # This sofware is derived from and incorporates existing works. For
 # further information and license texts please refer to:
 #
-# https://raw.github.com/projexsys/Jolt/master/LICENSES
+# [https://raw.github.com/projexsys/Jolt/master/LICENSES](https://raw.github.com/projexsys/Jolt/master/LICENSES)

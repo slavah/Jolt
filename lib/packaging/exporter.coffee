@@ -1,16 +1,34 @@
+# The `exports` object is in scope per the function wrapper around the entire
+# library -- i.e. that wrapper has a parameter named `exports`. In a node.js
+# environment, `module.exports` will be passed as the `exports` argument; for
+# other environments (e.g. browsers), an object named `this.Jolt` is passed,
+# after being created inline. See Jolt's
+# [bottom.js](https://raw.github.com/projexsys/Jolt/master/lib/packaging/bottom.js)
+# component file.
+
 exporter = (ns = Jolt, target = exports) ->
   for own key, value of ns
     target[key] = ns[key]
 
 
-Jolt._  = _
-Jolt._s = _s
+# Jolt bundles the [EventEmitter2](https://github.com/hij1nx/EventEmitter2) and
+# [Underscore](http://documentcloud.github.com/underscore/) libraries. See
+# their respective component files if you wish to understand how they've been
+# *slightly* modified to facilitate inline bundling:
+# [eventemitter2.mymod.js](https://raw.github.com/projexsys/Jolt/master/lib/helpers/eventemitter2.mymod.js),
+# [underscore.mymod.js](https://raw.github.com/projexsys/Jolt/master/lib/helpers/underscore.mymod.js).
+# Both are accessible as members of the exported API (e.g. `Jolt._`). Note that
+# if `Jolt.globalize()` is called (see the next annotation), both will be placed
+# in the global namespace.
+
 Jolt.EventEmitter2 = EventEmitter
+Jolt._             = _
 
 
-# manual calls to globalize would be superfluous for browser envs given
-# top/bottom wrapper implementation and the call to exporter at the end
-# of this script
+# Jolt's `globalize` method provides a convenient means to place the library's
+# API in the global namespace. It's never necessary to call it, but for
+# Jolt-heavy development and testing, it is useful for reducing verbosity.
+
 Jolt.globalize = (namespaces...) ->
   which = if window? then window else (if global? then global else {})
   if not namespaces.length then exporter(Jolt, which)
@@ -19,23 +37,32 @@ Jolt.globalize = (namespaces...) ->
   return undefined
 
 
-# :: modulize ::
-#
-#  hackery to allow "globalization" of a namespace within a module's
-#  scope but without leaking to the top-level scope in the manner of
-#  Jolt.globalize()
-#
-# for own key, value of namespace
-#   eval("var #{key} = namespace.#{key}")
-
-
 exporter()
-#
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 # <<<>>>
 #
 # Jolt - Reactive Objects for JavaScript
 #
-# https://github.com/projexsys/Jolt
+# [https://github.com/projexsys/Jolt](https://github.com/projexsys/Jolt)
 #
 # This software is Copyright (c) 2011 by Projexsys, Inc.
 #
@@ -50,10 +77,10 @@ exporter()
 # Foundation, either version 3 of the License, or (at your option) any
 # later version. The code is distributed WITHOUT ANY WARRANTY; without
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-# PARTICULAR PURPOSE. See the GNU GPL for more details.
+# PARTICULAR PURPOSE. See the GNU GPL for more details:
 #
-# https://raw.github.com/projexsys/Jolt/master/LICENSE
-# http://www.gnu.org/licenses/gpl-3.0.txt
+# [https://raw.github.com/projexsys/Jolt/master/LICENSE](https://raw.github.com/projexsys/Jolt/master/LICENSE)
+# [http://www.gnu.org/licenses/gpl-3.0.txt](http://www.gnu.org/licenses/gpl-3.0.txt)
 #
 # However, if you have executed an End User Software License and
 # Services Agreement or an OEM Software License and Support Services
@@ -66,4 +93,4 @@ exporter()
 # This sofware is derived from and incorporates existing works. For
 # further information and license texts please refer to:
 #
-# https://raw.github.com/projexsys/Jolt/master/LICENSES
+# [https://raw.github.com/projexsys/Jolt/master/LICENSES](https://raw.github.com/projexsys/Jolt/master/LICENSES)

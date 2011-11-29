@@ -1,12 +1,29 @@
-<!DOCTYPE html>  <html> <head>   <title>Reactor.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               Reactor.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>need to bundle an ever so slightly modified EventEmitter2 source
+<!DOCTYPE html>  <html> <head>   <title>Reactor.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="LiftedB.html">                 LiftedB.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="ConcatE.html">                 ConcatE.coffee               </a>                                           <a class="source" href="EventStream_api.html">                 EventStream_api.coffee               </a>                                           <a class="source" href="InternalE.html">                 InternalE.coffee               </a>                                           <a class="source" href="MappedE.html">                 MappedE.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Pulse_cat.html">                 Pulse_cat.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                                           <a class="source" href="say.html">                 say.coffee               </a>                                           <a class="source" href="exporter.html">                 exporter.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               Reactor.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>need to bundle an ever so slightly modified EventEmitter2 source
 use same trick as for underscore re: exporting and globalizing</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.Reactor = </span><span class="k">class</span> <span class="nx">Reactor</span> <span class="k">extends</span> <span class="nx">EventEmitter</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>also want to do an include/extend for class properties
-the above "extends" handles instances only</p>
-
-<p>&lt;&lt;&lt;>>></p>
+the above "extends" handles instances only</p>             </td>             <td class="code">               <div class="highlight"><pre> 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
 
 <p>Jolt - Reactive Objects for JavaScript</p>
 
-<p>https://github.com/projexsys/Jolt</p>
+<p><a href="https://github.com/projexsys/Jolt">https://github.com/projexsys/Jolt</a></p>
 
 <p>This software is Copyright (c) 2011 by Projexsys, Inc.</p>
 
@@ -21,10 +38,10 @@ Public License (GNU GPL) as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any
 later version. The code is distributed WITHOUT ANY WARRANTY; without
 even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU GPL for more details.</p>
+PARTICULAR PURPOSE. See the GNU GPL for more details:</p>
 
-<p>https://raw.github.com/projexsys/Jolt/master/LICENSE
-http://www.gnu.org/licenses/gpl-3.0.txt</p>
+<p><a href="https://raw.github.com/projexsys/Jolt/master/LICENSE">https://raw.github.com/projexsys/Jolt/master/LICENSE</a>
+<a href="http://www.gnu.org/licenses/gpl-3.0.txt">http://www.gnu.org/licenses/gpl-3.0.txt</a></p>
 
 <p>However, if you have executed an End User Software License and
 Services Agreement or an OEM Software License and Support Services
@@ -37,4 +54,4 @@ terms of the relevant Commercial Agreement.</p>
 <p>This sofware is derived from and incorporates existing works. For
 further information and license texts please refer to:</p>
 
-<p>https://raw.github.com/projexsys/Jolt/master/LICENSES</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
+<p><a href="https://raw.github.com/projexsys/Jolt/master/LICENSES">https://raw.github.com/projexsys/Jolt/master/LICENSES</a></p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

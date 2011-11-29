@@ -28,20 +28,6 @@ describe 'Sanity', ->
 
 
   it '''
-    Jolt should have an _s property
-  ''', ->
-
-    ( expect Jolt._s ).toBeTruthy()
-
-
-  it '''
-    Jolt should have _.str and _.string properties
-  ''', ->
-
-    ( expect (Jolt._.str and Jolt._.string) ).toBeTruthy()
-
-
-  it '''
     Jolt should have an EventEmitter2 property
   ''', ->
 

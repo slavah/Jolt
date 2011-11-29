@@ -1,12 +1,33 @@
-<!DOCTYPE html>  <html> <head>   <title>PriorityQueue.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               PriorityQueue.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.PriorityQueue = </span><span class="k">class</span> <span class="nx">PriorityQueue</span> <span class="k">extends</span> <span class="nx">BinaryHeap</span>
-  <span class="nv">constructor: </span><span class="o">-&gt;</span>
-    <span class="vi">@content = </span><span class="p">[]</span>
-
-  <span class="nv">scoreFunction: </span><span class="nf">(x) -&gt;</span> <span class="nx">x</span><span class="p">.</span><span class="nx">rank</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
+<!DOCTYPE html>  <html> <head>   <title>PriorityQueue.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="LiftedB.html">                 LiftedB.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="ConcatE.html">                 ConcatE.coffee               </a>                                           <a class="source" href="EventStream_api.html">                 EventStream_api.coffee               </a>                                           <a class="source" href="InternalE.html">                 InternalE.coffee               </a>                                           <a class="source" href="MappedE.html">                 MappedE.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Pulse_cat.html">                 Pulse_cat.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                                           <a class="source" href="say.html">                 say.coffee               </a>                                           <a class="source" href="exporter.html">                 exporter.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               PriorityQueue.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>Jolt's <code>PriorityQueue</code> is an extension of the
+<a href="https://raw.github.com/projexsys/Jolt/master/lib/helpers/BinaryHeap.mymod.coffee">bundled implementation</a>
+of class <code>BinaryHeap</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.PriorityQueue = </span><span class="k">class</span> <span class="nx">PriorityQueue</span> <span class="k">extends</span> <span class="nx">BinaryHeap</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p><code>BinaryHeap</code>'s constructor has been overriden so that the scoring method
+can be affixed to the extension's prototype.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">constructor: </span><span class="o">-&gt;</span>
+    <span class="vi">@content = </span><span class="p">[]</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>The fixed <code>scoreFunction</code> references a property of instances of
+<code>EventStream</code> (and derived classes).</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">scoreFunction: </span><span class="nf">(x) -&gt;</span> <span class="nx">x</span><span class="p">.</span><span class="nx">rank</span>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
 
 <p>Jolt - Reactive Objects for JavaScript</p>
 
-<p>https://github.com/projexsys/Jolt</p>
+<p><a href="https://github.com/projexsys/Jolt">https://github.com/projexsys/Jolt</a></p>
 
 <p>This software is Copyright (c) 2011 by Projexsys, Inc.</p>
 
@@ -21,10 +42,10 @@ Public License (GNU GPL) as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any
 later version. The code is distributed WITHOUT ANY WARRANTY; without
 even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU GPL for more details.</p>
+PARTICULAR PURPOSE. See the GNU GPL for more details:</p>
 
-<p>https://raw.github.com/projexsys/Jolt/master/LICENSE
-http://www.gnu.org/licenses/gpl-3.0.txt</p>
+<p><a href="https://raw.github.com/projexsys/Jolt/master/LICENSE">https://raw.github.com/projexsys/Jolt/master/LICENSE</a>
+<a href="http://www.gnu.org/licenses/gpl-3.0.txt">http://www.gnu.org/licenses/gpl-3.0.txt</a></p>
 
 <p>However, if you have executed an End User Software License and
 Services Agreement or an OEM Software License and Support Services
@@ -37,4 +58,4 @@ terms of the relevant Commercial Agreement.</p>
 <p>This sofware is derived from and incorporates existing works. For
 further information and license texts please refer to:</p>
 
-<p>https://raw.github.com/projexsys/Jolt/master/LICENSES</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
+<p><a href="https://raw.github.com/projexsys/Jolt/master/LICENSES">https://raw.github.com/projexsys/Jolt/master/LICENSES</a></p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

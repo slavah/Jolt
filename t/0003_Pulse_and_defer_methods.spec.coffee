@@ -224,15 +224,22 @@ describe 'Jolt.Pulse.prototype.propagate', ->
 
     me = new MockE
 
-    ( spyOn Pulse.prototype, 'PROPAGATE' ).andCallThrough()
-    ( spyOn me, 'UPDATER'                ).andCallThrough()
-    ( spyOn me, 'updater'                ).andCallThrough()
+    ( spyOn me._PulseClass.prototype, 'PROPAGATE' ).andCallThrough()
+    ( spyOn me, 'UPDATER'                         ).andCallThrough()
+    ( spyOn me, 'updater'                         ).andCallThrough()
 
-    Pulse.prototype.propagate pulse, pulse.sender, me
+    pulse.propagate pulse.sender, me
 
-    ( expect Pulse.prototype.PROPAGATE ).toHaveBeenCalled()
-    ( expect me.UPDATER                ).toHaveBeenCalled()
-    ( expect me.updater                ).toHaveBeenCalled()
+    # the following three references to the 'PROPAGATE' method are equivalent,
+    # though that would not be the case if instances of MockE had their
+    # '_PulseClass' properties set to a subclass of Pulse which overrode
+    # the method with another definition
+    ( expect me._PulseClass.prototype.PROPAGATE ).toHaveBeenCalled()
+    ( expect Pulse.prototype.PROPAGATE          ).toHaveBeenCalled()
+    ( expect pulse.PROPAGATE                    ).toHaveBeenCalled()
+
+    ( expect me.UPDATER                         ).toHaveBeenCalled()
+    ( expect me.updater                         ).toHaveBeenCalled()
 
 
   it '''
@@ -247,7 +254,7 @@ describe 'Jolt.Pulse.prototype.propagate', ->
     me = new MockE
     me.UPDATER = -> {} # not a pulse object
 
-    ( expect -> Pulse.prototype.propagate pulse, pulse.sender, me ).toThrow \
+    ( expect -> pulse.propagate pulse.sender, me ).toThrow \
     'receiver\'s UPDATER did not return a pulse object'
 
 
@@ -268,14 +275,18 @@ describe 'Jolt.Pulse.prototype.propagate', ->
     me = new MockE
     me.weaklyHeld = true
 
-    ( spyOn Pulse.prototype, 'PROPAGATE'      ).andCallThrough()
-    ( spyOn me, 'UPDATER'                     ).andCallThrough()
-    ( spyOn me, 'updater'                     ).andCallThrough()
-    ( spyOn mockSender, 'removeWeakReference' ).andCallThrough()
+    ( spyOn me._PulseClass.prototype, 'PROPAGATE' ).andCallThrough()
+    ( spyOn me, 'UPDATER'                         ).andCallThrough()
+    ( spyOn me, 'updater'                         ).andCallThrough()
+    ( spyOn mockSender, 'removeWeakReference'     ).andCallThrough()
 
-    Pulse.prototype.propagate pulse, pulse.sender, me
+    pulse.propagate pulse.sender, me
 
-    ( expect Pulse.prototype.PROPAGATE ).not.toHaveBeenCalled()
+    # equivalent references to the 'PROPAGATE' method; see note above
+    ( expect me._PulseClass.prototype.PROPAGATE ).not.toHaveBeenCalled()
+    ( expect Pulse.prototype.PROPAGATE          ).not.toHaveBeenCalled()
+    ( expect pulse.PROPAGATE                    ).not.toHaveBeenCalled()
+
     ( expect me.UPDATER                ).not.toHaveBeenCalled()
     ( expect me.updater                ).not.toHaveBeenCalled()
 
@@ -297,8 +308,8 @@ describe 'Jolt.Pulse.prototype.propagate', ->
     heap_save = nodes: []
 
     class Pulse_ext extends Pulse
-      PROPAGATE: (pulse, args...) ->
-        heap_save = pulse.heap
+      PROPAGATE: (args...) ->
+        heap_save = @heap
         super
 
     class MockE_ext extends MockE
@@ -325,19 +336,19 @@ describe 'Jolt.Pulse.prototype.propagate', ->
 
     pulse = new me[0]._PulseClass 3, false, mockSender, nextStamp(), ['d', 'e', 'f']
 
-    me[0]._PulseClass.prototype.propagate pulse, pulse.sender, me[0]
+    pulse.propagate pulse.sender, me[0]
 
     waitsFor ->
       fin.length is 4 and heap_save.nodes.length is 6
 
     runs ->
       ( expect heap_save.nodes ).toEqual [
-        me[0]
-        me[1]
-        me[2]
-        me[4]
-        me[5]
-        me[7]
+        [ mockSender, me[0] ]
+        [ me[0], me[1] ]
+        [ me[1], me[2] ]
+        [ me[1], me[4] ]
+        [ me[1], me[5] ]
+        [ me[4], me[7] ]
       ]
 
       ( expect fin ).toEqual [

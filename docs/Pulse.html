@@ -1,34 +1,44 @@
-<!DOCTYPE html>  <html> <head>   <title>Pulse.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               Pulse.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>it would NOT be necessary to pass the queues as arguments, nor to export the
-defer/delay methods, if my build-test tool allowed me to create coupled
-bundles and test specs, whereby I could take components of the Jolt library,
-prefix them with "mocks" (and in a node.js context postfix them with the
-contents of the specs, thereby avoiding the use of require so as to get the
-"mocks" and the specs into the same scope); when my next-gen build-test tool
-(built <em>with</em> Jolt) is ready, I should bundle it with a specific Jolt release
-and then work on a new version of Jolt and test specs which have the then
-unnecessary test-enabling workarounds removed; then in turn a new version of
-the build-test tool can be tested and bundled with the new version of Jolt</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">lastStamp = </span><span class="mi">0</span>
-<span class="nv">nextStamp = </span><span class="o">-&gt;</span> <span class="o">++</span><span class="nx">lastStamp</span>
+<!DOCTYPE html>  <html> <head>   <title>Pulse.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="LiftedB.html">                 LiftedB.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="ConcatE.html">                 ConcatE.coffee               </a>                                           <a class="source" href="EventStream_api.html">                 EventStream_api.coffee               </a>                                           <a class="source" href="InternalE.html">                 InternalE.coffee               </a>                                           <a class="source" href="MappedE.html">                 MappedE.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Pulse_cat.html">                 Pulse_cat.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                                           <a class="source" href="say.html">                 say.coffee               </a>                                           <a class="source" href="exporter.html">                 exporter.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               Pulse.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>Each propagation cycle is (supposed to be) "stamped" with a unique value. In
+practice this means using <code>nextStamp</code> to generate an always-increasing integer
+value which is then passed to the <code>Pulse</code> or subclass constructor.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">lastStamp = </span><span class="mi">0</span>
+<span class="nv">Jolt.nextStamp = nextStamp = </span><span class="o">-&gt;</span> <span class="o">++</span><span class="nx">lastStamp</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p><code>Pulse</code> propagation is, by design, a synchronous operation which in terms of
+Jolt's own algorightms should always be computationally finite. Practically,
+this means disallowing modification of event propagation graphs during
+propagation. The <code>propagating</code> flag is therefore toggled at the beginning
+and end of propagation cycles, by way of its setter function
+<code>Jolt.setPropagating</code>. <code>EventStream</code> methods which affect node-relationships
+use the getter function <code>Jolt.isPropagating</code> to determine whether they should
+proceed or schedule themselves for execution outside of a popagation cycle.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">propagating = </span><span class="kc">false</span>
 
-<span class="nv">Jolt.isPropagating  = isPropagating = </span><span class="kc">false</span>
-<span class="nv">Jolt.setPropagating = setPropagating = </span><span class="nf">(bool) -&gt;</span> <span class="nv">isPropagating = </span><span class="nb">Boolean</span> <span class="nx">bool</span>
-
-<span class="nv">Jolt.doNotPropagate = doNotPropagate = </span><span class="p">{}</span>
-<span class="nv">Jolt.propagateHigh  = propagateHigh  = </span><span class="p">{}</span>
-
-<span class="nv">sendCall = name: </span><span class="p">(</span><span class="o">-&gt;</span> <span class="s">&#39;Jolt.sendEvent&#39;</span><span class="p">),</span> <span class="nv">removeWeakReference: </span><span class="o">-&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>keep in mind the following when composing functions to call via defer
-https://bugzilla.mozilla.org/show_bug.cgi?id=394769</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="k">if</span> <span class="nx">isNodeJS</span>
+<span class="nv">Jolt.isPropagating  = isPropagating  = </span><span class="o">-&gt;</span> <span class="nx">propagating</span>
+<span class="nv">Jolt.setPropagating = setPropagating = </span><span class="nf">(bool) -&gt;</span> <span class="nv">propagating = </span><span class="nb">Boolean</span> <span class="nx">bool</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p><code>Jolt.doNotPropagate</code> is a sentinel value which signals that event propagation
+should be halted in the emitting node's branch of a propagation graph.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.doNotPropagate = doNotPropagate = </span><span class="p">{}</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p><code>Jolt.propagateHigh</code> is a unique value which when passed as the last argument
+to <code>Jolt.sendEvent</code> signals the <code>&lt;Pulse&gt;.propagate</code> method to invoke its
+<code>high</code> logic.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.propagateHigh  = propagateHigh  = </span><span class="p">{}</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p><code>sendCall</code> facilitates the always imperatively called method <code>Jolt.sendEvent</code>
+being named and treated as the first node in a propagation cycle, though it's not
+properly a node in the graph.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.sendCall = sendCall = name: </span><span class="p">(</span><span class="o">-&gt;</span> <span class="s">&#39;Jolt.sendEvent&#39;</span><span class="p">),</span> <span class="nv">removeWeakReference: </span><span class="o">-&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>Various graph modification and linking operations sometimes need to be delayed
+across a trip around the runtime's event loop. And some of these operations
+are queued and may be executed at a later time, and over time, to avoid
+unecessarily completing them all at once, thus freeing up the CPU.
+<code>Jolt.delay</code>, <code>Jolt.defer</code>, and <code>Jolt.defer_high</code> act as simple wrappers
+around the runtime's <code>setTimeout</code> facility, and <code>process.nextTick</code> in the case
+of node.js. The following "bug" affecting mozilla-derived runtimes should be
+kept in mind when composing functions to call through <code>Jolt.defer</code>:
+<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=394769">https://bugzilla.mozilla.org/show_bug.cgi?id=394769</a></p>             </td>             <td class="code">               <div class="highlight"><pre><span class="k">if</span> <span class="nx">isNodeJS</span>
   <span class="nv">Jolt.defer_high = defer_high = </span><span class="nf">(func, args...) -&gt;</span> <span class="nx">process</span><span class="p">.</span><span class="nx">nextTick</span> <span class="o">-&gt;</span> <span class="nx">func</span> <span class="nx">args</span><span class="p">...</span>
   <span class="nv">Jolt.delay = delay = </span><span class="nf">(func, ms, args...) -&gt;</span> <span class="nx">setTimeout</span> <span class="p">(</span><span class="o">-&gt;</span> <span class="nx">func</span> <span class="nx">args</span><span class="p">...),</span> <span class="nx">ms</span>
 <span class="k">else</span>
   <span class="nv">Jolt.defer_high = defer_high = </span><span class="nf">(func, args...) -&gt;</span> <span class="nx">defer</span> <span class="nx">func</span><span class="p">,</span> <span class="nx">args</span><span class="p">...</span>
   <span class="nv">Jolt.delay = delay = </span><span class="nf">(func, ms, args...) -&gt;</span> <span class="nb">window</span><span class="p">.</span><span class="nx">setTimeout</span> <span class="p">(</span><span class="o">-&gt;</span> <span class="nx">func</span> <span class="nx">args</span><span class="p">...),</span> <span class="nx">ms</span>
 
-<span class="nv">Jolt.defer = defer = </span><span class="nf">(func, args...) -&gt;</span> <span class="nx">delay</span> <span class="nx">func</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">args</span><span class="p">...</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>this queue should be adjusted so that it is drained more quickly/slowly, both
-in terms of the delay ms value and how many tasks are shifted/exec'd in one
-step, if the queue length grows beyond a certain upper threshold; research
-should be conducted to find a robust algorithm, as certainly this project
-is not the first with such a need</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.cleanupQ = cleanupQ = cleanupWeakReference = </span><span class="p">[]</span>
+<span class="nv">Jolt.defer = defer = </span><span class="nf">(func, args...) -&gt;</span> <span class="nx">delay</span> <span class="nx">func</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">args</span><span class="p">...</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>If an <code>EventStream</code> instance is flagged as "weaklyHeld", as observed during
+event propagation, it should be pruned from the <code>sendTo</code> array-property of the
+node in the propagation graph which referenced it. Such "cleanup" operations
+are queued in <code>Jolt.cleanupQ</code>. The current implementation of the queue's
+"drain" method is a bit naive. A future implementation should self-adjust its
+timing so the queue is drained more quickly/slowly, both in terms of the
+delay <code>ms</code> value and how many tasks are shifted/exec'd in one step, if the
+queue length grows beyond a certain upper threshold.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.cleanupQ = cleanupQ = cleanupWeakReference = </span><span class="p">[]</span>
 <span class="nv">cleanupQ.draining = </span><span class="kc">false</span>
 <span class="nv">cleanupQ.freq = </span><span class="mi">100</span>
 <span class="nv">cleanupQ.drain = </span><span class="o">-&gt;</span>
@@ -46,10 +56,19 @@ is not the first with such a need</p>             </td>             <td class="c
       <span class="nx">sender</span><span class="p">.</span><span class="nx">removeWeakReference</span> <span class="nx">weakReference</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">draining</span>
       <span class="nv">cleanupQ.draining = </span><span class="kc">true</span>
-      <span class="nx">delay</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">drain</span><span class="p">,</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">freq</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>this queue should be adjusted so that it is drained more quickly/slowly, both
-in terms of the delay ms value and how many tasks are shifted/exec'd in one
-step, with respect to the average number of tasks that remain for a "drain
-all" step that precedes pulse propagation; again, research is needed.......</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.beforeQ = beforeQ = beforeNextPulse = </span><span class="p">[]</span>
+      <span class="nx">delay</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">drain</span><span class="p">,</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">freq</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>Propagation graph modifications are disallowed during propagation, and any
+such operations attempted during propagation are automatically deferred by
+queueing them in <code>Jolt.beforeQ</code>. The "before" in the name is related to the
+design whereby all operations queued in <code>beforeQ</code> will be completed prior
+the first step in the next event propagation cycle. The queue will attempt
+to drain itself, one op at a time, and over time, prior to the next
+propagation. But if any ops remain in the queue when a propagation is
+initiated, the queue will be fully drained synchronously beforehand. The
+current implementation of this queue's "drain" method is also a bit naive. A
+future implementation should self-adjust its timing so the queue is drained
+more quickly/slowly, both in terms of the delay <code>ms</code> value and how many tasks
+are shifted/exec'd in one step, with respect to the average number of tasks
+that remain for the "drain all" step that precedes event propagation.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.beforeQ = beforeQ = beforeNextPulse = </span><span class="p">[]</span>
 <span class="nv">beforeQ.draining = </span><span class="kc">false</span>
 <span class="nv">beforeQ.freq = </span><span class="mi">10</span>
 <span class="nv">beforeQ.drain = </span><span class="o">-&gt;</span>
@@ -65,87 +84,143 @@ all" step that precedes pulse propagation; again, research is needed.......</p> 
     <span class="nx">func</span> <span class="nx">args</span><span class="p">...</span>
   <span class="k">if</span> <span class="o">not</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">draining</span>
     <span class="nv">beforeQ.draining = </span><span class="kc">true</span>
-    <span class="nx">delay</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drain</span><span class="p">,</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">freq</span>
-
-
-<span class="k">class</span> <span class="nx">HeapStore</span>
-  <span class="nv">constructor: </span><span class="nf">(@stamp) -&gt;</span>
-    <span class="vi">@nodes = </span><span class="p">[]</span>
-
-
-<span class="nv">Jolt.isP = isP = </span><span class="nf">(pulse) -&gt;</span>
+    <span class="nx">delay</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drain</span><span class="p">,</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">freq</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <p>Event propagation order among <code>EventStream</code> instances (estreams) that form a
+propagation graph is governed by a binary heap algorithm. As an event
+propagates through the graph, each step is recorded along the way in an
+instance of <code>HeapStore</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.HeapStore = </span><span class="k">class</span> <span class="nx">HeapStore</span>
+  <span class="nv">constructor: </span><span class="nf">(@stamp, @cont) -&gt;</span>
+    <span class="vi">@nodes = </span><span class="p">[]</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <p>Some <code>EventStream</code> transformers involve asynchronous <em>continuations</em> of event
+propagation. This results in disjointed propagation graphs since behind the
+scenes it involves at least two separate calls to <code>Jolt.sendEvent</code>. However,
+the constructor for Jolt's <code>Pulse</code> class allows an instance of <code>Jolt.ContInfo</code>
+("continuation information") to be passed into the instance of
+<code>Jolt.HeapStore</code> which is constructed and stored in the returned instance of
+<code>Pulse</code> (or a subclass). The <code>ContInfo</code> instance tracks which heap/s
+(referenced by <code>stamp</code>) and estream/s were the origin of the continued
+propagation. The recorded information does not directly affect the program's
+operation, but is useful for runtime analysis.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.ContInfo = </span><span class="k">class</span> <span class="nx">ContInfo</span>
+  <span class="nv">constructor: </span><span class="nf">(@stamps, @nodes) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <p>Propagation is mediated by instances of <code>Jolt.Pulse</code>, and <code>Jolt.isP</code> helps
+guarantee that objects passed between estreams during <code>propagate</code>/<code>update</code>
+cycles are such instances.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.isP = isP = </span><span class="nf">(pulse) -&gt;</span>
   <span class="nx">pulse</span> <span class="k">instanceof</span> <span class="nx">Pulse</span>
 
 
-<span class="nv">Jolt.Pulse = </span><span class="k">class</span> <span class="nx">Pulse</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>stamp is unique and gives us a key with which to pair heaps and estreams</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">constructor: </span><span class="nf">(@arity, @junction, @sender, @stamp, @value, @heap = new HeapStore @stamp) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">propagate: </span><span class="nf">(pulse, sender, receiver, high, more...) -&gt;</span>
-
-    <span class="k">if</span> <span class="o">not</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span>
-      <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">length</span> <span class="o">and</span> <span class="o">not</span> <span class="nx">high</span> <span class="k">then</span> <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span> <span class="k">while</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">length</span>
-
-      <span class="nx">setPropagating</span> <span class="kc">true</span>
-
+<span class="nv">Jolt.Pulse = </span><span class="k">class</span> <span class="nx">Pulse</span></pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <p>Instances of <code>Jolt.Pulse</code> have a set of properties which affect how they are
+processed by recipient estreams, though some of them have a more forensic
+character. <code>arity</code> is an integer value which indicates how many discrete
+pieces of data are carried by a particular pulse, and likewise how many
+arguments will be passed to a receiving estream's inner value transformer.
+<code>junction</code> is a boolean which indicates whether a <code>Pulse</code> instance is a
+"plain" pulse or a "junction of pulses". <code>sender</code> is a reference to the
+sending estream (or <code>Jolt.sendEvent</code> call). <code>stamp</code> is a unique value, an
+integer, which is incremented before each propagation cycle. <code>value</code> is an
+array (of length <code>arity</code>) which contains the data mediated by the pulse.
+<code>heap</code> is an instance of <code>HeapStore</code> and records the propagation steps.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">constructor: </span><span class="p">(</span><span class="nx">@arity</span><span class="p">,</span> <span class="nx">@junction</span><span class="p">,</span> <span class="nx">@sender</span><span class="p">,</span> <span class="nx">@stamp</span><span class="p">,</span> <span class="vi">@value = </span><span class="p">[],</span> <span class="vi">@heap = </span><span class="p">(</span><span class="k">new</span> <span class="nx">HeapStore</span> <span class="nx">@stamp</span><span class="p">,</span> <span class="nx">cont</span><span class="p">),</span> <span class="nx">cont</span><span class="p">)</span> <span class="o">-&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <p><code>Pulse.prototype.copy</code> clones the properties of a <code>Pulse</code> instance to a new
+instance, with the option that a derived class/constructor is used instead
+of the old instance's constructor.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">copy: </span><span class="nf">(PulseClass) -&gt;</span>
+    <span class="nx">PulseClass</span> <span class="o">?=</span> <span class="nx">@constructor</span>
+    <span class="k">new</span> <span class="nx">PulseClass</span> <span class="nx">@arity</span><span class="p">,</span> <span class="nx">@junction</span><span class="p">,</span> <span class="nx">@sender</span><span class="p">,</span> <span class="nx">@stamp</span><span class="p">,</span> <span class="p">(</span><span class="nx">@value</span><span class="p">.</span><span class="nx">slice</span> <span class="mi">0</span><span class="p">),</span> <span class="nx">@heap</span></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <p>The invocation of <code>Pulse.prototype.propagate</code> is the first step in an event
+propagation cycle. Though <code>sender</code> could be extracted from a well-formed
+<code>Pulse</code> instance, having it as a named argument lends clarity, particularly
+in more "advanced" dertivates of the <code>Pulse</code> class. The arguments splat
+<code>more...</code> also facilitates derivate implementations which need additional
+control flags.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">propagate: </span><span class="nf">(sender, receiver, high, more...) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-15">&#182;</a>               </div>               <p>If an estream is flagged as <code>weaklyHeld</code> then propagation will halt
+immediately and a cleanup op gets scheduled (in the corresponding <code>else</code>
+clause near the bottom of the script). Tasks which remain queued in
+<code>Jolt.beforeQ</code> (e.g. graph modifications) need to be drained and executed
+before propagation can proceed, though this step is skipped if the <code>high</code>
+argument is true.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">if</span> <span class="o">not</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span>
+      <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">length</span> <span class="o">and</span> <span class="o">not</span> <span class="nx">high</span> <span class="k">then</span> <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span> <span class="k">while</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">length</span></pre></div>             </td>           </tr>                               <tr id="section-16">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-16">&#182;</a>               </div>               <p>Having flipped the <code>propagating</code> flag (described above) to true, the
+next step is to make an instance of <code>Jolt.PriorityQueue</code> and populate
+it with the initial receiver. Queue members are hashes with keys
+<code>estream</code>, <code>pulse</code>, and <code>rank</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nx">setPropagating</span> <span class="kc">true</span>
       <span class="nv">queue = </span><span class="k">new</span> <span class="nx">PriorityQueue</span>
-
-      <span class="nx">queue</span><span class="p">.</span><span class="nx">push</span> <span class="nv">estream: </span><span class="nx">receiver</span><span class="p">,</span> <span class="nv">pulse: </span><span class="nx">pulse</span><span class="p">,</span> <span class="nv">rank: </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
-
-      <span class="k">while</span> <span class="nx">queue</span><span class="p">.</span><span class="nx">size</span><span class="p">()</span>
-        <span class="nv">qv = </span><span class="nx">queue</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
-
-        <span class="nv">P = </span><span class="k">new</span> <span class="p">(</span><span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">())</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">arity</span><span class="p">,</span> <span class="o">\</span>
-        <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">junction</span><span class="p">,</span> <span class="o">\</span>
-        <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
-        <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">stamp</span><span class="p">,</span> <span class="o">\</span>
-        <span class="p">(</span><span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">slice</span> <span class="mi">0</span><span class="p">),</span> <span class="o">\</span>
-        <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">heap</span>
-
-        <span class="nx">P</span><span class="p">.</span><span class="nx">heap</span><span class="p">.</span><span class="nx">nodes</span><span class="p">.</span><span class="nx">push</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span>
-
-        <span class="nv">nextPulse = </span><span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">().</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">PROPAGATE</span> <span class="nx">P</span><span class="p">,</span> <span class="o">\</span>
-        <span class="nx">P</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
-        <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">,</span> <span class="o">\</span>
-        <span class="nx">high</span><span class="p">,</span> <span class="o">\</span>
-        <span class="nx">more</span><span class="p">...</span>
-
-        <span class="nv">weaklyHeld = </span><span class="kc">true</span>
-
-        <span class="k">if</span> <span class="nx">nextPulse</span> <span class="o">isnt</span> <span class="nx">doNotPropagate</span>
-          <span class="nv">nextPulse.sender = </span><span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span>
-
-          <span class="nx">_</span><span class="p">(</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">sendTo</span> <span class="p">).</span><span class="nx">map</span> <span class="nf">(receiver) -&gt;</span>
-            <span class="nv">weaklyHeld = </span><span class="nx">weaklyHeld</span> <span class="o">and</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span>
-            <span class="k">if</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span>
+      <span class="nx">queue</span><span class="p">.</span><span class="nx">push</span> <span class="nv">estream: </span><span class="nx">receiver</span><span class="p">,</span> <span class="nv">pulse: </span><span class="k">this</span><span class="p">,</span> <span class="nv">rank: </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span></pre></div>             </td>           </tr>                               <tr id="section-17">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-17">&#182;</a>               </div>               <p>The bulk of the work done by <code>propagate</code> takes the form a while loop
+which alternately drains and populates the queue with the estream nodes
+that make up the event propagation graph.</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="k">while</span> <span class="nx">queue</span><span class="p">.</span><span class="nx">size</span><span class="p">()</span>
+        <span class="nv">qv = </span><span class="nx">queue</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-18">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-18">&#182;</a>               </div>               <p>For each step of the propagation cycle, the <code>sender</code> and <code>receiver</code>
+are recorded as a tuple in the instance of <code>Jolt.HeapStore</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">heap</span><span class="p">.</span><span class="nx">nodes</span><span class="p">.</span><span class="nx">push</span> <span class="p">[</span><span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">]</span></pre></div>             </td>           </tr>                               <tr id="section-19">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-19">&#182;</a>               </div>               <p>To avoid unwanted side effects during event propagation, each receiving
+estream is passed a new instance of <code>Pulse</code> (or a subclass) with the
+properties copied from the old one. The choice of constructor
+(<code>PulseClass</code>) for the <code>copy</code> operation is determined by the
+<code>_PulseClass</code> property of the receiving estream.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nv">PULSE = </span><span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">copy</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-20">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-20">&#182;</a>               </div>               <p>The next major step in the propagation cycle is the hand-off to the
+"inner propagation" method, <code>Pulse.prototype.PROPAGATE</code>. The return
+value, which is the result of transformations performed by the
+receiving estream, forms the basis of the succeeding steps in the
+cycle.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nv">nextPulse = </span><span class="nx">PULSE</span><span class="p">.</span><span class="nx">PROPAGATE</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">,</span> <span class="nx">high</span><span class="p">,</span> <span class="nx">more</span><span class="p">...</span></pre></div>             </td>           </tr>                               <tr id="section-21">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-21">&#182;</a>               </div>               <p>Certain estream transformers rely on logic whereby parent nodes in a
+propagation graph should be flagged as <code>weaklyHeld</code> if all their child
+nodes become so flagged. Using some combinatorial logic, we can detect
+such conditions without having to iterate an estream's <code>sendTo</code> array
+explicitly for this purpose. The variable <code>weaklyHeld</code> lets us do
+this.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nv">weaklyHeld = </span><span class="kc">true</span></pre></div>             </td>           </tr>                               <tr id="section-22">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-22">&#182;</a>               </div>               <p>If <code>PROPAGATE</code> returned the sentinel value <code>Jolt.doNotPropagate</code>, then
+popagation will not continue with members (if any) of the receiver's
+<code>sendTo</code> array property.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="k">if</span> <span class="nx">nextPulse</span> <span class="o">isnt</span> <span class="nx">doNotPropagate</span>
+          <span class="nv">nextPulse.sender = </span><span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span></pre></div>             </td>           </tr>                               <tr id="section-23">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-23">&#182;</a>               </div>               <p>If <code>PROPAGATE</code> returned a <code>Pulse</code> instance, then the next step
+involves pushing members of the receiver's <code>sendTo</code> array-property
+into the instance of <code>PriorityQueue</code> created at the beginning of the
+cycle.</p>             </td>             <td class="code">               <div class="highlight"><pre>          <span class="k">for</span> <span class="nx">receiver</span> <span class="k">in</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">sendTo</span></pre></div>             </td>           </tr>                               <tr id="section-24">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-24">&#182;</a>               </div>               <p>If any members of the receiver's child nodes are not flagged as
+<code>weaklyHeld</code> then we know to not flag the receiver, since the
+<code>weaklyHeld</code> variable will have been set to false.</p>             </td>             <td class="code">               <div class="highlight"><pre>            <span class="nv">weaklyHeld = </span><span class="nx">weaklyHeld</span> <span class="o">and</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span></pre></div>             </td>           </tr>                               <tr id="section-25">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-25">&#182;</a>               </div>               <p>If an estream is flagged as <code>weaklyHeld</code>, it's not added to the
+queue, and a "cleanup" operation is scheduled</p>             </td>             <td class="code">               <div class="highlight"><pre>            <span class="k">if</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span>
               <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">,</span> <span class="nx">receiver</span>
-            <span class="k">else</span>
-              <span class="nx">queue</span><span class="p">.</span><span class="nx">push</span> <span class="nv">estream: </span><span class="nx">receiver</span><span class="p">,</span> <span class="nv">pulse: </span><span class="nx">nextPulse</span><span class="p">,</span> <span class="nv">rank: </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
-
-          <span class="k">if</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">length</span> <span class="o">and</span> <span class="nx">weaklyHeld</span>
+            <span class="k">else</span></pre></div>             </td>           </tr>                               <tr id="section-26">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-26">&#182;</a>               </div>               <p>Each child receiver is paired with <code>nextPulse</code>, though note that
+<code>Pulse</code> instance has been modified so that its <code>sender</code> value
+references the parent node which transformed the original
+<code>Pulse</code> instance.</p>             </td>             <td class="code">               <div class="highlight"><pre>              <span class="nx">queue</span><span class="p">.</span><span class="nx">push</span> <span class="nv">estream: </span><span class="nx">receiver</span><span class="p">,</span> <span class="nv">pulse: </span><span class="nx">nextPulse</span><span class="p">,</span> <span class="nv">rank: </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span></pre></div>             </td>           </tr>                               <tr id="section-27">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-27">&#182;</a>               </div>               <p>If the original receiver had been flagged as <code>weaklyHeld</code> the
+<code>propagate</code> logic would not have proceeded this far. Since it did,
+we should only consider the <code>weaklyHeld</code> variable's having a true
+value to indicate the original receiver should be so flagged if it
+has a non-empty <code>sendTo</code> array property, i.e. it has child nodes
+that were all flagged as <code>weaklyHeld</code>. If it does end up flagged,
+then a "cleanup" op is scheduled for it.</p>             </td>             <td class="code">               <div class="highlight"><pre>          <span class="k">if</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">length</span> <span class="o">and</span> <span class="nx">weaklyHeld</span>
             <span class="nv">qv.estream.weaklyHeld = </span><span class="kc">true</span>
-            <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span>
-
-      <span class="nx">setPropagating</span> <span class="kc">false</span>
-
-      <span class="nx">P</span><span class="p">.</span><span class="nx">heap</span>
+            <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span></pre></div>             </td>           </tr>                               <tr id="section-28">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-28">&#182;</a>               </div>               <p>The propagation cycle is ended by setting the <code>propagate</code> flag to false
+and returning the instance of <code>HeapStore</code></p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nx">setPropagating</span> <span class="kc">false</span>
+      <span class="nx">PULSE</span><span class="p">.</span><span class="nx">heap</span>
 
     <span class="k">else</span>
       <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span>
+      <span class="nx">@heap</span>
 
-      <span class="nx">pulse</span><span class="p">.</span><span class="nx">heap</span>
 
-
-  <span class="nv">PROPAGATE: </span><span class="nf">(pulse, sender, receiver, high, more...) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>in non-catching scenarios (i.e. <em>PulseClass isnt Pulse</em>cat) in
-catching/finally branches, if this step results in an error being thrown
-then isPropagating will be "stuck true", so it's important that estreams
-attached to CATCH<em>E and FINALLY</em>E bet set to use Pulse_cat</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">PULSE = </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">UPDATER</span> <span class="nx">pulse</span>
-
-    <span class="k">if</span> <span class="nx">PULSE</span> <span class="o">isnt</span> <span class="nx">doNotPropagate</span> <span class="o">and</span> <span class="o">not</span> <span class="p">(</span><span class="nx">isP</span> <span class="nx">PULSE</span><span class="p">)</span>
+  <span class="nv">PROPAGATE: </span><span class="nf">(sender, receiver, high, more...) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-29">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-29">&#182;</a>               </div>               <p>The "inner propagation" method, <code>Pulse.prototype.PROPAGATE</code>, invokes the
+"transformation" steps (for each receiving estream) of the propagation
+cycle -- the <code>Pulse</code> instance is passed to the receiving estream's "outer
+updater" method, <code>EventStream.prototype.UPDATER</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">PULSE = </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">UPDATER</span> <span class="k">this</span></pre></div>             </td>           </tr>                               <tr id="section-30">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-30">&#182;</a>               </div>               <p>The value returned by <code>UPDATER</code> should be either an instance of <code>Pulse</code> or
+the sentinel value <code>Jolt.doNotPropagate</code>. If that's not the case, an error
+is thrown. Otherwise, the transformed <code>Pulse</code> instance is returned into
+the continued logic of <code>Pulse.prototype.propagate</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">if</span> <span class="nx">PULSE</span> <span class="o">isnt</span> <span class="nx">doNotPropagate</span> <span class="o">and</span> <span class="o">not</span> <span class="p">(</span><span class="nx">isP</span> <span class="nx">PULSE</span><span class="p">)</span>
       <span class="nx">setPropagating</span> <span class="kc">false</span>
       <span class="k">throw</span> <span class="s">&#39;receiver\&#39;s UPDATER did not return a pulse object&#39;</span>
     <span class="k">else</span>
-      <span class="nx">PULSE</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
+      <span class="nx">PULSE</span></pre></div>             </td>           </tr>                               <tr id="section-31">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-31">&#182;</a>               </div>               <p>(NOTE: In non-catching scenarios in catching/finally branches (see the
+implementation of <a href="Pulse_cat.html">Pulse_cat.coffee</a>), if this step
+results in an error being thrown then <code>propagating</code> will be "stuck true",
+so it's important that estreams attached to <code>Jolt.CATCH_E</code> and
+<code>Jolt.FINALLY_E</code> have their <code>_PulseClass</code> properties set to <code>Pulse_cat</code>.)</p>             </td>             <td class="code">               <div class="highlight"><pre> 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></div>             </td>           </tr>                               <tr id="section-32">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-32">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
 
 <p>Jolt - Reactive Objects for JavaScript</p>
 
-<p>https://github.com/projexsys/Jolt</p>
+<p><a href="https://github.com/projexsys/Jolt">https://github.com/projexsys/Jolt</a></p>
 
 <p>This software is Copyright (c) 2011 by Projexsys, Inc.</p>
 
@@ -160,10 +235,10 @@ Public License (GNU GPL) as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any
 later version. The code is distributed WITHOUT ANY WARRANTY; without
 even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU GPL for more details.</p>
+PARTICULAR PURPOSE. See the GNU GPL for more details:</p>
 
-<p>https://raw.github.com/projexsys/Jolt/master/LICENSE
-http://www.gnu.org/licenses/gpl-3.0.txt</p>
+<p><a href="https://raw.github.com/projexsys/Jolt/master/LICENSE">https://raw.github.com/projexsys/Jolt/master/LICENSE</a>
+<a href="http://www.gnu.org/licenses/gpl-3.0.txt">http://www.gnu.org/licenses/gpl-3.0.txt</a></p>
 
 <p>However, if you have executed an End User Software License and
 Services Agreement or an OEM Software License and Support Services
@@ -176,4 +251,4 @@ terms of the relevant Commercial Agreement.</p>
 <p>This sofware is derived from and incorporates existing works. For
 further information and license texts please refer to:</p>
 
-<p>https://raw.github.com/projexsys/Jolt/master/LICENSES</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
+<p><a href="https://raw.github.com/projexsys/Jolt/master/LICENSES">https://raw.github.com/projexsys/Jolt/master/LICENSES</a></p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

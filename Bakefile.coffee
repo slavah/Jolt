@@ -38,9 +38,7 @@ async.parallel(
   helpersJS: ((callback) -> async.parallel(_([
 
     'helpers/eventemitter2.mymod.js'
-    'helpers/sizzle.mymod.js'
     'helpers/underscore.mymod.js'
-    'helpers/underscore.string.mymod.js'
 
   ]).map((path) -> ((callback) -> readI path, callback))
 
@@ -51,16 +49,30 @@ async.parallel(
 
     'helpers/BinaryHeap.mymod.coffee'
     'Jolt.coffee'
+    'helpers/say.coffee'
     'PriorityQueue.coffee'
     'Pulse.coffee'
     'EventStream.coffee'
-    'EventStream/EventStream_api.coffee'
-    'EventStream/InternalE.coffee'
-    'EventStream/ConcatE.coffee'
-    'EventStream/MappedE.coffee'
-    'Pulse/Pulse_cat.coffee'
-    'Behavior.coffee'
-    'Reactor.coffee'
+    #'EventStream/EventStream_api.coffee'
+    #'EventStream/InternalE.coffee'
+
+    # need: ZeroE/zeroE, OneE/oneE (regular and high variants in API), BoundE/bindE, SwitchedE/switchE
+    # after those should go Behavior, but without factory methods
+
+    #'Behavior.coffee'
+
+    # then goes implementation of extractBofE, though switchE may get intertwined with it
+    # in a separate component file I should compose Behavior's extractBofE-dependent factory method
+
+    # then I can write MergedE/mergeE, with factory method dependent on extractBofE
+    # going forward from there, EventStream_api members should have extractBofE-dependent factory methods
+    # remember that semantics need to still be worked out for Behavior_api members ... notions of junction, etc.
+    #   and their factory methods should not reference extractBofE, of course
+
+    #'EventStream/ConcatE.coffee'
+    #'EventStream/MappedE.coffee'
+    #'Pulse/Pulse_cat.coffee'
+    #'Reactor.coffee'
     'packaging/exporter.coffee'
 
   ]).map((path) -> ((callback) -> read path, callback))

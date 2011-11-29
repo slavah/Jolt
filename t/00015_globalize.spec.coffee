@@ -20,3 +20,4 @@ describe 'Jolt.globalize', ->
 
     Jolt.globalize()
     ( expect _ ).toBe Jolt._
+

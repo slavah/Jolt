@@ -1,14 +1,44 @@
+# Jolt's `PriorityQueue` is an extension of the
+# [bundled implementation](https://raw.github.com/projexsys/Jolt/master/lib/helpers/BinaryHeap.mymod.coffee)
+# of class `BinaryHeap`.
+
 Jolt.PriorityQueue = class PriorityQueue extends BinaryHeap
+
+  # `BinaryHeap`'s constructor has been overriden so that the scoring method
+  # can be affixed to the extension's prototype.
+
   constructor: ->
     @content = []
 
+  # The fixed `scoreFunction` references a property of instances of
+  # `EventStream` (and derived classes).
+
   scoreFunction: (x) -> x.rank
-#
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 # <<<>>>
 #
 # Jolt - Reactive Objects for JavaScript
 #
-# https://github.com/projexsys/Jolt
+# [https://github.com/projexsys/Jolt](https://github.com/projexsys/Jolt)
 #
 # This software is Copyright (c) 2011 by Projexsys, Inc.
 #
@@ -23,10 +53,10 @@ Jolt.PriorityQueue = class PriorityQueue extends BinaryHeap
 # Foundation, either version 3 of the License, or (at your option) any
 # later version. The code is distributed WITHOUT ANY WARRANTY; without
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-# PARTICULAR PURPOSE. See the GNU GPL for more details.
+# PARTICULAR PURPOSE. See the GNU GPL for more details:
 #
-# https://raw.github.com/projexsys/Jolt/master/LICENSE
-# http://www.gnu.org/licenses/gpl-3.0.txt
+# [https://raw.github.com/projexsys/Jolt/master/LICENSE](https://raw.github.com/projexsys/Jolt/master/LICENSE)
+# [http://www.gnu.org/licenses/gpl-3.0.txt](http://www.gnu.org/licenses/gpl-3.0.txt)
 #
 # However, if you have executed an End User Software License and
 # Services Agreement or an OEM Software License and Support Services
@@ -39,4 +69,4 @@ Jolt.PriorityQueue = class PriorityQueue extends BinaryHeap
 # This sofware is derived from and incorporates existing works. For
 # further information and license texts please refer to:
 #
-# https://raw.github.com/projexsys/Jolt/master/LICENSES
+# [https://raw.github.com/projexsys/Jolt/master/LICENSES](https://raw.github.com/projexsys/Jolt/master/LICENSES)
