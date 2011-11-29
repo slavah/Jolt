@@ -119,45 +119,63 @@ array (of length <code>arity</code>) which contains the data mediated by the pul
 instance, with the option that a derived class/constructor is used instead
 of the old instance's constructor.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">copy: </span><span class="nf">(PulseClass) -&gt;</span>
     <span class="nx">PulseClass</span> <span class="o">?=</span> <span class="nx">@constructor</span>
-    <span class="k">new</span> <span class="nx">PulseClass</span> <span class="nx">@arity</span><span class="p">,</span> <span class="nx">@junction</span><span class="p">,</span> <span class="nx">@sender</span><span class="p">,</span> <span class="nx">@stamp</span><span class="p">,</span> <span class="p">(</span><span class="nx">@value</span><span class="p">.</span><span class="nx">slice</span> <span class="mi">0</span><span class="p">),</span> <span class="nx">@heap</span>
-
-  <span class="nv">propagate: </span><span class="nf">(sender, receiver, high, more...) -&gt;</span>
-
-    <span class="k">if</span> <span class="o">not</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span>
-      <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">length</span> <span class="o">and</span> <span class="o">not</span> <span class="nx">high</span> <span class="k">then</span> <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span> <span class="k">while</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">length</span>
-
-      <span class="nx">setPropagating</span> <span class="kc">true</span>
+    <span class="k">new</span> <span class="nx">PulseClass</span> <span class="nx">@arity</span><span class="p">,</span> <span class="nx">@junction</span><span class="p">,</span> <span class="nx">@sender</span><span class="p">,</span> <span class="nx">@stamp</span><span class="p">,</span> <span class="p">(</span><span class="nx">@value</span><span class="p">.</span><span class="nx">slice</span> <span class="mi">0</span><span class="p">),</span> <span class="nx">@heap</span></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <p>The invocation of <code>Pulse.prototype.propagate</code> is the first step in an event
+propagation cycle. Though <code>sender</code> could be extracted from a well-formed
+<code>Pulse</code> instance, having it as a named argument lends clarity, particularly
+in more "advanced" dertivates of the <code>Pulse</code> class. The arguments splat
+<code>more...</code> also facilitates derivate implementations which need additional
+control flags.</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">propagate: </span><span class="nf">(sender, receiver, high, more...) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-15">&#182;</a>               </div>               <p>If an estream is flagged as <code>weaklyHeld</code> then propagation will halt
+immediately and a cleanup op gets scheduled (in the corresponding <code>else</code>
+clause near the bottom of the script). Tasks which remain queued in
+<code>Jolt.beforeQ</code> (e.g. graph modifications) need to be drained and executed
+before propagation can proceed, though this step is skipped if the <code>high</code>
+argument is true.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">if</span> <span class="o">not</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span>
+      <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">length</span> <span class="o">and</span> <span class="o">not</span> <span class="nx">high</span> <span class="k">then</span> <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span> <span class="k">while</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">length</span></pre></div>             </td>           </tr>                               <tr id="section-16">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-16">&#182;</a>               </div>               <p>Having flipped the <code>propagating</code> flag (described above) to true, the
+next step is to make an instance of <code>Jolt.PriorityQueue</code> and populate
+it with the initial receiver. Queue members are hashes with keys
+<code>estream</code>, <code>pulse</code>, and <code>rank</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nx">setPropagating</span> <span class="kc">true</span>
       <span class="nv">queue = </span><span class="k">new</span> <span class="nx">PriorityQueue</span>
-      <span class="nx">queue</span><span class="p">.</span><span class="nx">push</span> <span class="nv">estream: </span><span class="nx">receiver</span><span class="p">,</span> <span class="nv">pulse: </span><span class="k">this</span><span class="p">,</span> <span class="nv">rank: </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
-
-      <span class="k">while</span> <span class="nx">queue</span><span class="p">.</span><span class="nx">size</span><span class="p">()</span>
-        <span class="nv">qv = </span><span class="nx">queue</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
-
-        <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">heap</span><span class="p">.</span><span class="nx">nodes</span><span class="p">.</span><span class="nx">push</span> <span class="p">[</span><span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">]</span></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <p>To avoid unwanted side effects during event propagation, each receiving
+      <span class="nx">queue</span><span class="p">.</span><span class="nx">push</span> <span class="nv">estream: </span><span class="nx">receiver</span><span class="p">,</span> <span class="nv">pulse: </span><span class="k">this</span><span class="p">,</span> <span class="nv">rank: </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span></pre></div>             </td>           </tr>                               <tr id="section-17">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-17">&#182;</a>               </div>               <p>The bulk of the work done by <code>propagate</code> takes the form a while loop
+which alternately drains and populates the queue with the estream nodes
+that make up the event propagation graph.</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="k">while</span> <span class="nx">queue</span><span class="p">.</span><span class="nx">size</span><span class="p">()</span>
+        <span class="nv">qv = </span><span class="nx">queue</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-18">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-18">&#182;</a>               </div>               <p>For each step of the propagation cycle, the <code>sender</code> and <code>receiver</code>
+are recorded as a tuple in the instance of <code>Jolt.HeapStore</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">heap</span><span class="p">.</span><span class="nx">nodes</span><span class="p">.</span><span class="nx">push</span> <span class="p">[</span><span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">]</span></pre></div>             </td>           </tr>                               <tr id="section-19">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-19">&#182;</a>               </div>               <p>To avoid unwanted side effects during event propagation, each receiving
 estream is passed a new instance of <code>Pulse</code> (or a subclass) with the
-properties copied from the old one. The choice of <code>&lt;PulseClass&gt;</code> for
-the <code>copy</code> operation is determined by the <code>_PulseClass</code> property of
-the receiving estream.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nv">PULSE = </span><span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">copy</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">()</span>
-
-        <span class="nv">nextPulse = </span><span class="nx">PULSE</span><span class="p">.</span><span class="nx">PROPAGATE</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">,</span> <span class="nx">high</span><span class="p">,</span> <span class="nx">more</span><span class="p">...</span>
-
-        <span class="nv">weaklyHeld = </span><span class="kc">true</span>
-
-        <span class="k">if</span> <span class="nx">nextPulse</span> <span class="o">isnt</span> <span class="nx">doNotPropagate</span>
-          <span class="nv">nextPulse.sender = </span><span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span>
-
-          <span class="k">for</span> <span class="nx">receiver</span> <span class="k">in</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">sendTo</span>
-            <span class="nv">weaklyHeld = </span><span class="nx">weaklyHeld</span> <span class="o">and</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span>
-            <span class="k">if</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span>
+properties copied from the old one. The choice of constructor
+(<code>PulseClass</code>) for the <code>copy</code> operation is determined by the
+<code>_PulseClass</code> property of the receiving estream.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nv">PULSE = </span><span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">copy</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-20">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-20">&#182;</a>               </div>               <p>The next major step in the propagation cycle is the hand-off to the
+"inner propagation" method, <code>Pulse.prototype.PROPAGATE</code>. The return
+value, which is the result of transformations performed by the
+receiving estream, forms the basis of the succeeding steps in the
+cycle.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nv">nextPulse = </span><span class="nx">PULSE</span><span class="p">.</span><span class="nx">PROPAGATE</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">,</span> <span class="nx">high</span><span class="p">,</span> <span class="nx">more</span><span class="p">...</span></pre></div>             </td>           </tr>                               <tr id="section-21">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-21">&#182;</a>               </div>               <p>Certain estream transformers rely on logic whereby parent nodes in a
+propagation graph should be flagged as <code>weaklyHeld</code> if all their child
+nodes become so flagged. Using some combinatorial logic, we can detect
+such conditions without having to iterate an estream's <code>sendTo</code> array
+explicitly for this purpose. The variable <code>weaklyHeld</code> lets us do
+this.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nv">weaklyHeld = </span><span class="kc">true</span></pre></div>             </td>           </tr>                               <tr id="section-22">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-22">&#182;</a>               </div>               <p>If <code>PROPAGATE</code> returned the sentinel value <code>Jolt.doNotPropagate</code>, then
+popagation will not continue with members (if any) of the receiver's
+<code>sendTo</code> array property.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="k">if</span> <span class="nx">nextPulse</span> <span class="o">isnt</span> <span class="nx">doNotPropagate</span>
+          <span class="nv">nextPulse.sender = </span><span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span></pre></div>             </td>           </tr>                               <tr id="section-23">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-23">&#182;</a>               </div>               <p>If <code>PROPAGATE</code> returned a <code>Pulse</code> instance, then the next step
+involves pushing members of the receiver's <code>sendTo</code> array-property
+into the instance of <code>PriorityQueue</code> created at the beginning of the
+cycle.</p>             </td>             <td class="code">               <div class="highlight"><pre>          <span class="k">for</span> <span class="nx">receiver</span> <span class="k">in</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">sendTo</span></pre></div>             </td>           </tr>                               <tr id="section-24">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-24">&#182;</a>               </div>               <p>If any members of the receiver's child nodes are not flagged as
+<code>weaklyHeld</code> then we know to not flag the receiver, since the
+<code>weaklyHeld</code> variable will have been set to false.</p>             </td>             <td class="code">               <div class="highlight"><pre>            <span class="nv">weaklyHeld = </span><span class="nx">weaklyHeld</span> <span class="o">and</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span></pre></div>             </td>           </tr>                               <tr id="section-25">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-25">&#182;</a>               </div>               <p>If an estream is flagged as <code>weaklyHeld</code>, it's not added to the
+queue, and a "cleanup" operation is scheduled</p>             </td>             <td class="code">               <div class="highlight"><pre>            <span class="k">if</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">weaklyHeld</span>
               <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">,</span> <span class="nx">receiver</span>
-            <span class="k">else</span>
-              <span class="nx">queue</span><span class="p">.</span><span class="nx">push</span> <span class="nv">estream: </span><span class="nx">receiver</span><span class="p">,</span> <span class="nv">pulse: </span><span class="nx">nextPulse</span><span class="p">,</span> <span class="nv">rank: </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
-
-          <span class="k">if</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">length</span> <span class="o">and</span> <span class="nx">weaklyHeld</span>
+            <span class="k">else</span></pre></div>             </td>           </tr>                               <tr id="section-26">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-26">&#182;</a>               </div>               <p>Each child receiver is paired with <code>nextPulse</code>, though note that
+<code>Pulse</code> instance has been modified so that its <code>sender</code> value
+references the parent node which transformed the original
+<code>Pulse</code> instance.</p>             </td>             <td class="code">               <div class="highlight"><pre>              <span class="nx">queue</span><span class="p">.</span><span class="nx">push</span> <span class="nv">estream: </span><span class="nx">receiver</span><span class="p">,</span> <span class="nv">pulse: </span><span class="nx">nextPulse</span><span class="p">,</span> <span class="nv">rank: </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span></pre></div>             </td>           </tr>                               <tr id="section-27">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-27">&#182;</a>               </div>               <p>If the original receiver had been flagged as <code>weaklyHeld</code> the
+<code>propagate</code> logic would not have proceeded this far. Since it did,
+we should only consider the <code>weaklyHeld</code> variable's having a true
+value to indicate the original receiver should be so flagged if it
+has a non-empty <code>sendTo</code> array property, i.e. it has child nodes
+that were all flagged as <code>weaklyHeld</code>. If it does end up flagged,
+then a "cleanup" op is scheduled for it.</p>             </td>             <td class="code">               <div class="highlight"><pre>          <span class="k">if</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">length</span> <span class="o">and</span> <span class="nx">weaklyHeld</span>
             <span class="nv">qv.estream.weaklyHeld = </span><span class="kc">true</span>
-            <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span>
-
-      <span class="nx">setPropagating</span> <span class="kc">false</span>
+            <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="nx">qv</span><span class="p">.</span><span class="nx">estream</span></pre></div>             </td>           </tr>                               <tr id="section-28">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-28">&#182;</a>               </div>               <p>The propagation cycle is ended by setting the <code>propagate</code> flag to false
+and returning the instance of <code>HeapStore</code></p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nx">setPropagating</span> <span class="kc">false</span>
       <span class="nx">PULSE</span><span class="p">.</span><span class="nx">heap</span>
 
     <span class="k">else</span>
@@ -165,16 +183,21 @@ the receiving estream.</p>             </td>             <td class="code">      
       <span class="nx">@heap</span>
 
 
-  <span class="nv">PROPAGATE: </span><span class="nf">(sender, receiver, high, more...) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-15">&#182;</a>               </div>               <p>in non-catching scenarios (i.e. <em>PulseClass isnt Pulse</em>cat) in
-catching/finally branches, if this step results in an error being thrown
-then isPropagating will be "stuck true", so it's important that estreams
-attached to CATCH<em>E and FINALLY</em>E bet set to use Pulse_cat</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">PULSE = </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">UPDATER</span> <span class="k">this</span>
-
-    <span class="k">if</span> <span class="nx">PULSE</span> <span class="o">isnt</span> <span class="nx">doNotPropagate</span> <span class="o">and</span> <span class="o">not</span> <span class="p">(</span><span class="nx">isP</span> <span class="nx">PULSE</span><span class="p">)</span>
+  <span class="nv">PROPAGATE: </span><span class="nf">(sender, receiver, high, more...) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-29">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-29">&#182;</a>               </div>               <p>The "inner propagation" method, <code>Pulse.prototype.PROPAGATE</code>, invokes the
+"transformation" steps (for each receiving estream) of the propagation
+cycle -- the <code>Pulse</code> instance is passed to the receiving estream's "outer
+updater" method, <code>EventStream.prototype.UPDATER</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">PULSE = </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">UPDATER</span> <span class="k">this</span></pre></div>             </td>           </tr>                               <tr id="section-30">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-30">&#182;</a>               </div>               <p>The value returned by <code>UPDATER</code> should be either an instance of <code>Pulse</code> or
+the sentinel value <code>Jolt.doNotPropagate</code>. If that's not the case, an error
+is thrown. Otherwise, the transformed <code>Pulse</code> instance is returned into
+the continued logic of <code>Pulse.prototype.propagate</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">if</span> <span class="nx">PULSE</span> <span class="o">isnt</span> <span class="nx">doNotPropagate</span> <span class="o">and</span> <span class="o">not</span> <span class="p">(</span><span class="nx">isP</span> <span class="nx">PULSE</span><span class="p">)</span>
       <span class="nx">setPropagating</span> <span class="kc">false</span>
       <span class="k">throw</span> <span class="s">&#39;receiver\&#39;s UPDATER did not return a pulse object&#39;</span>
     <span class="k">else</span>
-      <span class="nx">PULSE</span>
+      <span class="nx">PULSE</span></pre></div>             </td>           </tr>                               <tr id="section-31">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-31">&#182;</a>               </div>               <p>(NOTE: In non-catching scenarios in catching/finally branches (see the
+implementation of <code>Pulse_cat</code>), if this step results in an error being
+thrown then <code>propagating</code> will be "stuck true", so it's important that
+estreams attached to <code>Jolt.CATCH_E</code> and <code>Jolt.FINALLY_E</code> bet set to use
+Pulse_cat.)</p>             </td>             <td class="code">               <div class="highlight"><pre> 
  
  
  
@@ -193,8 +216,7 @@ attached to CATCH<em>E and FINALLY</em>E bet set to use Pulse_cat</p>           
  
  
  
- 
- </pre></div>             </td>           </tr>                               <tr id="section-16">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-16">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
+ </pre></div>             </td>           </tr>                               <tr id="section-32">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-32">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
 
 <p>Jolt - Reactive Objects for JavaScript</p>
 

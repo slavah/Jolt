@@ -179,45 +179,119 @@ Jolt.Pulse = class Pulse
     PulseClass ?= @constructor
     new PulseClass @arity, @junction, @sender, @stamp, (@value.slice 0), @heap
 
+  # The invocation of `Pulse.prototype.propagate` is the first step in an event
+  # propagation cycle. Though `sender` could be extracted from a well-formed
+  # `Pulse` instance, having it as a named argument lends clarity, particularly
+  # in more "advanced" dertivates of the `Pulse` class. The arguments splat
+  # `more...` also facilitates derivate implementations which need additional
+  # control flags.
+
   propagate: (sender, receiver, high, more...) ->
+
+    # If an estream is flagged as `weaklyHeld` then propagation will halt
+    # immediately and a cleanup op gets scheduled (in the corresponding `else`
+    # clause near the bottom of the script). Tasks which remain queued in
+    # `Jolt.beforeQ` (e.g. graph modifications) need to be drained and executed
+    # before propagation can proceed, though this step is skipped if the `high`
+    # argument is true.
 
     if not receiver.weaklyHeld
       if beforeQ.length and not high then (beforeQ.shift())() while beforeQ.length
+
+      # Having flipped the `propagating` flag (described above) to true, the
+      # next step is to make an instance of `Jolt.PriorityQueue` and populate
+      # it with the initial receiver. Queue members are hashes with keys
+      # `estream`, `pulse`, and `rank`.
 
       setPropagating true
       queue = new PriorityQueue
       queue.push estream: receiver, pulse: this, rank: receiver.rank
 
+      # The bulk of the work done by `propagate` takes the form a while loop
+      # which alternately drains and populates the queue with the estream nodes
+      # that make up the event propagation graph.
+
       while queue.size()
         qv = queue.pop()
+
+        # For each step of the propagation cycle, the `sender` and `receiver`
+        # are recorded as a tuple in the instance of `Jolt.HeapStore`.
 
         qv.pulse.heap.nodes.push [qv.pulse.sender, qv.estream]
 
         # To avoid unwanted side effects during event propagation, each receiving
         # estream is passed a new instance of `Pulse` (or a subclass) with the
-        # properties copied from the old one. The choice of `<PulseClass>` for
-        # the `copy` operation is determined by the `_PulseClass` property of
-        # the receiving estream.
+        # properties copied from the old one. The choice of constructor
+        # (`PulseClass`) for the `copy` operation is determined by the
+        # `_PulseClass` property of the receiving estream.
 
         PULSE = qv.pulse.copy qv.estream.PulseClass()
 
+        # The next major step in the propagation cycle is the hand-off to the
+        # "inner propagation" method, `Pulse.prototype.PROPAGATE`. The return
+        # value, which is the result of transformations performed by the
+        # receiving estream, forms the basis of the succeeding steps in the
+        # cycle.
+
         nextPulse = PULSE.PROPAGATE PULSE.sender, qv.estream, high, more...
 
+        # Certain estream transformers rely on logic whereby parent nodes in a
+        # propagation graph should be flagged as `weaklyHeld` if all their child
+        # nodes become so flagged. Using some combinatorial logic, we can detect
+        # such conditions without having to iterate an estream's `sendTo` array
+        # explicitly for this purpose. The variable `weaklyHeld` lets us do
+        # this.
+
         weaklyHeld = true
+
+        # If `PROPAGATE` returned the sentinel value `Jolt.doNotPropagate`, then
+        # popagation will not continue with members (if any) of the receiver's
+        # `sendTo` array property.
 
         if nextPulse isnt doNotPropagate
           nextPulse.sender = qv.estream
 
+          # If `PROPAGATE` returned a `Pulse` instance, then the next step
+          # involves pushing members of the receiver's `sendTo` array-property
+          # into the instance of `PriorityQueue` created at the beginning of the
+          # cycle.
+
           for receiver in qv.estream.sendTo
+
+            # If any members of the receiver's child nodes are not flagged as
+            # `weaklyHeld` then we know to not flag the receiver, since the
+            # `weaklyHeld` variable will have been set to false.
+
             weaklyHeld = weaklyHeld and receiver.weaklyHeld
+
+            # If an estream is flagged as `weaklyHeld`, it's not added to the
+            # queue, and a "cleanup" operation is scheduled
+
             if receiver.weaklyHeld
               scheduleCleanup cleanupQ, qv.estream, receiver
             else
+
+              # Each child receiver is paired with `nextPulse`, though note that
+              # `Pulse` instance has been modified so that its `sender` value
+              # references the parent node which transformed the original
+              # `Pulse` instance.
+
               queue.push estream: receiver, pulse: nextPulse, rank: receiver.rank
+
+          # If the original receiver had been flagged as `weaklyHeld` the
+          # `propagate` logic would not have proceeded this far. Since it did,
+          # we should only consider the `weaklyHeld` variable's having a true
+          # value to indicate the original receiver should be so flagged if it
+          # has a non-empty `sendTo` array property, i.e. it has child nodes
+          # that were all flagged as `weaklyHeld`. If it does end up flagged,
+          # then a "cleanup" op is scheduled for it.
 
           if qv.estream.sendTo.length and weaklyHeld
             qv.estream.weaklyHeld = true
             scheduleCleanup cleanupQ, qv.pulse.sender, qv.estream
+
+      # The propagation cycle is ended by setting the `propagate` flag to false
+      # and returning the instance of `HeapStore`
 
       setPropagating false
       PULSE.heap
@@ -229,18 +303,29 @@ Jolt.Pulse = class Pulse
 
   PROPAGATE: (sender, receiver, high, more...) ->
 
-    # in non-catching scenarios (i.e. _PulseClass isnt Pulse_cat) in
-    # catching/finally branches, if this step results in an error being thrown
-    # then isPropagating will be "stuck true", so it's important that estreams
-    # attached to CATCH_E and FINALLY_E bet set to use Pulse_cat
+    # The "inner propagation" method, `Pulse.prototype.PROPAGATE`, invokes the
+    # "transformation" steps (for each receiving estream) of the propagation
+    # cycle -- the `Pulse` instance is passed to the receiving estream's "outer
+    # updater" method, `EventStream.prototype.UPDATER`.
 
     PULSE = receiver.UPDATER this
+
+    # The value returned by `UPDATER` should be either an instance of `Pulse` or
+    # the sentinel value `Jolt.doNotPropagate`. If that's not the case, an error
+    # is thrown. Otherwise, the transformed `Pulse` instance is returned into
+    # the continued logic of `Pulse.prototype.propagate`.
 
     if PULSE isnt doNotPropagate and not (isP PULSE)
       setPropagating false
       throw 'receiver\'s UPDATER did not return a pulse object'
     else
       PULSE
+
+    # (NOTE: In non-catching scenarios in catching/finally branches (see the
+    # implementation of `Pulse_cat`), if this step results in an error being
+    # thrown then `propagating` will be "stuck true", so it's important that
+    # estreams attached to `Jolt.CATCH_E` and `Jolt.FINALLY_E` bet set to use
+    # Pulse_cat.)
  
  
  
