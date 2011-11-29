@@ -133,14 +133,14 @@ Jolt.HeapStore = class HeapStore
   constructor: (@stamp, @cont) ->
     @nodes = []
 
-# Some `EventStream` transformers involve asynchronous event propagation,
-# referred to as a "continuation". This results in disjointed propagation graphs
-# since behind the scenes it involves at least two separate calls to
-# `Jolt.sendEvent`. However, the constructor for Jolt's `Pulse` class allows an
-# instance of `Jolt.ContInfo` ("continuation information") to be passed into the
-# instance of `Jolt.HeapStore` which is constructed and stored in the returned
-# instance of `Pulse` (or a subclass). The `ContInfo` instance tracks which
-# heap/s (referenced by `stamp`) and estream/s were the origin of the continued
+# Some `EventStream` transformers involve asynchronous *continuations* of event
+# propagation. This results in disjointed propagation graphs since behind the
+# scenes it involves at least two separate calls to `Jolt.sendEvent`. However,
+# the constructor for Jolt's `Pulse` class allows an instance of `Jolt.ContInfo`
+# ("continuation information") to be passed into the instance of
+# `Jolt.HeapStore` which is constructed and stored in the returned instance of
+# `Pulse` (or a subclass). The `ContInfo` instance tracks which heap/s
+# (referenced by `stamp`) and estream/s were the origin of the continued
 # propagation. The recorded information does not directly affect the program's
 # operation, but is useful for runtime analysis.
 

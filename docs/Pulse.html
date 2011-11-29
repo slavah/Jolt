@@ -89,14 +89,14 @@ propagation graph is governed by a binary heap algorithm. As an event
 propagates through the graph, each step is recorded along the way in an
 instance of <code>HeapStore</code>.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.HeapStore = </span><span class="k">class</span> <span class="nx">HeapStore</span>
   <span class="nv">constructor: </span><span class="nf">(@stamp, @cont) -&gt;</span>
-    <span class="vi">@nodes = </span><span class="p">[]</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <p>Some <code>EventStream</code> transformers involve asynchronous event propagation,
-referred to as a "continuation". This results in disjointed propagation graphs
-since behind the scenes it involves at least two separate calls to
-<code>Jolt.sendEvent</code>. However, the constructor for Jolt's <code>Pulse</code> class allows an
-instance of <code>Jolt.ContInfo</code> ("continuation information") to be passed into the
-instance of <code>Jolt.HeapStore</code> which is constructed and stored in the returned
-instance of <code>Pulse</code> (or a subclass). The <code>ContInfo</code> instance tracks which
-heap/s (referenced by <code>stamp</code>) and estream/s were the origin of the continued
+    <span class="vi">@nodes = </span><span class="p">[]</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <p>Some <code>EventStream</code> transformers involve asynchronous <em>continuations</em> of event
+propagation. This results in disjointed propagation graphs since behind the
+scenes it involves at least two separate calls to <code>Jolt.sendEvent</code>. However,
+the constructor for Jolt's <code>Pulse</code> class allows an instance of <code>Jolt.ContInfo</code>
+("continuation information") to be passed into the instance of
+<code>Jolt.HeapStore</code> which is constructed and stored in the returned instance of
+<code>Pulse</code> (or a subclass). The <code>ContInfo</code> instance tracks which heap/s
+(referenced by <code>stamp</code>) and estream/s were the origin of the continued
 propagation. The recorded information does not directly affect the program's
 operation, but is useful for runtime analysis.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.ContInfo = </span><span class="k">class</span> <span class="nx">ContInfo</span>
   <span class="nv">constructor: </span><span class="nf">(@stamps, @nodes) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-11">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-11">&#182;</a>               </div>               <p>Propagation is mediated by instances of <code>Jolt.Pulse</code>, and <code>Jolt.isP</code> helps
