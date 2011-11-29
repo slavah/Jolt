@@ -1992,16 +1992,17 @@
   Jolt.EventStream = EventStream = (function() {
   
     function EventStream() {
-      var recvFrom;
-      var _this = this;
+      var estream, recvFrom, _i, _len, _ref;
       recvFrom = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       this.rank = nextRank();
       this.absRank = this.rank;
       this.sendTo = [];
       if (recvFrom.length) {
-        _(_.flatten(__slice.call(recvFrom))).map(function(estream) {
-          return estream.attachListener(_this);
-        });
+        _ref = _.flatten(__slice.call(recvFrom));
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          estream = _ref[_i];
+          estream.attachListener(this);
+        }
       }
     }
   
@@ -2200,30 +2201,32 @@
     };
   
     EventStream.prototype.seq_junc_helper = function(pulse) {
-      var ret, thisClass;
-      thisClass = this;
+      var jp, ret, _i, _len, _ref;
       ret = [];
-      _(pulse.value).each(function(jp) {
+      _ref = pulse.value;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        jp = _ref[_i];
         if (jp.junction) {
-          return ret = ret.concat(thisClass.seq_junc_helper(jp));
+          ret = ret.concat(this.seq_junc_helper(jp));
         } else {
-          return ret = ret.concat(jp.value);
+          ret = ret.concat(jp.value);
         }
-      });
+      }
       return ret;
     };
   
     EventStream.prototype.vec_junc_helper = function(pulse) {
-      var ret, thisClass;
-      thisClass = this;
+      var jp, ret, _i, _len, _ref;
       ret = [];
-      _(pulse.value).each(function(jp) {
+      _ref = pulse.value;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        jp = _ref[_i];
         if (jp.junction) {
-          return ret = ret.concat(thisClass.vec_junc_helper(jp));
+          ret = ret.concat(this.vec_junc_helper(jp));
         } else {
-          return ret.push(jp.value);
+          ret.push(jp.value);
         }
-      });
+      }
       return ret;
     };
   

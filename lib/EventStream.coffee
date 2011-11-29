@@ -16,8 +16,7 @@ Jolt.EventStream = class EventStream
     @sendTo = []
 
     if recvFrom.length
-      _( _.flatten [ recvFrom... ] ).map (estream) =>
-        estream.attachListener this
+      (estream.attachListener this) for estream in (_.flatten [ recvFrom... ])
 
   attachListener: (receiver) ->
     if not isE receiver
@@ -145,25 +144,21 @@ Jolt.EventStream = class EventStream
     this
 
   seq_junc_helper: (pulse) ->
-    thisClass = this
     ret = []
-    _( pulse.value )
-    .each((jp) ->
+    for jp in pulse.value
       if jp.junction
-        ret = ret.concat (thisClass.seq_junc_helper jp)
+        ret = ret.concat (@seq_junc_helper jp)
       else
-        ret = ret.concat jp.value)
+        ret = ret.concat jp.value
     ret
 
   vec_junc_helper: (pulse) ->
-    thisClass = this
     ret = []
-    _( pulse.value )
-    .each((jp) ->
+    for jp in pulse.value
       if jp.junction
-        ret = ret.concat (thisClass.vec_junc_helper jp)
+        ret = ret.concat (@vec_junc_helper jp)
       else
-        ret.push jp.value)
+        ret.push jp.value
     ret
 
   zip_junc_helper: (pulse) ->
