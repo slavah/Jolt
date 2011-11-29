@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var BinaryHeap, ContInfo, EventStream, HeapStore, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, genericAttachListener, genericRemoveListener, genericRemoveWeakReference, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, _say, _say_helper;
+  var Behavior, BinaryHeap, ContInfo, EventStream, HeapStore, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, isB, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -1986,70 +1986,7 @@
   };
   
   Jolt.isE = isE = function(estream) {
-    return estream instanceof EventStream;
-  };
-  
-  genericAttachListener = function(sender, receiver) {
-    var cur, doNextRank, estream, i, q, sentinel, _i, _len, _results;
-    if (!isPropagating()) {
-      if (sender.rank === receiver.rank) {
-        throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph';
-      }
-      i = _.indexOf(sender.sendTo, receiver);
-      if (!(i + 1)) {
-        sender.sendTo.push(receiver);
-        if (sender.rank > receiver.rank) {
-          doNextRank = [];
-          sentinel = {};
-          sender.__cycleSentinel__ = sentinel;
-          q = [receiver];
-          while (q.length) {
-            cur = q.shift();
-            if (cur.__cycleSentinel__ === sentinel) {
-              sender.sendTo.pop();
-              throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph';
-            }
-            doNextRank.push(cur);
-            cur.__cycleSentinel__ = sentinel;
-            q.push.apply(q, cur.sendTo);
-          }
-          _results = [];
-          for (_i = 0, _len = doNextRank.length; _i < _len; _i++) {
-            estream = doNextRank[_i];
-            _results.push(estream.rank = nextRank());
-          }
-          return _results;
-        }
-      }
-    } else {
-      return scheduleBefore(beforeQ, genericAttachListener, sender, receiver);
-    }
-  };
-  
-  genericRemoveListener = function(sender, receiver) {
-    var i;
-    if (!isPropagating()) {
-      i = _.indexOf(sender.sendTo, receiver);
-      if (i + 1) return sender.sendTo.splice(i, 1);
-    } else {
-      return scheduleBefore(beforeQ, genericRemoveListener, sender, receiver);
-    }
-  };
-  
-  genericRemoveWeakReference = function(sender, weakReference) {
-    var i;
-    weakReference.cleanupScheduled = false;
-    if (!weakReference.cleanupCanceled) {
-      if (!isPropagating()) {
-        i = _.indexOf(sender.sendTo, weakReference);
-        if (i + 1) sender.sendTo.splice(i, 1);
-        if (!sender.sendTo.length) return sender.weaklyHeld = true;
-      } else {
-        return scheduleCleanup(cleanupQ, sender, weakReference);
-      }
-    } else {
-      return weakReference.cleanupCanceled = null;
-    }
+    return (estream instanceof EventStream) && !(isB(estream));
   };
   
   Jolt.EventStream = EventStream = (function() {
@@ -2072,7 +2009,7 @@
       if (!isE(receiver)) {
         throw '<' + this.ClassName + '>.attachListener: expected an EventStream';
       }
-      genericAttachListener(this, receiver);
+      this.constructor.genericAttachListener(this, receiver);
       return this;
     };
   
@@ -2080,7 +2017,7 @@
       if (!isE(receiver)) {
         throw '<' + this.ClassName + '>.removeListener: expected an EventStream';
       }
-      genericRemoveListener(this, receiver);
+      this.constructor.genericRemoveListener(this, receiver);
       return this;
     };
   
@@ -2088,7 +2025,7 @@
       if (!isE(weakReference)) {
         throw '<' + this.ClassName + '>.removeWeakReference: expected an EventStream';
       }
-      genericRemoveWeakReference(this, weakReference);
+      this.constructor.genericRemoveWeakReference(this, weakReference);
       return this;
     };
   
@@ -2097,6 +2034,75 @@
     EventStream.prototype.cleanupCanceled = null;
   
     EventStream.prototype.cleanupScheduled = false;
+  
+    EventStream.genericAttachListener = function(sender, receiver) {
+      var cur, doNextRank, estream, i, q, sentinel, thisClass, _i, _len, _results;
+      if (!isPropagating()) {
+        if (sender.rank === receiver.rank) {
+          throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph';
+        }
+        i = _.indexOf(sender.sendTo, receiver);
+        if (!(i + 1)) {
+          sender.sendTo.push(receiver);
+          if (sender.rank > receiver.rank) {
+            doNextRank = [];
+            sentinel = {};
+            sender.__cycleSentinel__ = sentinel;
+            q = [receiver];
+            while (q.length) {
+              cur = q.shift();
+              if (cur.__cycleSentinel__ === sentinel) {
+                sender.sendTo.pop();
+                throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph';
+              }
+              doNextRank.push(cur);
+              cur.__cycleSentinel__ = sentinel;
+              q.push.apply(q, cur.sendTo);
+            }
+            _results = [];
+            for (_i = 0, _len = doNextRank.length; _i < _len; _i++) {
+              estream = doNextRank[_i];
+              _results.push(estream.rank = nextRank());
+            }
+            return _results;
+          }
+        }
+      } else {
+        thisClass = this;
+        return scheduleBefore(beforeQ, (function(sender, receiver) {
+          return thisClass.genericAttachListener(sender, receiver);
+        }), sender, receiver);
+      }
+    };
+  
+    EventStream.genericRemoveListener = function(sender, receiver) {
+      var i, thisClass;
+      if (!isPropagating()) {
+        i = _.indexOf(sender.sendTo, receiver);
+        if (i + 1) return sender.sendTo.splice(i, 1);
+      } else {
+        thisClass = this;
+        return scheduleBefore(beforeQ, (function(sender, receiver) {
+          return thisClass.genericRemoveListener(sender, receiver);
+        }), sender, receiver);
+      }
+    };
+  
+    EventStream.genericRemoveWeakReference = function(sender, weakReference) {
+      var i;
+      weakReference.cleanupScheduled = false;
+      if (!weakReference.cleanupCanceled) {
+        if (!isPropagating()) {
+          i = _.indexOf(sender.sendTo, weakReference);
+          if (i + 1) sender.sendTo.splice(i, 1);
+          if (!sender.sendTo.length) return sender.weaklyHeld = true;
+        } else {
+          return scheduleCleanup(cleanupQ, sender, weakReference);
+        }
+      } else {
+        return weakReference.cleanupCanceled = null;
+      }
+    };
   
     EventStream.prototype._mode = null;
   
@@ -2351,6 +2357,22 @@
     pulse = new PulseClass(vals.length, false, sendCall, nextStamp(), vals, heap, cont);
     pulse.propagate(sendCall, estream, high);
     return;
+  };
+  
+  Jolt.Behavior = Behavior = (function() {
+  
+    __extends(Behavior, EventStream);
+  
+    function Behavior() {
+      Behavior.__super__.constructor.apply(this, arguments);
+    }
+  
+    return Behavior;
+  
+  })();
+  
+  Jolt.isB = isB = function(behavior) {
+    return behavior instanceof Behavior;
   };
   
   exporter = function(ns, target) {

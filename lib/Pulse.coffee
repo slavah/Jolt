@@ -135,12 +135,12 @@ Jolt.HeapStore = class HeapStore
 
 # Some `EventStream` transformers involve asynchronous event propagation,
 # referred to as a "continuation". This results in disjointed propagation graphs
-# since behind the scenes it involves two separate calls to `Jolt.sendEvent`.
-# However, the constructor for Jolt's `Pulse` class allows an instance of
-# `Jolt.ContInfo` ("continuation information") to be passed into the instance of
-# `Jolt.HeapStore` which is constructed and stored in the returned instance of
-# `Pulse` (or a subclass). The `ContInfo` instance tracks which heap/s
-# (referenced by `stamp`) and estream/s were the origin of the continued
+# since behind the scenes it involves at least two separate calls to
+# `Jolt.sendEvent`. However, the constructor for Jolt's `Pulse` class allows an
+# instance of `Jolt.ContInfo` ("continuation information") to be passed into the
+# instance of `Jolt.HeapStore` which is constructed and stored in the returned
+# instance of `Pulse` (or a subclass). The `ContInfo` instance tracks which
+# heap/s (referenced by `stamp`) and estream/s were the origin of the continued
 # propagation. The recorded information does not directly affect the program's
 # operation, but is useful for runtime analysis.
 
@@ -322,10 +322,10 @@ Jolt.Pulse = class Pulse
       PULSE
 
     # (NOTE: In non-catching scenarios in catching/finally branches (see the
-    # implementation of `Pulse_cat`), if this step results in an error being
-    # thrown then `propagating` will be "stuck true", so it's important that
-    # estreams attached to `Jolt.CATCH_E` and `Jolt.FINALLY_E` bet set to use
-    # Pulse_cat.)
+    # implementation of [Pulse_cat.coffee](Pulse_cat.html)), if this step
+    # results in an error being thrown then `propagating` will be "stuck true",
+    # so it's important that estreams attached to `Jolt.CATCH_E` and
+    # `Jolt.FINALLY_E` have their `_PulseClass` properties set to `Pulse_cat`.)
  
  
  

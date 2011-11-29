@@ -3,53 +3,7 @@ nextRank = -> ++lastRank
 
 
 Jolt.isE = isE = (estream) ->
-  estream instanceof EventStream
-
-
-genericAttachListener = (sender, receiver) ->
-  if not isPropagating()
-    if sender.rank is receiver.rank
-      throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph'
-    i = _.indexOf sender.sendTo, receiver
-    if not (i + 1)
-      sender.sendTo.push receiver
-      if sender.rank > receiver.rank
-        doNextRank = []
-        sentinel = {}
-        sender.__cycleSentinel__ = sentinel
-        q = [ receiver ]
-        while q.length
-          cur = q.shift()
-          if cur.__cycleSentinel__ is sentinel
-            sender.sendTo.pop()
-            throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph'
-          doNextRank.push cur
-          cur.__cycleSentinel__ = sentinel
-          q.push cur.sendTo...
-        (estream.rank = nextRank()) for estream in doNextRank
-  else
-    scheduleBefore beforeQ, genericAttachListener, sender, receiver
-
-
-genericRemoveListener = (sender, receiver) ->
-  if not isPropagating()
-    i = _.indexOf sender.sendTo, receiver
-    if (i + 1) then sender.sendTo.splice i, 1
-  else
-    scheduleBefore beforeQ, genericRemoveListener, sender, receiver
-
-
-genericRemoveWeakReference = (sender, weakReference) ->
-  weakReference.cleanupScheduled = false
-  if not weakReference.cleanupCanceled
-    if not isPropagating()
-      i = _.indexOf sender.sendTo, weakReference
-      if (i + 1) then sender.sendTo.splice i, 1
-      if not sender.sendTo.length then sender.weaklyHeld = true
-    else
-      scheduleCleanup cleanupQ, sender, weakReference
-  else
-    weakReference.cleanupCanceled = null
+  (estream instanceof EventStream) and not (isB estream)
 
 
 Jolt.EventStream = class EventStream
@@ -65,24 +19,22 @@ Jolt.EventStream = class EventStream
       _( _.flatten [ recvFrom... ] ).map (estream) =>
         estream.attachListener this
 
-  # --- #
-
   attachListener: (receiver) ->
     if not isE receiver
       throw '<' + @ClassName + '>.attachListener: expected an EventStream'
-    genericAttachListener this, receiver
+    @constructor.genericAttachListener this, receiver
     this
 
   removeListener: (receiver) ->
     if not isE receiver
       throw '<' + @ClassName + '>.removeListener: expected an EventStream'
-    genericRemoveListener this, receiver
+    @constructor.genericRemoveListener this, receiver
     this
 
   removeWeakReference: (weakReference) ->
     if not isE weakReference
       throw '<' + @ClassName + '>.removeWeakReference: expected an EventStream'
-    genericRemoveWeakReference this, weakReference
+    @constructor.genericRemoveWeakReference this, weakReference
     this
 
   ClassName: 'EventStream'
@@ -90,6 +42,51 @@ Jolt.EventStream = class EventStream
   cleanupCanceled: null
 
   cleanupScheduled: false
+
+  @genericAttachListener = (sender, receiver) ->
+    if not isPropagating()
+      if sender.rank is receiver.rank
+        throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph'
+      i = _.indexOf sender.sendTo, receiver
+      if not (i + 1)
+        sender.sendTo.push receiver
+        if sender.rank > receiver.rank
+          doNextRank = []
+          sentinel = {}
+          sender.__cycleSentinel__ = sentinel
+          q = [ receiver ]
+          while q.length
+            cur = q.shift()
+            if cur.__cycleSentinel__ is sentinel
+              sender.sendTo.pop()
+              throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph'
+            doNextRank.push cur
+            cur.__cycleSentinel__ = sentinel
+            q.push cur.sendTo...
+          (estream.rank = nextRank()) for estream in doNextRank
+    else
+      thisClass = this
+      scheduleBefore beforeQ, ((sender, receiver) -> thisClass.genericAttachListener sender, receiver), sender, receiver
+
+  @genericRemoveListener = (sender, receiver) ->
+    if not isPropagating()
+      i = _.indexOf sender.sendTo, receiver
+      if (i + 1) then sender.sendTo.splice i, 1
+    else
+      thisClass = this
+      scheduleBefore beforeQ, ((sender, receiver) -> thisClass.genericRemoveListener sender, receiver), sender, receiver
+
+  @genericRemoveWeakReference = (sender, weakReference) ->
+    weakReference.cleanupScheduled = false
+    if not weakReference.cleanupCanceled
+      if not isPropagating()
+        i = _.indexOf sender.sendTo, weakReference
+        if (i + 1) then sender.sendTo.splice i, 1
+        if not sender.sendTo.length then sender.weaklyHeld = true
+      else
+        scheduleCleanup cleanupQ, sender, weakReference
+    else
+      weakReference.cleanupCanceled = null
 
   _mode: null
   mode: (mode) ->
@@ -246,7 +243,6 @@ Jolt.EventStream = class EventStream
 
   weaklyHeld: false
 
-# --- #
 
 Jolt.sendEvent = sendEvent = (estream, vals...) ->
   cont = undefined
@@ -267,6 +263,17 @@ Jolt.sendEvent = sendEvent = (estream, vals...) ->
   pulse = new PulseClass vals.length, false, sendCall, nextStamp(), vals, heap, cont
   pulse.propagate sendCall, estream, high
   undefined
+
+
+# `Jolt.Behavior` is stubbed in here, though the working re/definition is given
+# in [Behavior.cofee](Behavior.html)
+Jolt.Behavior = class Behavior extends EventStream
+
+
+# For `Jolt.isE` to operate prior to the working definition of `Jolt.Behavior`,
+# `Jolt.isB` needs its own working definition.
+Jolt.isB = isB = (behavior) ->
+  behavior instanceof Behavior
  
  
  
