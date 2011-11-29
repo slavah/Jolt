@@ -2256,7 +2256,7 @@
           if (pulse.junction) {
             pulse.value = this.zip_junc_helper(pulse);
           } else {
-            pulse.value = _(pulse.value).zip();
+            pulse.value = _.zip(pulse.value);
             return pulse;
           }
           break;
@@ -2276,19 +2276,21 @@
     };
   
     EventStream.prototype.tranOUT = function(pulse) {
-      var ret;
+      var ret, value, _i, _len, _ref;
       if ((pulse !== doNotPropagate) && this.isNary()) {
         ret = [];
-        _(pulse.value).each(function(val) {
-          return ret = ret.concat(val);
-        });
+        _ref = pulse.value;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          value = _ref[_i];
+          ret = ret.concat(value);
+        }
         pulse.value = ret;
       }
       return pulse;
     };
   
     EventStream.prototype.tranVAL = function(pulse) {
-      var ret, thisClass;
+      var iret, ret, thisClass, value, _i, _len, _ref;
       switch (this.mode()) {
         case null:
         case 'sequenced':
@@ -2303,11 +2305,12 @@
         case 'zipped':
           thisClass = this;
           ret = [];
-          _(pulse.value).each(function(value) {
-            var iret;
-            iret = thisClass.updater.apply(thisClass, value);
-            if (iret !== doNotPropagate) return ret.push(iret);
-          });
+          _ref = pulse.value;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            value = _ref[_i];
+            iret = this.updater.apply(this, value);
+            if (iret !== doNotPropagate) ret.push(iret);
+          }
           if (ret.length === 0) {
             pulse = doNotPropagate;
           } else {
