@@ -2,11 +2,13 @@
 
   <span class="nv">ClassName: </span><span class="s">&#39;ConcatE&#39;</span>
 
-  <span class="vi">@factory: </span><span class="nf">(args...) -&gt;</span>
-    <span class="k">new</span> <span class="k">this</span> <span class="nx">args</span><span class="p">...</span>
+  <span class="nv">no_null_junc: </span><span class="kc">true</span>
 
   <span class="nv">updater: </span><span class="nf">(value...) -&gt;</span>
-    <span class="p">[].</span><span class="nx">concat</span> <span class="nx">value</span><span class="p">...</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.concatE = concatE = </span><span class="nf">(args...) -&gt;</span>
+    <span class="p">[].</span><span class="nx">concat</span> <span class="nx">value</span><span class="p">...</span>
+
+
+<span class="nv">Jolt.concatE = concatE = </span><span class="nf">(args...) -&gt;</span>
   <span class="nx">ConcatE</span><span class="p">.</span><span class="nx">factory</span> <span class="nx">args</span><span class="p">...</span>
 
 <span class="nv">EventStream_api::concatE = </span><span class="nf">(args...) -&gt;</span>
@@ -30,7 +32,7 @@
  
  
  
- </pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
+ </pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
 
 <p>Jolt - Reactive Objects for JavaScript</p>
 
