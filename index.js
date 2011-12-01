@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var Behavior, BinaryHeap, ContInfo, EventStream, HeapStore, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, isB, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, _say, _say_helper;
+  var Behavior, BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isB, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -2188,6 +2188,19 @@
       return this;
     };
   
+    EventStream.prototype._reduce = false;
+  
+    EventStream.prototype.reduce = function() {
+      this._reduce = true;
+      return this;
+    };
+  
+    EventStream.prototype.doesReduce = function(bool) {
+      if (!arguments.length) return this._reduce;
+      this._reduce = Boolean(bool);
+      return this;
+    };
+  
     EventStream.prototype.no_null_junc = false;
   
     EventStream.prototype._PulseClass = Pulse;
@@ -2384,6 +2397,54 @@
   
   Jolt.isB = isB = function(behavior) {
     return behavior instanceof Behavior;
+  };
+  
+  Jolt.EventStream_api = EventStream_api = (function() {
+  
+    __extends(EventStream_api, EventStream);
+  
+    function EventStream_api() {
+      EventStream_api.__super__.constructor.apply(this, arguments);
+    }
+  
+    return EventStream_api;
+  
+  })();
+  
+  Jolt.InternalE = InternalE = (function() {
+  
+    __extends(InternalE, EventStream_api);
+  
+    function InternalE() {
+      InternalE.__super__.constructor.apply(this, arguments);
+    }
+  
+    InternalE.prototype.ClassName = 'InternalE';
+  
+    InternalE.factory = function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (function(func, args, ctor) {
+        ctor.prototype = func.prototype;
+        var child = new ctor, result = func.apply(child, args);
+        return typeof result === "object" ? result : child;
+      })(this, args, function() {});
+    };
+  
+    return InternalE;
+  
+  })();
+  
+  Jolt.internalE = internalE = function() {
+    var args;
+    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return InternalE.factory.apply(InternalE, args);
+  };
+  
+  EventStream_api.prototype.internalE = function() {
+    var args;
+    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return internalE.apply(null, __slice.call(args).concat([this]));
   };
   
   exporter = function(ns, target) {

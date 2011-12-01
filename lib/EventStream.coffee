@@ -132,6 +132,15 @@ Jolt.EventStream = class EventStream
     @_nary = Boolean bool
     this
 
+  _reduce: false
+  reduce: ->
+    @_reduce = true
+    this
+  doesReduce: (bool) ->
+    if not arguments.length then return @_reduce
+    @_reduce = Boolean bool
+    this
+
   no_null_junc: false
 
   _PulseClass: Pulse
