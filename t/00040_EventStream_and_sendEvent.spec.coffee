@@ -547,44 +547,31 @@ describe 'Jolt.EventStream.prototype.removeWeakReference', ->
 
   it '''
     should remove an argument-EventStream from the method's EventStream's
-    'sendTo' array-property if the argument-EventStream is found in the array;
-    otherwise, it should not modify the 'sendTo' array
+    'sendTo' array-property if the argument-EventStream is found in the array,
+    and if the argument-EventStream's 'weaklyHeld' property is true; otherwise,
+    it should not modify the 'sendTo' array
   ''', ->
 
     myE = []
-    myE[i] = new EventStream for i in [0..2]
+    myE[i] = new EventStream for i in [0..3]
 
     myE[0].attachListener myE[1]
+    myE[0].attachListener myE[3]
+    myE[3].weaklyHeld = true
 
-    ( expect myE[0].sendTo ).toEqual [myE[1]]
+    ( expect myE[0].sendTo ).toEqual [myE[1], myE[3]]
 
     myE[0].removeWeakReference myE[2]
 
+    ( expect myE[0].sendTo ).toEqual [myE[1], myE[3]]
+
+    myE[0].removeWeakReference myE[1]
+
+    ( expect myE[0].sendTo ).toEqual [myE[1], myE[3]]
+
+    myE[0].removeWeakReference myE[3]
+
     ( expect myE[0].sendTo ).toEqual [myE[1]]
-
-    myE[0].removeWeakReference myE[1]
-
-    ( expect myE[0].sendTo ).toEqual []
-
-
-  it '''
-    should not remove an argument-EventStream from the method's EventStream's
-    'sendTo' array-property if the argument-EventStream's 'cleanupCanceled'
-    property is true; the EventStream-argument should subsequently have it's
-    'cleanupCanceled' property set to null
-  ''', ->
-
-    myE = []
-    myE[i] = new EventStream for i in [0..1]
-
-    myE[1].cleanupCanceled = true
-
-    myE[0].attachListener myE[1]
-
-    myE[0].removeWeakReference myE[1]
-
-    ( expect myE[0].sendTo[0]       ).toBe myE[1]
-    ( expect myE[1].cleanupCanceled ).toBe null
 
 
   it '''
@@ -600,6 +587,7 @@ describe 'Jolt.EventStream.prototype.removeWeakReference', ->
     ( expect myE[0].weaklyHeld ).toBe false
 
     myE[0].attachListener myE[1]
+    myE[1].weaklyHeld = true
 
     myE[0].removeWeakReference myE[1]
 
@@ -609,6 +597,9 @@ describe 'Jolt.EventStream.prototype.removeWeakReference', ->
 
     myE[0].attachListener myE[1]
     myE[0].attachListener myE[2]
+
+    myE[1].weaklyHeld = true
+    myE[2].weaklyHeld = true
 
     myE[0].removeWeakReference myE[1]
 
@@ -1373,8 +1364,8 @@ describe 'Jolt.sendEvent', ->
 
 
   it '''
-    should result in tasks being pushed onto Jolt.beforeQ if during propagation
-    an EventStream's 'attachListener', 'removeListener', or
+    should result in tasks being pushed onto Jolt.beforeQ or Jolt.cleanupQ if
+    during propagation an EventStream's 'attachListener', 'removeListener', or
     'removeWeakReference' method is called
   ''', ->
 
@@ -1397,6 +1388,8 @@ describe 'Jolt.sendEvent', ->
       j.attachListener myE_dummy[2]
       if i < 2 then j.attachListener myE[i + 1]
       i++
+
+    myE_dummy[2].weaklyHeld = true
 
     ( expect myE[0].sendTo ).toEqual [myE_dummy[1], myE_dummy[2], myE[1]]
     ( expect myE[1].sendTo ).toEqual [myE_dummy[1], myE_dummy[2], myE[2]]

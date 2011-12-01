@@ -2032,8 +2032,6 @@
   
     EventStream.prototype.ClassName = 'EventStream';
   
-    EventStream.prototype.cleanupCanceled = null;
-  
     EventStream.prototype.cleanupScheduled = false;
   
     EventStream.genericAttachListener = function(sender, receiver) {
@@ -2044,6 +2042,7 @@
         }
         i = _.indexOf(sender.sendTo, receiver);
         if (!(i + 1)) {
+          receiver.weaklyHeld = false;
           sender.sendTo.push(receiver);
           if (sender.rank > receiver.rank) {
             doNextRank = [];
@@ -2092,7 +2091,7 @@
     EventStream.genericRemoveWeakReference = function(sender, weakReference) {
       var i;
       weakReference.cleanupScheduled = false;
-      if (!weakReference.cleanupCanceled) {
+      if (weakReference.weaklyHeld) {
         if (!isPropagating()) {
           i = _.indexOf(sender.sendTo, weakReference);
           if (i + 1) sender.sendTo.splice(i, 1);
@@ -2100,8 +2099,6 @@
         } else {
           return scheduleCleanup(cleanupQ, sender, weakReference);
         }
-      } else {
-        return weakReference.cleanupCanceled = null;
       }
     };
   

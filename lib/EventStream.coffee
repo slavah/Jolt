@@ -38,8 +38,6 @@ Jolt.EventStream = class EventStream
 
   ClassName: 'EventStream'
 
-  cleanupCanceled: null
-
   cleanupScheduled: false
 
   @genericAttachListener = (sender, receiver) ->
@@ -48,6 +46,7 @@ Jolt.EventStream = class EventStream
         throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph'
       i = _.indexOf sender.sendTo, receiver
       if not (i + 1)
+        receiver.weaklyHeld = false
         sender.sendTo.push receiver
         if sender.rank > receiver.rank
           doNextRank = []
@@ -77,15 +76,13 @@ Jolt.EventStream = class EventStream
 
   @genericRemoveWeakReference = (sender, weakReference) ->
     weakReference.cleanupScheduled = false
-    if not weakReference.cleanupCanceled
+    if weakReference.weaklyHeld
       if not isPropagating()
         i = _.indexOf sender.sendTo, weakReference
         if (i + 1) then sender.sendTo.splice i, 1
         if not sender.sendTo.length then sender.weaklyHeld = true
       else
         scheduleCleanup cleanupQ, sender, weakReference
-    else
-      weakReference.cleanupCanceled = null
 
   _mode: null
   mode: (mode) ->
