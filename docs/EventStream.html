@@ -18,36 +18,39 @@
     <span class="k">if</span> <span class="nx">recvFrom</span><span class="p">.</span><span class="nx">length</span>
       <span class="p">(</span><span class="nx">estream</span><span class="p">.</span><span class="nx">attachListener</span> <span class="k">this</span><span class="p">)</span> <span class="k">for</span> <span class="nx">estream</span> <span class="k">in</span> <span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">flatten</span> <span class="p">[</span> <span class="nx">recvFrom</span><span class="p">...</span> <span class="p">])</span>
 
+  <span class="nv">expAnEstreamErr = </span><span class="s">&#39;expected an EventStream&#39;</span>
+
   <span class="nv">attachListener: </span><span class="nf">(receiver) -&gt;</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">receiver</span>
-      <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: expected an EventStream&#39;</span>
+      <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: &#39;</span> <span class="o">+</span> <span class="nx">expAnEstreamErr</span>
     <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericAttachListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
     <span class="k">this</span>
 
   <span class="nv">removeListener: </span><span class="nf">(receiver) -&gt;</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">receiver</span>
-      <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.removeListener: expected an EventStream&#39;</span>
+      <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.removeListener: &#39;</span> <span class="o">+</span> <span class="nx">expAnEstreamErr</span>
     <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericRemoveListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
     <span class="k">this</span>
 
   <span class="nv">removeWeakReference: </span><span class="nf">(weakReference) -&gt;</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">weakReference</span>
-      <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.removeWeakReference: expected an EventStream&#39;</span>
+      <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.removeWeakReference: &#39;</span> <span class="o">+</span> <span class="nx">expAnEstreamErr</span>
     <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericRemoveWeakReference</span> <span class="k">this</span><span class="p">,</span> <span class="nx">weakReference</span>
     <span class="k">this</span>
 
   <span class="nv">ClassName: </span><span class="s">&#39;EventStream&#39;</span>
 
-  <span class="nv">cleanupCanceled: </span><span class="kc">null</span>
-
   <span class="nv">cleanupScheduled: </span><span class="kc">false</span>
+
+  <span class="nv">cycleError = </span><span class="s">&#39;.genericAttachListener: cycle detected in propagation graph&#39;</span>
 
   <span class="vi">@genericAttachListener = </span><span class="nf">(sender, receiver) -&gt;</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span><span class="p">()</span>
       <span class="k">if</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">rank</span> <span class="o">is</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
-        <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: cycle detected in propagation graph&#39;</span>
+        <span class="k">throw</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="nx">cycleError</span>
       <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">receiver</span>
       <span class="k">if</span> <span class="o">not</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="nv">receiver.weaklyHeld = </span><span class="kc">false</span>
         <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">push</span> <span class="nx">receiver</span>
         <span class="k">if</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">rank</span> <span class="o">&gt;</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
           <span class="nv">doNextRank = </span><span class="p">[]</span>
@@ -58,7 +61,7 @@
             <span class="nv">cur = </span><span class="nx">q</span><span class="p">.</span><span class="nx">shift</span><span class="p">()</span>
             <span class="k">if</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">__cycleSentinel__</span> <span class="o">is</span> <span class="nx">sentinel</span>
               <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
-              <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: cycle detected in propagation graph&#39;</span>
+              <span class="k">throw</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="nx">cycleError</span>
             <span class="nx">doNextRank</span><span class="p">.</span><span class="nx">push</span> <span class="nx">cur</span>
             <span class="nv">cur.__cycleSentinel__ = </span><span class="nx">sentinel</span>
             <span class="nx">q</span><span class="p">.</span><span class="nx">push</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">...</span>
@@ -77,15 +80,13 @@
 
   <span class="vi">@genericRemoveWeakReference = </span><span class="nf">(sender, weakReference) -&gt;</span>
     <span class="nv">weakReference.cleanupScheduled = </span><span class="kc">false</span>
-    <span class="k">if</span> <span class="o">not</span> <span class="nx">weakReference</span><span class="p">.</span><span class="nx">cleanupCanceled</span>
+    <span class="k">if</span> <span class="nx">weakReference</span><span class="p">.</span><span class="nx">weaklyHeld</span>
       <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span><span class="p">()</span>
         <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">weakReference</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">splice</span> <span class="nx">i</span><span class="p">,</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="o">not</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">length</span> <span class="k">then</span> <span class="nv">sender.weaklyHeld = </span><span class="kc">true</span>
       <span class="k">else</span>
         <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">weakReference</span>
-    <span class="k">else</span>
-      <span class="nv">weakReference.cleanupCanceled = </span><span class="kc">null</span>
 
   <span class="nv">_mode: </span><span class="kc">null</span>
   <span class="nv">mode: </span><span class="nf">(mode) -&gt;</span>
@@ -143,95 +144,97 @@
     <span class="vi">@_PulseClass = </span><span class="nx">klass</span>
     <span class="k">this</span>
 
-  <span class="nv">seq_junc_helper: </span><span class="nf">(pulse) -&gt;</span>
-    <span class="nv">ret = </span><span class="p">[]</span>
-    <span class="k">for</span> <span class="nx">jp</span> <span class="k">in</span> <span class="nx">pulse</span><span class="p">.</span><span class="nx">value</span>
+  <span class="nv">seq_junc_helper: </span><span class="nf">(value) -&gt;</span>
+    <span class="nv">retval = </span><span class="p">[]</span>
+    <span class="k">for</span> <span class="nx">jp</span> <span class="k">in</span> <span class="nx">value</span>
       <span class="k">if</span> <span class="nx">jp</span><span class="p">.</span><span class="nx">junction</span>
-        <span class="nv">ret = </span><span class="nx">ret</span><span class="p">.</span><span class="nx">concat</span> <span class="p">(</span><span class="nx">@seq_junc_helper</span> <span class="nx">jp</span><span class="p">)</span>
+        <span class="nv">retval = </span><span class="nx">retval</span><span class="p">.</span><span class="nx">concat</span> <span class="p">(</span><span class="nx">@seq_junc_helper</span> <span class="nx">jp</span><span class="p">.</span><span class="nx">value</span><span class="p">)</span>
       <span class="k">else</span>
-        <span class="nv">ret = </span><span class="nx">ret</span><span class="p">.</span><span class="nx">concat</span> <span class="nx">jp</span><span class="p">.</span><span class="nx">value</span>
-    <span class="nx">ret</span>
+        <span class="nv">retval = </span><span class="nx">retval</span><span class="p">.</span><span class="nx">concat</span> <span class="nx">jp</span><span class="p">.</span><span class="nx">value</span>
+    <span class="nx">retval</span>
 
-  <span class="nv">vec_junc_helper: </span><span class="nf">(pulse) -&gt;</span>
-    <span class="nv">ret = </span><span class="p">[]</span>
-    <span class="k">for</span> <span class="nx">jp</span> <span class="k">in</span> <span class="nx">pulse</span><span class="p">.</span><span class="nx">value</span>
+  <span class="nv">vec_junc_helper: </span><span class="nf">(value) -&gt;</span>
+    <span class="nv">retval = </span><span class="p">[]</span>
+    <span class="k">for</span> <span class="nx">jp</span> <span class="k">in</span> <span class="nx">value</span>
       <span class="k">if</span> <span class="nx">jp</span><span class="p">.</span><span class="nx">junction</span>
-        <span class="nv">ret = </span><span class="nx">ret</span><span class="p">.</span><span class="nx">concat</span> <span class="p">(</span><span class="nx">@vec_junc_helper</span> <span class="nx">jp</span><span class="p">)</span>
+        <span class="nv">retval = </span><span class="nx">retval</span><span class="p">.</span><span class="nx">concat</span> <span class="p">(</span><span class="nx">@vec_junc_helper</span> <span class="nx">jp</span><span class="p">.</span><span class="nx">value</span><span class="p">)</span>
       <span class="k">else</span>
-        <span class="nx">ret</span><span class="p">.</span><span class="nx">push</span> <span class="nx">jp</span><span class="p">.</span><span class="nx">value</span>
-    <span class="nx">ret</span>
+        <span class="nx">retval</span><span class="p">.</span><span class="nx">push</span> <span class="nx">jp</span><span class="p">.</span><span class="nx">value</span>
+    <span class="nx">retval</span>
 
-  <span class="nv">zip_junc_helper: </span><span class="nf">(pulse) -&gt;</span>
-    <span class="nx">_</span><span class="p">.</span><span class="nx">zip</span> <span class="p">(</span><span class="nx">@vec_junc_helper</span> <span class="nx">pulse</span><span class="p">)...</span>
+  <span class="nv">zip_junc_helper: </span><span class="nf">(value) -&gt;</span>
+    <span class="nx">_</span><span class="p">.</span><span class="nx">zip</span> <span class="p">(</span><span class="nx">@vec_junc_helper</span> <span class="nx">value</span><span class="p">)...</span>
 
-  <span class="nv">tranRCV: </span><span class="nf">(pulse) -&gt;</span>
+  <span class="nv">tranIN: </span><span class="nf">(pulse) -&gt;</span>
+    <span class="nv">PULSE = </span><span class="nx">pulse</span><span class="p">.</span><span class="nx">copy</span><span class="p">()</span>
     <span class="k">switch</span> <span class="nx">@mode</span><span class="p">()</span>
       <span class="k">when</span> <span class="s">&#39;sequenced&#39;</span>
-        <span class="k">if</span> <span class="nx">pulse</span><span class="p">.</span><span class="nx">junction</span>
-          <span class="nv">pulse.value = </span><span class="nx">@seq_junc_helper</span> <span class="nx">pulse</span>
+        <span class="k">if</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">junction</span>
+          <span class="nv">PULSE.value = </span><span class="nx">@seq_junc_helper</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">value</span>
         <span class="k">else</span>
-          <span class="k">return</span> <span class="nx">pulse</span>
+          <span class="k">return</span> <span class="nx">PULSE</span>
       <span class="k">when</span> <span class="s">&#39;vectored&#39;</span>
-        <span class="k">if</span> <span class="nx">pulse</span><span class="p">.</span><span class="nx">junction</span>
-          <span class="nv">pulse.value = </span><span class="nx">@vec_junc_helper</span> <span class="nx">pulse</span>
+        <span class="k">if</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">junction</span>
+          <span class="nv">PULSE.value = </span><span class="nx">@vec_junc_helper</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">value</span>
         <span class="k">else</span>
-          <span class="nv">pulse.value = </span><span class="p">[</span> <span class="nx">pulse</span><span class="p">.</span><span class="nx">value</span> <span class="p">]</span>
-          <span class="nv">pulse.arity = </span><span class="mi">1</span>
-          <span class="k">return</span> <span class="nx">pulse</span>
+          <span class="nv">PULSE.value = </span><span class="p">[</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">value</span> <span class="p">]</span>
+          <span class="nv">PULSE.arity = </span><span class="mi">1</span>
+          <span class="k">return</span> <span class="nx">PULSE</span>
       <span class="k">when</span> <span class="s">&#39;zipped&#39;</span>
-        <span class="k">if</span> <span class="nx">pulse</span><span class="p">.</span><span class="nx">junction</span>
-          <span class="nv">pulse.value = </span><span class="nx">@zip_junc_helper</span> <span class="nx">pulse</span>
+        <span class="k">if</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">junction</span>
+          <span class="nv">PULSE.value = </span><span class="nx">@zip_junc_helper</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">value</span>
         <span class="k">else</span>
-          <span class="nv">pulse.value = </span><span class="nx">_</span><span class="p">.</span><span class="nx">zip</span> <span class="nx">pulse</span><span class="p">.</span><span class="nx">value</span>
-          <span class="k">return</span> <span class="nx">pulse</span>
+          <span class="nv">PULSE.value = </span><span class="nx">_</span><span class="p">.</span><span class="nx">zip</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">value</span>
+          <span class="k">return</span> <span class="nx">PULSE</span>
       <span class="k">when</span> <span class="kc">null</span>
-        <span class="k">if</span> <span class="nx">pulse</span><span class="p">.</span><span class="nx">junction</span> <span class="o">and</span> <span class="nx">@no_null_junc</span>
-          <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.transRCV: does not support null mode for pulse junctions&#39;</span>
+        <span class="k">if</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">junction</span> <span class="o">and</span> <span class="nx">@no_null_junc</span>
+          <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.tranIN: does not support null mode for pulse junctions&#39;</span>
         <span class="k">else</span>
-          <span class="k">return</span> <span class="nx">pulse</span>
+          <span class="k">return</span> <span class="nx">PULSE</span>
       <span class="k">else</span>
-        <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.transRCV: bad mode value &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span> <span class="nx">@mode</span><span class="p">())</span>
+        <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.tranIN: bad mode value &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span> <span class="nx">@mode</span><span class="p">())</span>
 
-    <span class="nv">pulse.arity = </span><span class="nx">pulse</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span>
-    <span class="nv">pulse.junction = </span><span class="kc">false</span>
+    <span class="nv">PULSE.arity = </span><span class="nx">PULSE</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span>
+    <span class="nv">PULSE.junction = </span><span class="kc">false</span>
 
-    <span class="nx">pulse</span>
+    <span class="nx">PULSE</span>
 
   <span class="nv">tranOUT: </span><span class="nf">(pulse) -&gt;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">pulse</span> <span class="o">isnt</span> <span class="nx">doNotPropagate</span><span class="p">)</span> <span class="o">and</span> <span class="nx">@isNary</span><span class="p">()</span>
+    <span class="nv">PULSE = </span><span class="nx">pulse</span><span class="p">.</span><span class="nx">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">PULSE</span> <span class="o">isnt</span> <span class="nx">doNotPropagate</span><span class="p">)</span> <span class="o">and</span> <span class="nx">@isNary</span><span class="p">()</span>
       <span class="nv">ret = </span><span class="p">[]</span>
-      <span class="p">(</span><span class="nv">ret = </span><span class="nx">ret</span><span class="p">.</span><span class="nx">concat</span> <span class="nx">value</span><span class="p">)</span> <span class="k">for</span> <span class="nx">value</span> <span class="k">in</span> <span class="nx">pulse</span><span class="p">.</span><span class="nx">value</span>
-      <span class="nv">pulse.value = </span><span class="nx">ret</span>
+      <span class="p">(</span><span class="nv">ret = </span><span class="nx">ret</span><span class="p">.</span><span class="nx">concat</span> <span class="nx">value</span><span class="p">)</span> <span class="k">for</span> <span class="nx">value</span> <span class="k">in</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">value</span>
+      <span class="nv">PULSE.value = </span><span class="nx">ret</span>
 
-    <span class="nx">pulse</span>
+    <span class="nx">PULSE</span>
 
   <span class="nv">tranVAL: </span><span class="nf">(pulse) -&gt;</span>
+    <span class="nv">PULSE = </span><span class="nx">pulse</span><span class="p">.</span><span class="nx">copy</span><span class="p">()</span>
     <span class="k">switch</span> <span class="nx">@mode</span><span class="p">()</span>
       <span class="k">when</span> <span class="kc">null</span><span class="p">,</span> <span class="s">&#39;sequenced&#39;</span>
-        <span class="nv">ret = </span><span class="nx">@updater</span> <span class="nx">pulse</span><span class="p">.</span><span class="nx">value</span><span class="p">...</span>
+        <span class="nv">ret = </span><span class="nx">@updater</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">value</span><span class="p">...</span>
         <span class="k">if</span> <span class="nx">ret</span> <span class="o">is</span> <span class="nx">doNotPropagate</span>
-          <span class="nv">pulse = </span><span class="nx">ret</span>
+          <span class="nv">PULSE = </span><span class="nx">ret</span>
         <span class="k">else</span>
-          <span class="nv">pulse.value = </span><span class="nx">ret</span>
+          <span class="nv">PULSE.value = </span><span class="nx">ret</span>
       <span class="k">when</span> <span class="s">&#39;vectored&#39;</span><span class="p">,</span> <span class="s">&#39;zipped&#39;</span>
-        <span class="nv">thisClass = </span><span class="k">this</span>
         <span class="nv">ret = </span><span class="p">[]</span>
-        <span class="k">for</span> <span class="nx">value</span> <span class="k">in</span> <span class="nx">pulse</span><span class="p">.</span><span class="nx">value</span>
+        <span class="k">for</span> <span class="nx">value</span> <span class="k">in</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">value</span>
           <span class="nv">iret = </span><span class="nx">@updater</span> <span class="nx">value</span><span class="p">...</span>
           <span class="k">if</span> <span class="nx">iret</span> <span class="o">isnt</span> <span class="nx">doNotPropagate</span>
             <span class="nx">ret</span><span class="p">.</span><span class="nx">push</span> <span class="nx">iret</span>
         <span class="k">if</span> <span class="nx">ret</span><span class="p">.</span><span class="nx">length</span> <span class="o">is</span> <span class="mi">0</span>
-          <span class="nv">pulse = </span><span class="nx">doNotPropagate</span>
+          <span class="nv">PULSE = </span><span class="nx">doNotPropagate</span>
         <span class="k">else</span>
-          <span class="nv">pulse.value = </span><span class="nx">ret</span>
+          <span class="nv">PULSE.value = </span><span class="nx">ret</span>
       <span class="k">else</span>
         <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.UPDATER: bad mode value &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span> <span class="nx">@mode</span><span class="p">())</span>
 
-    <span class="nx">pulse</span>
+    <span class="nx">PULSE</span>
 
   <span class="nv">updater: </span><span class="nf">(value...) -&gt;</span> <span class="nx">value</span>
 
-  <span class="nv">UPDATER: </span><span class="nf">(pulse) -&gt;</span> <span class="nx">@tranOUT</span> <span class="nx">@tranVAL</span> <span class="nx">@tranRCV</span> <span class="nx">pulse</span>
+  <span class="nv">UPDATER: </span><span class="nf">(pulse) -&gt;</span> <span class="nx">@tranOUT</span> <span class="nx">@tranVAL</span> <span class="nx">@tranIN</span> <span class="nx">pulse</span>
 
   <span class="nv">weaklyHeld: </span><span class="kc">false</span>
 
