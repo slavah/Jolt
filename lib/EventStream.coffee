@@ -18,21 +18,23 @@ Jolt.EventStream = class EventStream
     if recvFrom.length
       (estream.attachListener this) for estream in (_.flatten [ recvFrom... ])
 
+  expAnEstreamErr = 'expected an EventStream'
+
   attachListener: (receiver) ->
     if not isE receiver
-      throw '<' + @ClassName + '>.attachListener: expected an EventStream'
+      throw '<' + @ClassName + '>.attachListener: ' + expAnEstreamErr
     @constructor.genericAttachListener this, receiver
     this
 
   removeListener: (receiver) ->
     if not isE receiver
-      throw '<' + @ClassName + '>.removeListener: expected an EventStream'
+      throw '<' + @ClassName + '>.removeListener: ' + expAnEstreamErr
     @constructor.genericRemoveListener this, receiver
     this
 
   removeWeakReference: (weakReference) ->
     if not isE weakReference
-      throw '<' + @ClassName + '>.removeWeakReference: expected an EventStream'
+      throw '<' + @ClassName + '>.removeWeakReference: ' + expAnEstreamErr
     @constructor.genericRemoveWeakReference this, weakReference
     this
 
@@ -40,10 +42,12 @@ Jolt.EventStream = class EventStream
 
   cleanupScheduled: false
 
+  cycleError = '.genericAttachListener: cycle detected in propagation graph'
+
   @genericAttachListener = (sender, receiver) ->
     if not isPropagating()
       if sender.rank is receiver.rank
-        throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph'
+        throw sender.ClassName + cycleError
       i = _.indexOf sender.sendTo, receiver
       if not (i + 1)
         receiver.weaklyHeld = false
@@ -57,7 +61,7 @@ Jolt.EventStream = class EventStream
             cur = q.shift()
             if cur.__cycleSentinel__ is sentinel
               sender.sendTo.pop()
-              throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph'
+              throw sender.ClassName + cycleError
             doNextRank.push cur
             cur.__cycleSentinel__ = sentinel
             q.push cur.sendTo...

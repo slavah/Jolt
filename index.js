@@ -1990,6 +1990,7 @@
   };
   
   Jolt.EventStream = EventStream = (function() {
+    var cycleError, expAnEstreamErr;
   
     function EventStream() {
       var estream, recvFrom, _i, _len, _ref;
@@ -2006,9 +2007,11 @@
       }
     }
   
+    expAnEstreamErr = 'expected an EventStream';
+  
     EventStream.prototype.attachListener = function(receiver) {
       if (!isE(receiver)) {
-        throw '<' + this.ClassName + '>.attachListener: expected an EventStream';
+        throw '<' + this.ClassName + '>.attachListener: ' + expAnEstreamErr;
       }
       this.constructor.genericAttachListener(this, receiver);
       return this;
@@ -2016,7 +2019,7 @@
   
     EventStream.prototype.removeListener = function(receiver) {
       if (!isE(receiver)) {
-        throw '<' + this.ClassName + '>.removeListener: expected an EventStream';
+        throw '<' + this.ClassName + '>.removeListener: ' + expAnEstreamErr;
       }
       this.constructor.genericRemoveListener(this, receiver);
       return this;
@@ -2024,7 +2027,7 @@
   
     EventStream.prototype.removeWeakReference = function(weakReference) {
       if (!isE(weakReference)) {
-        throw '<' + this.ClassName + '>.removeWeakReference: expected an EventStream';
+        throw '<' + this.ClassName + '>.removeWeakReference: ' + expAnEstreamErr;
       }
       this.constructor.genericRemoveWeakReference(this, weakReference);
       return this;
@@ -2034,12 +2037,12 @@
   
     EventStream.prototype.cleanupScheduled = false;
   
+    cycleError = '.genericAttachListener: cycle detected in propagation graph';
+  
     EventStream.genericAttachListener = function(sender, receiver) {
       var cur, doNextRank, estream, i, q, sentinel, thisClass, _i, _len, _results;
       if (!isPropagating()) {
-        if (sender.rank === receiver.rank) {
-          throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph';
-        }
+        if (sender.rank === receiver.rank) throw sender.ClassName + cycleError;
         i = _.indexOf(sender.sendTo, receiver);
         if (!(i + 1)) {
           receiver.weaklyHeld = false;
@@ -2053,7 +2056,7 @@
               cur = q.shift();
               if (cur.__cycleSentinel__ === sentinel) {
                 sender.sendTo.pop();
-                throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph';
+                throw sender.ClassName + cycleError;
               }
               doNextRank.push(cur);
               cur.__cycleSentinel__ = sentinel;

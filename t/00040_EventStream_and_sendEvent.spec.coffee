@@ -376,7 +376,7 @@ describe 'Jolt.EventStream.prototype.attachListener', ->
     tryIt = ->
       myE.attachListener myE
 
-    ( expect tryIt ).toThrow '<EventStream>.attachListener: cycle detected in propagation graph'
+    ( expect tryIt ).toThrow 'EventStream.genericAttachListener: cycle detected in propagation graph'
 
 
   it '''
@@ -394,7 +394,7 @@ describe 'Jolt.EventStream.prototype.attachListener', ->
 
       myE[0].attachListener myE[1]
 
-    ( expect tryIt ).toThrow '<EventStream>.attachListener: cycle detected in propagation graph'
+    ( expect tryIt ).toThrow 'EventStream.genericAttachListener: cycle detected in propagation graph'
 
 
   it '''
@@ -463,7 +463,7 @@ describe 'Jolt.EventStream.prototype.attachListener', ->
 
     try
       tryIt = -> myE[3].attachListener myE[2]
-      ( expect tryIt ).toThrow '<EventStream>.attachListener: cycle detected in propagation graph'
+      ( expect tryIt ).toThrow 'EventStream.genericAttachListener: cycle detected in propagation graph'
       tryIt()
     catch error
       ( expect myE[3].sendTo ).toEqual []
