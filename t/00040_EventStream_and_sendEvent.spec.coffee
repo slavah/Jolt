@@ -1185,74 +1185,35 @@ describe 'Jolt.sendEvent', ->
         arity: 6
         junction: false
         name: 'myE_0'
-        value: [
-          'a'
-          'b'
-          'c'
-          'd'
-          'e'
-          'f'
-        ]
+        value: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
       }
 
       {
         arity: 6
         junction: false
         name: 'myE_1'
-        value: [
-          'a'
-          'b'
-          'c'
-          'd'
-          'e'
-          'f'
-        ]
+        value: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
       }
 
       {
         arity: 6
         junction: false
         name: 'myE_4'
-        value: [
-          ['a']
-          ['b']
-          ['c']
-          ['d']
-          ['e']
-          ['f']
-        ]
+        value: [ ['a'], ['b'], ['c'], ['d'], ['e'], ['f'] ]
       }
 
       {
         arity: 1
         junction: false
         name: 'myE_5'
-        value: [
-          [
-            'a'
-            'b'
-            'c'
-            'd'
-            'e'
-            'f'
-          ]
-        ]
+        value: [ [ 'a', 'b', 'c', 'd', 'e', 'f' ] ]
       }
 
       {
         arity: 1
         junction: false
         name: 'myE_7'
-        value: [
-          [
-            ['a']
-            ['b']
-            ['c']
-            ['d']
-            ['e']
-            ['f']
-          ]
-        ]
+        value: [ [ ['a'], ['b'], ['c'], ['d'], ['e'], ['f'] ] ]
       }
 
     ]
@@ -1310,42 +1271,21 @@ describe 'Jolt.sendEvent', ->
             arity: 6
             junction: false
             name: 'myE_0'
-            value: [
-              'a'
-              'b'
-              'c'
-              'd'
-              'e'
-              'f'
-            ]
+            value: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
           }
 
           {
             arity: 6
             junction: false
             name: 'myE_1'
-            value: [
-              'a'
-              'b'
-              'c'
-              'd'
-              'e'
-              'f'
-            ]
+            value: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
           }
 
           {
             arity: 6
             junction: false
             name: 'myE_5'
-            value: [
-              ['a']
-              ['b']
-              ['c']
-              ['d']
-              ['e']
-              ['f']
-            ]
+            value: [ ['a'], ['b'], ['c'], ['d'], ['e'], ['f'] ]
           }
 
         ]
