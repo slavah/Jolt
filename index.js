@@ -2293,22 +2293,16 @@
     };
   
     EventStream.prototype.tranOUT = function(pulse) {
-      var PULSE, ret, value, _i, _len, _ref;
+      var PULSE, _ref;
       PULSE = pulse.copy();
       if ((PULSE !== doNotPropagate) && this.isNary()) {
-        ret = [];
-        _ref = PULSE.value;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          value = _ref[_i];
-          ret = ret.concat(value);
-        }
-        PULSE.value = ret;
+        PULSE.value = (_ref = []).concat.apply(_ref, PULSE.value);
       }
       return PULSE;
     };
   
     EventStream.prototype.tranVAL = function(pulse) {
-      var PULSE, iret, ret, value, _i, _len, _ref;
+      var PULSE, iret, redret, redval, ret, value, _i, _len, _ref, _ref2, _ref3;
       PULSE = pulse.copy();
       switch (this.mode()) {
         case null:
@@ -2332,7 +2326,18 @@
           if (ret.length === 0) {
             PULSE = doNotPropagate;
           } else {
-            PULSE.value = ret;
+            if (this.doesReduce()) {
+              redval = (_ref2 = []).concat.apply(_ref2, ret);
+              if (this.isNary()) redval = (_ref3 = []).concat.apply(_ref3, redval);
+              redret = this.updater.apply(this, redval);
+              if (redret === doNotPropagate) {
+                PULSE = redret;
+              } else {
+                PULSE.value = redret;
+              }
+            } else {
+              PULSE.value = ret;
+            }
           }
           break;
         default:

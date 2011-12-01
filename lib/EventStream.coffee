@@ -211,9 +211,7 @@ Jolt.EventStream = class EventStream
   tranOUT: (pulse) ->
     PULSE = pulse.copy()
     if (PULSE isnt doNotPropagate) and @isNary()
-      ret = []
-      (ret = ret.concat value) for value in PULSE.value
-      PULSE.value = ret
+      PULSE.value = [].concat PULSE.value...
 
     PULSE
 
@@ -235,7 +233,17 @@ Jolt.EventStream = class EventStream
         if ret.length is 0
           PULSE = doNotPropagate
         else
-          PULSE.value = ret
+          if @doesReduce()
+            redval = [].concat ret...
+            if @isNary()
+              redval = [].concat redval...
+            redret = @updater redval...
+            if redret is doNotPropagate
+              PULSE = redret
+            else
+              PULSE.value = redret
+          else
+            PULSE.value = ret
       else
         throw '<' + @ClassName + '>.UPDATER: bad mode value ' + (JSON.stringify @mode())
 
