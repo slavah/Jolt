@@ -221,8 +221,7 @@ describe 'Jolt.EventStream.prototype.isNary', ->
 
   it '''
     should set the value of an EventStream's '_nary' property to true if it is
-    called it is called with a truthy value, and to false if it is called with
-    a falsy value
+    called with a truthy value, and to false if it is called with a falsy value
   ''', ->
 
     myE = new EventStream
@@ -288,6 +287,78 @@ describe 'Jolt.EventStream.prototype.nary', ->
     myE.nary false
 
     ( expect myE._nary ).toBe true
+
+
+describe 'Jolt.EventStream.prototype.doesReduce', ->
+
+  it '''
+    should set the value of an EventStream's '_reduce' property to true if it is
+    called with a truthy value, and to false if it is called with a falsy value
+  ''', ->
+
+    myE = new EventStream
+
+    myE.doesReduce true
+    ( expect myE._reduce ).toBe true
+    myE.doesReduce 1
+    ( expect myE._reduce ).toBe true
+    myE.doesReduce 'a string'
+    ( expect myE._reduce ).toBe true
+    myE.doesReduce {}
+    ( expect myE._reduce ).toBe true
+
+    myE.doesReduce false
+    ( expect myE._reduce ).toBe false
+    myE.doesReduce 0
+    ( expect myE._reduce ).toBe false
+    myE.doesReduce ''
+    ( expect myE._reduce ).toBe false
+
+  it '''
+    should return the value of an EventStream's '_reduce' property if it is
+    called with no arguments
+  ''', ->
+
+    myE = new EventStream
+
+    ret = myE.doesReduce()
+
+    ( expect ret ).toBe false
+    ( expect ret ).not.toBe true
+
+    myE._reduce = true
+    ret = myE.doesReduce()
+
+    ( expect ret ).toBe true
+    ( expect ret ).not.toBe false
+
+
+describe 'Jolt.EventStream.prototype.reduce', ->
+
+  it '''
+    should have the same effect as calling <EventStream>.doesReduce(true),
+    ignoring any arguments passed to it
+  ''', ->
+
+    myE = new EventStream
+
+    myE.doesReduce false
+
+    ( expect myE._reduce ).toBe false
+
+    myE.reduce()
+
+    ( expect myE._reduce ).toBe true
+
+    myE.doesReduce false
+
+    ( expect myE._reduce ).toBe false
+
+    myE.reduce 123
+    myE.reduce 0
+    myE.reduce false
+
+    ( expect myE._reduce ).toBe true
 
 
 describe 'Jolt.EventStream.prototype.PulseClass', ->
