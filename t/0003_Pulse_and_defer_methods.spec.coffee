@@ -109,6 +109,25 @@ describe 'Jolt.Pulse', ->
     ( expect testP.heap.stamp ).toBe testP.stamp
 
 
+  it '''
+    if an instance of Jolt.ContInfo is passed as the last argument to the Pulse
+    (or Pulse subclass) constructor, then it should be stored as the 'cont'
+    property of the Pulse instance
+  ''', ->
+
+    testC = new Jolt.ContInfo [1], [ (estream = {}) ]
+
+    # Note: it's important to pass undefined as the heap-argument if the desired
+    # result is to have the Pulse constructor generate a new HeapStore instance
+    # stored as the pulse's 'heap' property
+    testP = new Jolt.Pulse 2, false, {}, 1, ['value'], undefined, testC
+
+    ( expect testP.heap.cont ).toBe testC
+    ( expect (testP.heap instanceof Jolt.HeapStore)).toBe true
+    ( expect testP.heap.cont.nodes  ).toEqual [ estream ]
+    ( expect testP.heap.cont.stamps ).toEqual [ 1 ]
+
+
 describe 'Jolt.scheduleCleanup', ->
 
   it '''
@@ -141,8 +160,8 @@ describe 'Jolt.scheduleCleanup', ->
 
 
   it '''
-    should not push a "cleanup job" onto a 'cleanupQ', if the specified 'weakReference' has
-    its 'cleanupScheduled' property set to 'true'
+    should not push a "cleanup job" onto a 'cleanupQ', if the specified
+    'weakReference' has its 'cleanupScheduled' property set to 'true'
   ''', ->
 
     mockSender = {}
@@ -305,11 +324,9 @@ describe 'Jolt.Pulse.prototype.propagate', ->
   ''', ->
 
     fin = []
-    heap_save = nodes: []
 
     class Pulse_ext extends Pulse
       PROPAGATE: (args...) ->
-        heap_save = @heap
         super
 
     class MockE_ext extends MockE
@@ -336,13 +353,13 @@ describe 'Jolt.Pulse.prototype.propagate', ->
 
     pulse = new me[0]._PulseClass 3, false, mockSender, nextStamp(), ['d', 'e', 'f']
 
-    pulse.propagate pulse.sender, me[0]
+    heap = pulse.propagate pulse.sender, me[0]
 
     waitsFor ->
-      fin.length is 4 and heap_save.nodes.length is 6
+      fin.length is 4
 
     runs ->
-      ( expect heap_save.nodes ).toEqual [
+      ( expect heap.nodes ).toEqual [
         [ mockSender, me[0] ]
         [ me[0], me[1] ]
         [ me[1], me[2] ]

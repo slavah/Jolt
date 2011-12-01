@@ -18,36 +18,39 @@ Jolt.EventStream = class EventStream
     if recvFrom.length
       (estream.attachListener this) for estream in (_.flatten [ recvFrom... ])
 
+  expAnEstreamErr = 'expected an EventStream'
+
   attachListener: (receiver) ->
     if not isE receiver
-      throw '<' + @ClassName + '>.attachListener: expected an EventStream'
+      throw '<' + @ClassName + '>.attachListener: ' + expAnEstreamErr
     @constructor.genericAttachListener this, receiver
     this
 
   removeListener: (receiver) ->
     if not isE receiver
-      throw '<' + @ClassName + '>.removeListener: expected an EventStream'
+      throw '<' + @ClassName + '>.removeListener: ' + expAnEstreamErr
     @constructor.genericRemoveListener this, receiver
     this
 
   removeWeakReference: (weakReference) ->
     if not isE weakReference
-      throw '<' + @ClassName + '>.removeWeakReference: expected an EventStream'
+      throw '<' + @ClassName + '>.removeWeakReference: ' + expAnEstreamErr
     @constructor.genericRemoveWeakReference this, weakReference
     this
 
   ClassName: 'EventStream'
 
-  cleanupCanceled: null
-
   cleanupScheduled: false
+
+  cycleError = '.genericAttachListener: cycle detected in propagation graph'
 
   @genericAttachListener = (sender, receiver) ->
     if not isPropagating()
       if sender.rank is receiver.rank
-        throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph'
+        throw sender.ClassName + cycleError
       i = _.indexOf sender.sendTo, receiver
       if not (i + 1)
+        receiver.weaklyHeld = false
         sender.sendTo.push receiver
         if sender.rank > receiver.rank
           doNextRank = []
@@ -58,7 +61,7 @@ Jolt.EventStream = class EventStream
             cur = q.shift()
             if cur.__cycleSentinel__ is sentinel
               sender.sendTo.pop()
-              throw '<' + sender.ClassName + '>.attachListener: cycle detected in propagation graph'
+              throw sender.ClassName + cycleError
             doNextRank.push cur
             cur.__cycleSentinel__ = sentinel
             q.push cur.sendTo...
@@ -77,15 +80,13 @@ Jolt.EventStream = class EventStream
 
   @genericRemoveWeakReference = (sender, weakReference) ->
     weakReference.cleanupScheduled = false
-    if not weakReference.cleanupCanceled
+    if weakReference.weaklyHeld
       if not isPropagating()
         i = _.indexOf sender.sendTo, weakReference
         if (i + 1) then sender.sendTo.splice i, 1
         if not sender.sendTo.length then sender.weaklyHeld = true
       else
         scheduleCleanup cleanupQ, sender, weakReference
-    else
-      weakReference.cleanupCanceled = null
 
   _mode: null
   mode: (mode) ->
@@ -143,95 +144,97 @@ Jolt.EventStream = class EventStream
     @_PulseClass = klass
     this
 
-  seq_junc_helper: (pulse) ->
-    ret = []
-    for jp in pulse.value
+  seq_junc_helper: (value) ->
+    retval = []
+    for jp in value
       if jp.junction
-        ret = ret.concat (@seq_junc_helper jp)
+        retval = retval.concat (@seq_junc_helper jp.value)
       else
-        ret = ret.concat jp.value
-    ret
+        retval = retval.concat jp.value
+    retval
 
-  vec_junc_helper: (pulse) ->
-    ret = []
-    for jp in pulse.value
+  vec_junc_helper: (value) ->
+    retval = []
+    for jp in value
       if jp.junction
-        ret = ret.concat (@vec_junc_helper jp)
+        retval = retval.concat (@vec_junc_helper jp.value)
       else
-        ret.push jp.value
-    ret
+        retval.push jp.value
+    retval
 
-  zip_junc_helper: (pulse) ->
-    _.zip (@vec_junc_helper pulse)...
+  zip_junc_helper: (value) ->
+    _.zip (@vec_junc_helper value)...
 
-  tranRCV: (pulse) ->
+  tranIN: (pulse) ->
+    PULSE = pulse.copy()
     switch @mode()
       when 'sequenced'
-        if pulse.junction
-          pulse.value = @seq_junc_helper pulse
+        if PULSE.junction
+          PULSE.value = @seq_junc_helper PULSE.value
         else
-          return pulse
+          return PULSE
       when 'vectored'
-        if pulse.junction
-          pulse.value = @vec_junc_helper pulse
+        if PULSE.junction
+          PULSE.value = @vec_junc_helper PULSE.value
         else
-          pulse.value = [ pulse.value ]
-          pulse.arity = 1
-          return pulse
+          PULSE.value = [ PULSE.value ]
+          PULSE.arity = 1
+          return PULSE
       when 'zipped'
-        if pulse.junction
-          pulse.value = @zip_junc_helper pulse
+        if PULSE.junction
+          PULSE.value = @zip_junc_helper PULSE.value
         else
-          pulse.value = _.zip pulse.value
-          return pulse
+          PULSE.value = _.zip PULSE.value
+          return PULSE
       when null
-        if pulse.junction and @no_null_junc
-          throw '<' + @ClassName + '>.transRCV: does not support null mode for pulse junctions'
+        if PULSE.junction and @no_null_junc
+          throw '<' + @ClassName + '>.tranIN: does not support null mode for pulse junctions'
         else
-          return pulse
+          return PULSE
       else
-        throw '<' + @ClassName + '>.transRCV: bad mode value ' + (JSON.stringify @mode())
+        throw '<' + @ClassName + '>.tranIN: bad mode value ' + (JSON.stringify @mode())
 
-    pulse.arity = pulse.value.length
-    pulse.junction = false
+    PULSE.arity = PULSE.value.length
+    PULSE.junction = false
 
-    pulse
+    PULSE
 
   tranOUT: (pulse) ->
-    if (pulse isnt doNotPropagate) and @isNary()
+    PULSE = pulse.copy()
+    if (PULSE isnt doNotPropagate) and @isNary()
       ret = []
-      (ret = ret.concat value) for value in pulse.value
-      pulse.value = ret
+      (ret = ret.concat value) for value in PULSE.value
+      PULSE.value = ret
 
-    pulse
+    PULSE
 
   tranVAL: (pulse) ->
+    PULSE = pulse.copy()
     switch @mode()
       when null, 'sequenced'
-        ret = @updater pulse.value...
+        ret = @updater PULSE.value...
         if ret is doNotPropagate
-          pulse = ret
+          PULSE = ret
         else
-          pulse.value = ret
+          PULSE.value = ret
       when 'vectored', 'zipped'
-        thisClass = this
         ret = []
-        for value in pulse.value
+        for value in PULSE.value
           iret = @updater value...
           if iret isnt doNotPropagate
             ret.push iret
         if ret.length is 0
-          pulse = doNotPropagate
+          PULSE = doNotPropagate
         else
-          pulse.value = ret
+          PULSE.value = ret
       else
         throw '<' + @ClassName + '>.UPDATER: bad mode value ' + (JSON.stringify @mode())
 
-    pulse
+    PULSE
 
   updater: (value...) -> value
 
-  UPDATER: (pulse) -> @tranOUT @tranVAL @tranRCV pulse
+  UPDATER: (pulse) -> @tranOUT @tranVAL @tranIN pulse
 
   weaklyHeld: false
 
