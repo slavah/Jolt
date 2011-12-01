@@ -1766,6 +1766,10 @@
   
   Jolt.doNotPropagate = doNotPropagate = {};
   
+  doNotPropagate.copy = function() {
+    return this;
+  };
+  
   Jolt.propagateHigh = propagateHigh = {};
   
   Jolt.sendCall = sendCall = {
@@ -2200,127 +2204,128 @@
       return this;
     };
   
-    EventStream.prototype.seq_junc_helper = function(pulse) {
-      var jp, ret, _i, _len, _ref;
-      ret = [];
-      _ref = pulse.value;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        jp = _ref[_i];
+    EventStream.prototype.seq_junc_helper = function(value) {
+      var jp, retval, _i, _len;
+      retval = [];
+      for (_i = 0, _len = value.length; _i < _len; _i++) {
+        jp = value[_i];
         if (jp.junction) {
-          ret = ret.concat(this.seq_junc_helper(jp));
+          retval = retval.concat(this.seq_junc_helper(jp.value));
         } else {
-          ret = ret.concat(jp.value);
+          retval = retval.concat(jp.value);
         }
       }
-      return ret;
+      return retval;
     };
   
-    EventStream.prototype.vec_junc_helper = function(pulse) {
-      var jp, ret, _i, _len, _ref;
-      ret = [];
-      _ref = pulse.value;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        jp = _ref[_i];
+    EventStream.prototype.vec_junc_helper = function(value) {
+      var jp, retval, _i, _len;
+      retval = [];
+      for (_i = 0, _len = value.length; _i < _len; _i++) {
+        jp = value[_i];
         if (jp.junction) {
-          ret = ret.concat(this.vec_junc_helper(jp));
+          retval = retval.concat(this.vec_junc_helper(jp.value));
         } else {
-          ret.push(jp.value);
+          retval.push(jp.value);
         }
       }
-      return ret;
+      return retval;
     };
   
-    EventStream.prototype.zip_junc_helper = function(pulse) {
-      return _.zip.apply(_, this.vec_junc_helper(pulse));
+    EventStream.prototype.zip_junc_helper = function(value) {
+      return _.zip.apply(_, this.vec_junc_helper(value));
     };
   
-    EventStream.prototype.tranRCV = function(pulse) {
+    EventStream.prototype.tranIN = function(pulse) {
+      var PULSE;
+      PULSE = pulse.copy();
       switch (this.mode()) {
         case 'sequenced':
-          if (pulse.junction) {
-            pulse.value = this.seq_junc_helper(pulse);
+          if (PULSE.junction) {
+            PULSE.value = this.seq_junc_helper(PULSE.value);
           } else {
-            return pulse;
+            return PULSE;
           }
           break;
         case 'vectored':
-          if (pulse.junction) {
-            pulse.value = this.vec_junc_helper(pulse);
+          if (PULSE.junction) {
+            PULSE.value = this.vec_junc_helper(PULSE.value);
           } else {
-            pulse.value = [pulse.value];
-            pulse.arity = 1;
-            return pulse;
+            PULSE.value = [PULSE.value];
+            PULSE.arity = 1;
+            return PULSE;
           }
           break;
         case 'zipped':
-          if (pulse.junction) {
-            pulse.value = this.zip_junc_helper(pulse);
+          if (PULSE.junction) {
+            PULSE.value = this.zip_junc_helper(PULSE.value);
           } else {
-            pulse.value = _.zip(pulse.value);
-            return pulse;
+            PULSE.value = _.zip(PULSE.value);
+            return PULSE;
           }
           break;
         case null:
-          if (pulse.junction && this.no_null_junc) {
-            throw '<' + this.ClassName + '>.transRCV: does not support null mode for pulse junctions';
+          if (PULSE.junction && this.no_null_junc) {
+            throw '<' + this.ClassName + '>.tranIN: does not support null mode for pulse junctions';
           } else {
-            return pulse;
+            return PULSE;
           }
           break;
         default:
-          throw '<' + this.ClassName + '>.transRCV: bad mode value ' + (JSON.stringify(this.mode()));
+          throw '<' + this.ClassName + '>.tranIN: bad mode value ' + (JSON.stringify(this.mode()));
       }
-      pulse.arity = pulse.value.length;
-      pulse.junction = false;
-      return pulse;
+      PULSE.arity = PULSE.value.length;
+      PULSE.junction = false;
+      return PULSE;
     };
   
     EventStream.prototype.tranOUT = function(pulse) {
-      var ret, value, _i, _len, _ref;
-      if ((pulse !== doNotPropagate) && this.isNary()) {
+      var PULSE, ret, value, _i, _len, _ref;
+      PULSE = pulse.copy();
+      if ((PULSE !== doNotPropagate) && this.isNary()) {
         ret = [];
-        _ref = pulse.value;
+        _ref = PULSE.value;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           value = _ref[_i];
           ret = ret.concat(value);
         }
-        pulse.value = ret;
+        PULSE.value = ret;
       }
-      return pulse;
+      return PULSE;
     };
   
     EventStream.prototype.tranVAL = function(pulse) {
-      var iret, ret, thisClass, value, _i, _len, _ref;
+      var PULSE, iret, ret, value, _i, _len, _ref;
+      PULSE = pulse.copy();
       switch (this.mode()) {
         case null:
         case 'sequenced':
-          ret = this.updater.apply(this, pulse.value);
+          ret = this.updater.apply(this, PULSE.value);
           if (ret === doNotPropagate) {
-            pulse = ret;
+            PULSE = ret;
           } else {
-            pulse.value = ret;
+            PULSE.value = ret;
           }
           break;
         case 'vectored':
         case 'zipped':
-          thisClass = this;
           ret = [];
-          _ref = pulse.value;
+          _ref = PULSE.value;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             value = _ref[_i];
             iret = this.updater.apply(this, value);
             if (iret !== doNotPropagate) ret.push(iret);
           }
           if (ret.length === 0) {
-            pulse = doNotPropagate;
+            PULSE = doNotPropagate;
           } else {
-            pulse.value = ret;
+            PULSE.value = ret;
           }
           break;
         default:
           throw '<' + this.ClassName + '>.UPDATER: bad mode value ' + (JSON.stringify(this.mode()));
       }
-      return pulse;
+      return PULSE;
     };
   
     EventStream.prototype.updater = function() {
@@ -2330,7 +2335,7 @@
     };
   
     EventStream.prototype.UPDATER = function(pulse) {
-      return this.tranOUT(this.tranVAL(this.tranRCV(pulse)));
+      return this.tranOUT(this.tranVAL(this.tranIN(pulse)));
     };
   
     EventStream.prototype.weaklyHeld = false;

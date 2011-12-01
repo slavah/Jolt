@@ -25,6 +25,7 @@ Jolt.setPropagating = setPropagating = (bool) -> propagating = Boolean bool
 # should be halted in the emitting node's branch of a propagation graph.
 
 Jolt.doNotPropagate = doNotPropagate = {}
+doNotPropagate.copy = -> this
 
 
 # `Jolt.propagateHigh` is a unique value which when passed as the last argument

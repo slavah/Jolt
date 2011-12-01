@@ -622,7 +622,7 @@ describe 'EventStream.prototype.UPDATER', ->
 
     pulse = new (myE.PulseClass()) 4, false, Jolt.sendCall, 1, ['a','b','c','d']
 
-    ( expect -> myE.UPDATER pulse ).toThrow '<' + myE.ClassName + '>.transRCV: bad mode value ' + (JSON.stringify myE.mode())
+    ( expect -> myE.UPDATER pulse ).toThrow '<' + myE.ClassName + '>.tranIN: bad mode value ' + (JSON.stringify myE.mode())
 
 
   it '''
@@ -640,7 +640,7 @@ describe 'EventStream.prototype.UPDATER', ->
     pulse[0] = new (myE.PulseClass()) 4, false, Jolt.sendCall, 1, ['a','b','c','d']
     pulse[1] = new (myE.PulseClass()) 1, true,  Jolt.sendCall, 1, [pulse[0]]
 
-    ( expect -> myE.UPDATER pulse[1] ).toThrow '<' + myE.ClassName + '>.transRCV: does not support null mode for pulse junctions'
+    ( expect -> myE.UPDATER pulse[1] ).toThrow '<' + myE.ClassName + '>.tranIN: does not support null mode for pulse junctions'
 
 
   it '''
@@ -882,15 +882,15 @@ describe 'EventStream.prototype.UPDATER', ->
   ''', ->
 
     checkP =
-      RECV: null
-      SEND: null
+      IN:  null
+      OUT: null
 
     class EventStream_ext extends EventStream
       UPDATER: (pulse) ->
-        checkP.RECV = pulse.value
-        super
-        checkP.SEND = pulse.value
-        pulse
+        checkP.IN = pulse.value
+        PULSE = super pulse
+        checkP.OUT = PULSE.value
+        PULSE
 
     myE = new EventStream_ext
 
@@ -901,8 +901,8 @@ describe 'EventStream.prototype.UPDATER', ->
 
     myE.UPDATER pulse[0]
 
-    ( expect checkP.RECV ).toEqual [1,2,3]
-    ( expect checkP.SEND ).toEqual [[1],[2],[3]]
+    ( expect checkP.IN  ).toEqual [1,2,3]
+    ( expect checkP.OUT ).toEqual [[1],[2],[3]]
 
     myE.z().nary()
 
@@ -910,8 +910,8 @@ describe 'EventStream.prototype.UPDATER', ->
 
     myE.UPDATER pulse[1]
 
-    ( expect checkP.RECV ).toEqual [1,2,3]
-    ( expect checkP.SEND ).toEqual [1,2,3]
+    ( expect checkP.IN  ).toEqual [1,2,3]
+    ( expect checkP.OUT ).toEqual [1,2,3]
 
     myE.isNary(false)
     myE.v()
@@ -928,8 +928,8 @@ describe 'EventStream.prototype.UPDATER', ->
 
     myE.UPDATER pulse[4]
 
-    ( expect checkP.RECV ).toEqual [pulse[2],pulse[3]]
-    ( expect checkP.SEND ).toEqual [[[2,4,6]],[[8,10,12]]]
+    ( expect checkP.IN  ).toEqual [pulse[2],pulse[3]]
+    ( expect checkP.OUT ).toEqual [[[2,4,6]],[[8,10,12]]]
 
     myE.isNary(false)
     myE.nary().v()
@@ -940,8 +940,8 @@ describe 'EventStream.prototype.UPDATER', ->
 
     myE.UPDATER pulse[7]
 
-    ( expect checkP.RECV ).toEqual [pulse[5],pulse[6]]
-    ( expect checkP.SEND ).toEqual [[2,4,6],[8,10,12]]
+    ( expect checkP.IN  ).toEqual [pulse[5],pulse[6]]
+    ( expect checkP.OUT ).toEqual [[2,4,6],[8,10,12]]
 
     myE.isNary(false)
     myE.z().nary()
@@ -955,8 +955,8 @@ describe 'EventStream.prototype.UPDATER', ->
 
     myE.UPDATER pulse[10]
 
-    ( expect checkP.RECV ).toEqual [pulse[8],pulse[9]]
-    ( expect checkP.SEND ).toEqual [[[3],[12]],[[6],[15]],[[9],[18]]]
+    ( expect checkP.IN  ).toEqual [pulse[8],pulse[9]]
+    ( expect checkP.OUT ).toEqual [[[3],[12]],[[6],[15]],[[9],[18]]]
 
 
 describe 'Jolt.sendEvent', ->
@@ -1127,22 +1127,22 @@ describe 'Jolt.sendEvent', ->
 
       UPDATER: (pulse) ->
 
-        super
+        PULSE = super pulse
 
-        if counter is -1 then hold_stamp = pulse.stamp
+        if counter is -1 then hold_stamp = PULSE.stamp
 
         counter += 1
 
         ( expect @name() ).toBe expectations[counter].name
 
-        ( expect (pulse[i] for i in checkProps) ).toEqual [
+        ( expect (PULSE[i] for i in checkProps) ).toEqual [
           expectations[counter].arity
           expectations[counter].junction
           hold_stamp
           expectations[counter].value
         ]
 
-        pulse
+        PULSE
 
       removeWeakReference: (weakReference) ->
         fin.push weakReference
