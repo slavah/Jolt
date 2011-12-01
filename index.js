@@ -2407,6 +2407,16 @@
       EventStream_api.__super__.constructor.apply(this, arguments);
     }
   
+    EventStream_api.factory = function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (function(func, args, ctor) {
+        ctor.prototype = func.prototype;
+        var child = new ctor, result = func.apply(child, args);
+        return typeof result === "object" ? result : child;
+      })(this, args, function() {});
+    };
+  
     return EventStream_api;
   
   })();
@@ -2420,16 +2430,6 @@
     }
   
     InternalE.prototype.ClassName = 'InternalE';
-  
-    InternalE.factory = function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (function(func, args, ctor) {
-        ctor.prototype = func.prototype;
-        var child = new ctor, result = func.apply(child, args);
-        return typeof result === "object" ? result : child;
-      })(this, args, function() {});
-    };
   
     return InternalE;
   

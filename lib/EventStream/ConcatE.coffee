@@ -2,13 +2,11 @@ Jolt.ConcatE = class ConcatE extends EventStream_api
 
   ClassName: 'ConcatE'
 
-  @factory: (args...) ->
-    new this args...
+  no_null_junc: true
 
   updater: (value...) ->
     [].concat value...
 
-# --- #
 
 Jolt.concatE = concatE = (args...) ->
   ConcatE.factory args...

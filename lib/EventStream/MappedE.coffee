@@ -3,8 +3,6 @@ Jolt.MappedE = class MappedE extends EventStream_api
   constructor: (@fn, args...) ->
     super args...
 
-  # --- #
-
   ClassName: 'MappedE'
 
   @factory: (fn, args...) ->
@@ -16,7 +14,6 @@ Jolt.MappedE = class MappedE extends EventStream_api
     fn = @fn
     [ (fn value...) ]
 
-# --- #
 
 Jolt.mapE = mapE = (args...) ->
   MappedE.factory args...

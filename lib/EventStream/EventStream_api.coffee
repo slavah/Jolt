@@ -1,4 +1,7 @@
 Jolt.EventStream_api = class EventStream_api extends EventStream
+
+  @factory: (args...) ->
+    new this args...
  
  
  
