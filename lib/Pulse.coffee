@@ -29,15 +29,14 @@ doNotPropagate.copy = -> this
 
 
 # `Jolt.propagateHigh` is a unique value which when passed as the last argument
-# to `Jolt.sendEvent` signals the `<Pulse>.propagate` method to invoke its
-# `high` logic.
+# to `Jolt.sendEvent` signals `Pulse.prototype.propagate` to invoke its `high`
+# logic.
 
 Jolt.propagateHigh  = propagateHigh  = {}
 
 
-# `sendCall` facilitates the always imperatively called method `Jolt.sendEvent`
-# being named and treated as the first node in a propagation cycle, though it's not
-# properly a node in the graph.
+# `sendCall` facilitates `Jolt.sendEvent` being named and treated as the first
+# node in a propagation cycle, though it's not properly a node in the graph.
 
 Jolt.sendCall = sendCall = name: (-> 'Jolt.sendEvent'), removeWeakReference: ->
 
@@ -280,12 +279,13 @@ Jolt.Pulse = class Pulse
               queue.push estream: receiver, pulse: nextPulse, rank: receiver.rank
 
           # If the original receiver had been flagged as `weaklyHeld` the
-          # `propagate` logic would not have proceeded this far. Since it did,
+          # `propagate` logic would not have proceeded thus far. Since it did,
           # we should only consider the `weaklyHeld` variable's having a true
-          # value to indicate the original receiver should be so flagged if it
-          # has a non-empty `sendTo` array property, i.e. it has child nodes
-          # that were all flagged as `weaklyHeld`. If it does end up flagged,
-          # then a "cleanup" op is scheduled for it.
+          # value as indicating the original receiver should be so flagged if
+          # the receiver has a non-empty `sendTo` array property, i.e. it has
+          # child nodes that were all flagged as `weaklyHeld`. If the original
+          # receiver does end up flagged, then a "cleanup" op is scheduled for
+          # it.
 
           if qv.estream.sendTo.length and weaklyHeld
             qv.estream.weaklyHeld = true
