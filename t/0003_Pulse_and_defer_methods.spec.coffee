@@ -324,11 +324,9 @@ describe 'Jolt.Pulse.prototype.propagate', ->
   ''', ->
 
     fin = []
-    heap_save = nodes: []
 
     class Pulse_ext extends Pulse
       PROPAGATE: (args...) ->
-        heap_save = @heap
         super
 
     class MockE_ext extends MockE
@@ -355,13 +353,13 @@ describe 'Jolt.Pulse.prototype.propagate', ->
 
     pulse = new me[0]._PulseClass 3, false, mockSender, nextStamp(), ['d', 'e', 'f']
 
-    pulse.propagate pulse.sender, me[0]
+    heap = pulse.propagate pulse.sender, me[0]
 
     waitsFor ->
-      fin.length is 4 and heap_save.nodes.length is 6
+      fin.length is 4
 
     runs ->
-      ( expect heap_save.nodes ).toEqual [
+      ( expect heap.nodes ).toEqual [
         [ mockSender, me[0] ]
         [ me[0], me[1] ]
         [ me[1], me[2] ]
