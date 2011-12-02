@@ -1,7 +1,7 @@
 Name
 ====
 
-Jolt - Reactive Objects for JavaScript.
+Jolt - Reactive Objects for JavaScript. [![Build Status](https://secure.travis-ci.org/projexsys/Jolt.png)](http://travis-ci.org/projexsys/Jolt)
 
 Please Note
 ===========
