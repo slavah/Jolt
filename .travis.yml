@@ -2,7 +2,9 @@ language: node_js
 node_js:
   - 0.6
 notifications:
-  email:
+  irc:
+    - "irc.freenode.net#Jolt"
+    - "irc.freenode.net#projexsys"
     on_success: change
     on_failure: always
 
