@@ -1,5 +1,3 @@
 language: node_js
-before_install:
-  - "nvm ls && echo 1"
 node_js:
   - 0.6.4
