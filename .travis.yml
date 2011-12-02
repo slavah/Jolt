@@ -10,4 +10,3 @@ notifications:
     on_failure: always
 node_js:
   - 0.6.4
-
