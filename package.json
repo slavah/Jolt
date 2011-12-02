@@ -24,7 +24,6 @@
   },
   "directories": { "bundles" : "./bundles", "docs": "./docs", "lib": "./lib", "tests" : "./t" },
   "scripts": {
-    "preinstall" : "npm update -g npm",
     "test" : "cd t/ && ../node_modules/jasmine-node/bin/jasmine-node --coffee ./"
   },
   "licenses" : [
