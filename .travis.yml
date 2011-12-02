@@ -3,6 +3,11 @@ node_js:
   - 0.4
   - 0.6
 notifications:
+  email:
+    on_success: change
+    on_failure: always
   irc:
     - "irc.freenode.net#Jolt"
+    on_success: always
+    on_failure: always
 
