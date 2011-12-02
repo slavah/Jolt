@@ -6,7 +6,8 @@ notifications:
     on_success: change
     on_failure: always
   irc:
-    channels: "irc.freenode.net#Jolt"
+    channels:
+      - "irc.freenode.net#Jolt"
     on_success: always
     on_failure: always
 
