@@ -947,6 +947,51 @@ describe 'EventStream.prototype.UPDATER', ->
 
 
   it '''
+    for an EventStream in 'vectored' or 'zipped' mode, when its '_recur'
+    property is set to true, the 'UPDATER' method will (via the 'tranVAL'
+    method) recursively apply the 'updater' method. First, it will apply it to
+    the "array-boxed" value/s returned by the 'tranIN' method; then it will
+    apply it to an array of values resulting from calling an empty array's
+    concat method, with concat's arguments being the set of values returned by
+    the first application of 'tranVAL'
+  ''', ->
+
+    myE = new EventStream
+    myE.v().recur()
+
+    interim = []
+
+    myE.updater = (value...) ->
+      interim.push value...
+      sum = 0
+      (sum += num) for num in (2 * val for val in value)
+      interim.push sum
+      [sum]
+
+    pulse = []
+
+    pulse[0] = new (myE.PulseClass()) 3, false, Jolt.sendCall, 1, [1,2,3]
+    pulse[1] = new (myE.PulseClass()) 3, false, Jolt.sendCall, 2, [4,5,6]
+    pulse[2] = new (myE.PulseClass()) 3, false, Jolt.sendCall, 3, [7,8,9]
+
+    pulse[3] = new (myE.PulseClass()) 3, true,  Jolt.sendCall, 4, [pulse[0],pulse[1],pulse[2]]
+
+    retP = []
+    retP[0] = myE.UPDATER pulse[3]
+
+    ( expect interim ).toEqual [ 1, 2, 3, 12, 4, 5, 6, 30, 7, 8, 9, 48, 12, 30, 48, 180 ]
+    ( expect retP[0].value ).toEqual [180]
+
+    myE.z()
+
+    interim = []
+
+    retP[1] = myE.UPDATER pulse[3]
+
+    ( expect interim ).toEqual [ 1, 4, 7, 24, 2, 5, 8, 30, 3, 6, 9, 36, 24, 30, 36, 180 ]
+    ( expect retP[0].value ).toEqual [180]
+
+  it '''
     for an EventStream that has its '_nary' property set to true, it should
     return pulses which have all members of their 'value' array-properties
     "unboxed" from any containing arrays, but only one level deep
