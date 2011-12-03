@@ -1,24 +1,23 @@
-Jolt.OneE = class OneE extends EventStream_api
+Jolt.OneE_high = class OneE_high extends OneE
 
-  ClassName: 'OneE'
+  ClassName: 'OneE_high'
 
   @factory: (value...) ->
-    thisOneE = new this
-    defer -> sendEvent thisOneE, value...
-    thisOneE
+    thisOneE_high = new this
 
-  sent: false
+    sendOneHigh = ->
+      if not sendOneHigh.already
+        sendOneHigh.already = true
+        sendEvent thisOneE_high, value..., propagateHigh
+    sendOneHigh.already = false
 
-  UPDATER: (pulse) ->
-    if @sent
-      throw '<' + @ClassName + '>.UPDATER: received an extra pulse; an instance of ' + @ClassName + ' should never receive more than 1 pulse'
-    else
-      @sent = true
-      super
+    scheduleBefore beforeQ, sendOneHigh
+    defer sendOneHigh
+    thisOneE_high
 
 
-Jolt.oneE = oneE = (value...) ->
-  OneE.factory value...
+Jolt.oneE_high = oneE_high = (value...) ->
+  OneE_high.factory value...
  
  
  
@@ -75,4 +74,5 @@ Jolt.oneE = oneE = (value...) ->
 # further information and license texts please refer to:
 #
 # [https://raw.github.com/projexsys/Jolt/master/LICENSES](https://raw.github.com/projexsys/Jolt/master/LICENSES)
+
 

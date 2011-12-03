@@ -7,11 +7,10 @@ if isNodeJS
 beforeEach ->
   Jolt.globalize()
 
-describe 'Jolt.BoundE', ->
+describe 'Jolt.OneE', ->
 
   it '''
     should...
   ''', ->
 
     ( expect true ).toBe true
-

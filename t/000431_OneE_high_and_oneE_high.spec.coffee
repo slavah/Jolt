@@ -7,7 +7,7 @@ if isNodeJS
 beforeEach ->
   Jolt.globalize()
 
-describe 'Jolt.OneE', ->
+describe 'Jolt.OneE_high', ->
 
   it '''
     should...
@@ -30,3 +30,4 @@ describe 'Jolt.OneE', ->
 
     runs ->
       ( expect checkIt ).toEqual [ 1, 2, 3, 4, 5, 6 ]
+
