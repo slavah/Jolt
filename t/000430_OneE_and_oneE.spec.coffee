@@ -13,5 +13,4 @@ describe 'Jolt.OneE', ->
     should...
   ''', ->
 
-    expect(true).toBe(true)
-
+    ( expect true ).toBe true

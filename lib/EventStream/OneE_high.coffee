@@ -1,16 +1,23 @@
-Jolt.ZeroE = class ZeroE extends EventStream_api
+Jolt.OneE_high = class OneE_high extends OneE
 
-  ClassName: 'ZeroE'
+  ClassName: 'OneE_high'
 
-  UPDATER: (pulse) ->
-    throw '<' + @ClassName + '>.UPDATER: received a pulse; an instance of ' + @ClassName + ' should never receive a pulse'
+  @factory: (value...) ->
+    thisOneE_high = new this
+
+    sendOneHigh = ->
+      if not sendOneHigh.already
+        sendOneHigh.already = true
+        sendEvent thisOneE_high, value..., propagateHigh
+    sendOneHigh.already = false
+
+    scheduleBefore beforeQ, sendOneHigh
+    defer sendOneHigh
+    thisOneE_high
 
 
-Jolt.zeroE = zeroE = (args...) ->
-  ZeroE.factory args...
-
-EventStream_api::zeroE = (args...) ->
-  zeroE (args.push this ; args)...
+Jolt.oneE_high = oneE_high = (value...) ->
+  OneE_high.factory value...
  
  
  
@@ -67,3 +74,5 @@ EventStream_api::zeroE = (args...) ->
 # further information and license texts please refer to:
 #
 # [https://raw.github.com/projexsys/Jolt/master/LICENSES](https://raw.github.com/projexsys/Jolt/master/LICENSES)
+
+

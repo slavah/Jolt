@@ -13,6 +13,5 @@ describe 'Jolt.SwitchedE', ->
     should...
   ''', ->
 
-    expect(true).toBe(true)
-
+    ( expect true ).toBe true
 

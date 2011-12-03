@@ -57,6 +57,7 @@ async.parallel(
     'EventStream/InternalE.coffee'
     'EventStream/ZeroE.coffee'
     'EventStream/OneE.coffee'
+    'EventStream/OneE_high.coffee'
     'EventStream/BoundE.coffee'
     'EventStream/SwitchedE.coffee'
 
