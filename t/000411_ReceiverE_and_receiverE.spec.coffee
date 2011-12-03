@@ -17,13 +17,12 @@ describe 'Jolt.ReceiverE', ->
 
     checkIt = []
 
-    ###
     (myR.internalE()).updater = (value...) ->
       checkIt.push value...
       value
-    ###
 
-    myE = myR.internalE()
+
+    #myE = myR.internalE()
 
     ###
     myEU = myE.UPDATER
