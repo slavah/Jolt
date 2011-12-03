@@ -1075,6 +1075,58 @@ describe 'EventStream.prototype.UPDATER', ->
     ( expect checkP.OUT ).toEqual [[[3],[12]],[[6],[15]],[[9],[18]]]
 
 
+  it '''
+    for an EventStream that has its '_nary' and '_recur' properties set to true,
+    the "nary logic" should applied between the first and second steps of the
+    "recur logic"
+  ''', ->
+
+    myE = new EventStream
+    myE.v().recur().nary()
+
+    interim = []
+
+    myE.fn = (value...) ->
+      for val in value
+        if _.isArray val
+          3 * v for v in val
+        else
+          3 * val
+
+    myE.updater = (value...) ->
+      interim.push value
+      retval = @fn.apply null, value
+      interim.push retval
+      [retval]
+
+    pulse = []
+
+    pulse[0] = new (myE.PulseClass()) 3, false, Jolt.sendCall, 1, [1,2,3]
+    pulse[1] = new (myE.PulseClass()) 3, false, Jolt.sendCall, 2, [4,5,6]
+    pulse[2] = new (myE.PulseClass()) 3, false, Jolt.sendCall, 3, [7,8,9]
+
+    pulse[3] = new (myE.PulseClass()) 3, true,  Jolt.sendCall, 4, [pulse[0],pulse[1],pulse[2]]
+
+    retP = []
+    retP[0] = myE.UPDATER pulse[3]
+
+    ( expect interim ).toEqual [ [1,2,3], [3,6,9], [4,5,6], [12,15,18], [7,8,9], [21,24,27],
+      [3,6,9,12,15,18,21,24,27], [9,18,27,36,45,54,63,72,81]
+    ]
+    ( expect retP[0].value ).toEqual [ 9, 18, 27, 36, 45, 54, 63, 72, 81 ]
+
+    myE.isNary(false)
+
+    interim = []
+
+    retP[1] = myE.UPDATER pulse[3]
+
+    ( expect interim ).toEqual [ [1,2,3], [3,6,9], [4,5,6], [12,15,18], [7,8,9], [21,24,27],
+      [[3,6,9],[12,15,18],[21,24,27]], [[9,18,27],[36,45,54],[63,72,81]]
+    ]
+    ( expect retP[1].value ).toEqual [ [ [ 9, 18, 27 ], [ 36, 45, 54 ], [ 63, 72, 81 ] ] ]
+
+
 describe 'Jolt.sendEvent', ->
 
   it '''
