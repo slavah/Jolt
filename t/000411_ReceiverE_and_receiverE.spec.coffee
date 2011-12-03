@@ -27,7 +27,7 @@ describe 'Jolt.ReceiverE', ->
 
     myEU = myE.UPDATER
     myE.UPDATER = (pulse) ->
-      checkIt.push pulse.value...
+      #checkIt.push pulse.value...
       myEU.call myE, pulse
 
     myR.sendEvent 'a', 'b', 'c'
