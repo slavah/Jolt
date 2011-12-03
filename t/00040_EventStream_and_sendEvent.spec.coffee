@@ -289,76 +289,76 @@ describe 'Jolt.EventStream.prototype.nary', ->
     ( expect myE._nary ).toBe true
 
 
-describe 'Jolt.EventStream.prototype.doesReduce', ->
+describe 'Jolt.EventStream.prototype.doesRecur', ->
 
   it '''
-    should set the value of an EventStream's '_reduce' property to true if it is
+    should set the value of an EventStream's '_recur' property to true if it is
     called with a truthy value, and to false if it is called with a falsy value
   ''', ->
 
     myE = new EventStream
 
-    myE.doesReduce true
-    ( expect myE._reduce ).toBe true
-    myE.doesReduce 1
-    ( expect myE._reduce ).toBe true
-    myE.doesReduce 'a string'
-    ( expect myE._reduce ).toBe true
-    myE.doesReduce {}
-    ( expect myE._reduce ).toBe true
+    myE.doesRecur true
+    ( expect myE._recur ).toBe true
+    myE.doesRecur 1
+    ( expect myE._recur ).toBe true
+    myE.doesRecur 'a string'
+    ( expect myE._recur ).toBe true
+    myE.doesRecur {}
+    ( expect myE._recur ).toBe true
 
-    myE.doesReduce false
-    ( expect myE._reduce ).toBe false
-    myE.doesReduce 0
-    ( expect myE._reduce ).toBe false
-    myE.doesReduce ''
-    ( expect myE._reduce ).toBe false
+    myE.doesRecur false
+    ( expect myE._recur ).toBe false
+    myE.doesRecur 0
+    ( expect myE._recur ).toBe false
+    myE.doesRecur ''
+    ( expect myE._recur ).toBe false
 
   it '''
-    should return the value of an EventStream's '_reduce' property if it is
+    should return the value of an EventStream's '_recur' property if it is
     called with no arguments
   ''', ->
 
     myE = new EventStream
 
-    ret = myE.doesReduce()
+    ret = myE.doesRecur()
 
     ( expect ret ).toBe false
     ( expect ret ).not.toBe true
 
-    myE._reduce = true
-    ret = myE.doesReduce()
+    myE._recur = true
+    ret = myE.doesRecur()
 
     ( expect ret ).toBe true
     ( expect ret ).not.toBe false
 
 
-describe 'Jolt.EventStream.prototype.reduce', ->
+describe 'Jolt.EventStream.prototype.recur', ->
 
   it '''
-    should have the same effect as calling <EventStream>.doesReduce(true),
+    should have the same effect as calling <EventStream>.doesRecur(true),
     ignoring any arguments passed to it
   ''', ->
 
     myE = new EventStream
 
-    myE.doesReduce false
+    myE.doesRecur false
 
-    ( expect myE._reduce ).toBe false
+    ( expect myE._recur ).toBe false
 
-    myE.reduce()
+    myE.recur()
 
-    ( expect myE._reduce ).toBe true
+    ( expect myE._recur ).toBe true
 
-    myE.doesReduce false
+    myE.doesRecur false
 
-    ( expect myE._reduce ).toBe false
+    ( expect myE._recur ).toBe false
 
-    myE.reduce 123
-    myE.reduce 0
-    myE.reduce false
+    myE.recur 123
+    myE.recur 0
+    myE.recur false
 
-    ( expect myE._reduce ).toBe true
+    ( expect myE._recur ).toBe true
 
 
 describe 'Jolt.EventStream.prototype.PulseClass', ->

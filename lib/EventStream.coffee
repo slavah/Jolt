@@ -132,13 +132,13 @@ Jolt.EventStream = class EventStream
     @_nary = Boolean bool
     this
 
-  _reduce: false
-  reduce: ->
-    @_reduce = true
+  _recur: false
+  recur: ->
+    @_recur = true
     this
-  doesReduce: (bool) ->
-    if not arguments.length then return @_reduce
-    @_reduce = Boolean bool
+  doesRecur: (bool) ->
+    if not arguments.length then return @_recur
+    @_recur = Boolean bool
     this
 
   no_null_junc: false
@@ -233,7 +233,7 @@ Jolt.EventStream = class EventStream
         if ret.length is 0
           PULSE = doNotPropagate
         else
-          if @doesReduce()
+          if @doesRecur()
             redval = [].concat ret...
             if @isNary()
               redval = [].concat redval...
