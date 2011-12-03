@@ -17,10 +17,12 @@ describe 'Jolt.ReceiverE', ->
 
     checkIt = []
 
+    ###
     (myR.internalE()).updater = (value...) ->
       checkIt.push value...
       value
 
     myR.sendEvent 'a', 'b', 'c'
+    ###
 
     ( expect checkIt ).toEqual [ 'a', 'b', 'c' ]
