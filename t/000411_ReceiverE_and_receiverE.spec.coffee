@@ -23,7 +23,7 @@ describe 'Jolt.ReceiverE', ->
       value
     ###
 
-    # myE = myR.internalE()
+    myE = myR.internalE()
 
     ###
     myEU = myE.UPDATER
