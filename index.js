@@ -2188,16 +2188,16 @@
       return this;
     };
   
-    EventStream.prototype._reduce = false;
+    EventStream.prototype._recur = false;
   
-    EventStream.prototype.reduce = function() {
-      this._reduce = true;
+    EventStream.prototype.recur = function() {
+      this._recur = true;
       return this;
     };
   
-    EventStream.prototype.doesReduce = function(bool) {
-      if (!arguments.length) return this._reduce;
-      this._reduce = Boolean(bool);
+    EventStream.prototype.doesRecur = function(bool) {
+      if (!arguments.length) return this._recur;
+      this._recur = Boolean(bool);
       return this;
     };
   
@@ -2326,7 +2326,7 @@
           if (ret.length === 0) {
             PULSE = doNotPropagate;
           } else {
-            if (this.doesReduce()) {
+            if (this.doesRecur()) {
               redval = (_ref2 = []).concat.apply(_ref2, ret);
               if (this.isNary()) redval = (_ref3 = []).concat.apply(_ref3, redval);
               redret = this.updater.apply(this, redval);

@@ -132,13 +132,13 @@
     <span class="vi">@_nary = </span><span class="nb">Boolean</span> <span class="nx">bool</span>
     <span class="k">this</span>
 
-  <span class="nv">_reduce: </span><span class="kc">false</span>
-  <span class="nv">reduce: </span><span class="o">-&gt;</span>
-    <span class="vi">@_reduce = </span><span class="kc">true</span>
+  <span class="nv">_recur: </span><span class="kc">false</span>
+  <span class="nv">recur: </span><span class="o">-&gt;</span>
+    <span class="vi">@_recur = </span><span class="kc">true</span>
     <span class="k">this</span>
-  <span class="nv">doesReduce: </span><span class="nf">(bool) -&gt;</span>
-    <span class="k">if</span> <span class="o">not</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="k">then</span> <span class="k">return</span> <span class="nx">@_reduce</span>
-    <span class="vi">@_reduce = </span><span class="nb">Boolean</span> <span class="nx">bool</span>
+  <span class="nv">doesRecur: </span><span class="nf">(bool) -&gt;</span>
+    <span class="k">if</span> <span class="o">not</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="k">then</span> <span class="k">return</span> <span class="nx">@_recur</span>
+    <span class="vi">@_recur = </span><span class="nb">Boolean</span> <span class="nx">bool</span>
     <span class="k">this</span>
 
   <span class="nv">no_null_junc: </span><span class="kc">false</span>
@@ -233,7 +233,7 @@
         <span class="k">if</span> <span class="nx">ret</span><span class="p">.</span><span class="nx">length</span> <span class="o">is</span> <span class="mi">0</span>
           <span class="nv">PULSE = </span><span class="nx">doNotPropagate</span>
         <span class="k">else</span>
-          <span class="k">if</span> <span class="nx">@doesReduce</span><span class="p">()</span>
+          <span class="k">if</span> <span class="nx">@doesRecur</span><span class="p">()</span>
             <span class="nv">redval = </span><span class="p">[].</span><span class="nx">concat</span> <span class="nx">ret</span><span class="p">...</span>
             <span class="k">if</span> <span class="nx">@isNary</span><span class="p">()</span>
               <span class="nv">redval = </span><span class="p">[].</span><span class="nx">concat</span> <span class="nx">redval</span><span class="p">...</span>

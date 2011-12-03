@@ -289,76 +289,76 @@ describe 'Jolt.EventStream.prototype.nary', ->
     ( expect myE._nary ).toBe true
 
 
-describe 'Jolt.EventStream.prototype.doesReduce', ->
+describe 'Jolt.EventStream.prototype.doesRecur', ->
 
   it '''
-    should set the value of an EventStream's '_reduce' property to true if it is
+    should set the value of an EventStream's '_recur' property to true if it is
     called with a truthy value, and to false if it is called with a falsy value
   ''', ->
 
     myE = new EventStream
 
-    myE.doesReduce true
-    ( expect myE._reduce ).toBe true
-    myE.doesReduce 1
-    ( expect myE._reduce ).toBe true
-    myE.doesReduce 'a string'
-    ( expect myE._reduce ).toBe true
-    myE.doesReduce {}
-    ( expect myE._reduce ).toBe true
+    myE.doesRecur true
+    ( expect myE._recur ).toBe true
+    myE.doesRecur 1
+    ( expect myE._recur ).toBe true
+    myE.doesRecur 'a string'
+    ( expect myE._recur ).toBe true
+    myE.doesRecur {}
+    ( expect myE._recur ).toBe true
 
-    myE.doesReduce false
-    ( expect myE._reduce ).toBe false
-    myE.doesReduce 0
-    ( expect myE._reduce ).toBe false
-    myE.doesReduce ''
-    ( expect myE._reduce ).toBe false
+    myE.doesRecur false
+    ( expect myE._recur ).toBe false
+    myE.doesRecur 0
+    ( expect myE._recur ).toBe false
+    myE.doesRecur ''
+    ( expect myE._recur ).toBe false
 
   it '''
-    should return the value of an EventStream's '_reduce' property if it is
+    should return the value of an EventStream's '_recur' property if it is
     called with no arguments
   ''', ->
 
     myE = new EventStream
 
-    ret = myE.doesReduce()
+    ret = myE.doesRecur()
 
     ( expect ret ).toBe false
     ( expect ret ).not.toBe true
 
-    myE._reduce = true
-    ret = myE.doesReduce()
+    myE._recur = true
+    ret = myE.doesRecur()
 
     ( expect ret ).toBe true
     ( expect ret ).not.toBe false
 
 
-describe 'Jolt.EventStream.prototype.reduce', ->
+describe 'Jolt.EventStream.prototype.recur', ->
 
   it '''
-    should have the same effect as calling <EventStream>.doesReduce(true),
+    should have the same effect as calling <EventStream>.doesRecur(true),
     ignoring any arguments passed to it
   ''', ->
 
     myE = new EventStream
 
-    myE.doesReduce false
+    myE.doesRecur false
 
-    ( expect myE._reduce ).toBe false
+    ( expect myE._recur ).toBe false
 
-    myE.reduce()
+    myE.recur()
 
-    ( expect myE._reduce ).toBe true
+    ( expect myE._recur ).toBe true
 
-    myE.doesReduce false
+    myE.doesRecur false
 
-    ( expect myE._reduce ).toBe false
+    ( expect myE._recur ).toBe false
 
-    myE.reduce 123
-    myE.reduce 0
-    myE.reduce false
+    myE.recur 123
+    myE.recur 0
+    myE.recur false
 
-    ( expect myE._reduce ).toBe true
+    ( expect myE._recur ).toBe true
 
 
 describe 'Jolt.EventStream.prototype.PulseClass', ->
@@ -947,6 +947,51 @@ describe 'EventStream.prototype.UPDATER', ->
 
 
   it '''
+    for an EventStream in 'vectored' or 'zipped' mode, when its '_recur'
+    property is set to true, the 'UPDATER' method will (via the 'tranVAL'
+    method) recursively apply the 'updater' method. First, it will apply it to
+    the "array-boxed" value/s returned by the 'tranIN' method; then it will
+    apply it to an array of values resulting from calling an empty array's
+    concat method, with concat's arguments being the set of values returned by
+    the first application of 'tranVAL'
+  ''', ->
+
+    myE = new EventStream
+    myE.v().recur()
+
+    interim = []
+
+    myE.updater = (value...) ->
+      interim.push value...
+      sum = 0
+      (sum += num) for num in (2 * val for val in value)
+      interim.push sum
+      [sum]
+
+    pulse = []
+
+    pulse[0] = new (myE.PulseClass()) 3, false, Jolt.sendCall, 1, [1,2,3]
+    pulse[1] = new (myE.PulseClass()) 3, false, Jolt.sendCall, 2, [4,5,6]
+    pulse[2] = new (myE.PulseClass()) 3, false, Jolt.sendCall, 3, [7,8,9]
+
+    pulse[3] = new (myE.PulseClass()) 3, true,  Jolt.sendCall, 4, [pulse[0],pulse[1],pulse[2]]
+
+    retP = []
+    retP[0] = myE.UPDATER pulse[3]
+
+    ( expect interim ).toEqual [ 1, 2, 3, 12, 4, 5, 6, 30, 7, 8, 9, 48, 12, 30, 48, 180 ]
+    ( expect retP[0].value ).toEqual [180]
+
+    myE.z()
+
+    interim = []
+
+    retP[1] = myE.UPDATER pulse[3]
+
+    ( expect interim ).toEqual [ 1, 4, 7, 24, 2, 5, 8, 30, 3, 6, 9, 36, 24, 30, 36, 180 ]
+    ( expect retP[0].value ).toEqual [180]
+
+  it '''
     for an EventStream that has its '_nary' property set to true, it should
     return pulses which have all members of their 'value' array-properties
     "unboxed" from any containing arrays, but only one level deep
@@ -1028,6 +1073,58 @@ describe 'EventStream.prototype.UPDATER', ->
 
     ( expect checkP.IN  ).toEqual [pulse[8],pulse[9]]
     ( expect checkP.OUT ).toEqual [[[3],[12]],[[6],[15]],[[9],[18]]]
+
+
+  it '''
+    for an EventStream that has its '_nary' and '_recur' properties set to true,
+    the "nary logic" should be effectively applied between the first and second
+    steps of the "recur logic"
+  ''', ->
+
+    myE = new EventStream
+    myE.v().recur().nary()
+
+    interim = []
+
+    myE.fn = (value...) ->
+      for val in value
+        if _.isArray val
+          3 * v for v in val
+        else
+          3 * val
+
+    myE.updater = (value...) ->
+      interim.push value
+      retval = @fn.apply null, value
+      interim.push retval
+      [retval]
+
+    pulse = []
+
+    pulse[0] = new (myE.PulseClass()) 3, false, Jolt.sendCall, 1, [1,2,3]
+    pulse[1] = new (myE.PulseClass()) 3, false, Jolt.sendCall, 2, [4,5,6]
+    pulse[2] = new (myE.PulseClass()) 3, false, Jolt.sendCall, 3, [7,8,9]
+
+    pulse[3] = new (myE.PulseClass()) 3, true,  Jolt.sendCall, 4, [pulse[0],pulse[1],pulse[2]]
+
+    retP = []
+    retP[0] = myE.UPDATER pulse[3]
+
+    ( expect interim ).toEqual [ [1,2,3], [3,6,9], [4,5,6], [12,15,18], [7,8,9], [21,24,27],
+      [3,6,9,12,15,18,21,24,27], [9,18,27,36,45,54,63,72,81]
+    ]
+    ( expect retP[0].value ).toEqual [ 9, 18, 27, 36, 45, 54, 63, 72, 81 ]
+
+    myE.isNary(false)
+
+    interim = []
+
+    retP[1] = myE.UPDATER pulse[3]
+
+    ( expect interim ).toEqual [ [1,2,3], [3,6,9], [4,5,6], [12,15,18], [7,8,9], [21,24,27],
+      [[3,6,9],[12,15,18],[21,24,27]], [[9,18,27],[36,45,54],[63,72,81]]
+    ]
+    ( expect retP[1].value ).toEqual [ [ [ 9, 18, 27 ], [ 36, 45, 54 ], [ 63, 72, 81 ] ] ]
 
 
 describe 'Jolt.sendEvent', ->
