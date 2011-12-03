@@ -67,4 +67,3 @@ Jolt.receiverE = receiverE = ->
 # further information and license texts please refer to:
 #
 # [https://raw.github.com/projexsys/Jolt/master/LICENSES](https://raw.github.com/projexsys/Jolt/master/LICENSES)
-
