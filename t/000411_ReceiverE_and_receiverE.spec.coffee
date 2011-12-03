@@ -25,9 +25,10 @@ describe 'Jolt.ReceiverE', ->
 
     myE = myR.internalE()
 
-    myE.updater = (value...) ->
-      checkIt.push value...
-      value
+    myEU = myE.UPDATER
+    myE.UPDATER = (pulse) ->
+      checkIt.push pulse.value...
+      myEU.call myE, pulse
 
     myR.sendEvent 'a', 'b', 'c'
 
