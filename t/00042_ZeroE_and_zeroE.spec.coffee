@@ -16,3 +16,5 @@ describe 'Jolt.ZeroE', ->
     myZ = zeroE()
 
     ( expect -> sendEvent myZ, 1, 2, 3 ).toThrow '<ZeroE>.UPDATER: received a pulse; an instance of ZeroE should never receive a pulse'
+
+    setPropagating false
