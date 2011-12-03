@@ -55,6 +55,10 @@ async.parallel(
     'EventStream.coffee'
     'EventStream/EventStream_api.coffee'
     'EventStream/InternalE.coffee'
+    'EventStream/ZeroE.coffee'
+    'EventStream/OneE.coffee'
+    'EventStream/BoundE.coffee'
+    'EventStream/SwitchedE.coffee'
 
     # need: ZeroE/zeroE, OneE/oneE (regular and high variants in API), BoundE/bindE, SwitchedE/switchE
     # after those should go Behavior, but without factory methods
