@@ -55,6 +55,7 @@ async.parallel(
     'EventStream.coffee'
     'EventStream/EventStream_api.coffee'
     'EventStream/InternalE.coffee'
+    'EventStream/ReceiverE.coffee'
     'EventStream/ZeroE.coffee'
     'EventStream/OneE.coffee'
     'EventStream/OneE_high.coffee'

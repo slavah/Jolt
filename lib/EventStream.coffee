@@ -256,23 +256,23 @@ Jolt.EventStream = class EventStream
   weaklyHeld: false
 
 
-Jolt.sendEvent = sendEvent = (estream, vals...) ->
+Jolt.sendEvent = sendEvent = (estream, value...) ->
   cont = undefined
-  cont_maybe = vals[vals.length - 1]
+  cont_maybe = value[value.length - 1]
   if cont_maybe instanceof ContInfo
     cont = cont_maybe
-    vals.pop()
+    value.pop()
   high = false
   if cont
-    high_maybe = vals[vals.length - 1]
+    high_maybe = value[value.length - 1]
   else
     high_maybe = cont_maybe
   if high_maybe is propagateHigh
     high = true
-    vals.pop()
+    value.pop()
   heap = undefined
   PulseClass = estream.PulseClass()
-  pulse = new PulseClass vals.length, false, sendCall, nextStamp(), vals, heap, cont
+  pulse = new PulseClass value.length, false, sendCall, nextStamp(), value, heap, cont
   pulse.propagate sendCall, estream, high
   undefined
 

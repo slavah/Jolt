@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var Behavior, BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isB, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, oneE, oneE_high, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, zeroE, _say, _say_helper;
+  var Behavior, BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isB, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, oneE, oneE_high, propagateHigh, propagating, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, zeroE, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -2363,27 +2363,27 @@
   })();
   
   Jolt.sendEvent = sendEvent = function() {
-    var PulseClass, cont, cont_maybe, estream, heap, high, high_maybe, pulse, vals;
-    estream = arguments[0], vals = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    var PulseClass, cont, cont_maybe, estream, heap, high, high_maybe, pulse, value;
+    estream = arguments[0], value = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
     cont = void 0;
-    cont_maybe = vals[vals.length - 1];
+    cont_maybe = value[value.length - 1];
     if (cont_maybe instanceof ContInfo) {
       cont = cont_maybe;
-      vals.pop();
+      value.pop();
     }
     high = false;
     if (cont) {
-      high_maybe = vals[vals.length - 1];
+      high_maybe = value[value.length - 1];
     } else {
       high_maybe = cont_maybe;
     }
     if (high_maybe === propagateHigh) {
       high = true;
-      vals.pop();
+      value.pop();
     }
     heap = void 0;
     PulseClass = estream.PulseClass();
-    pulse = new PulseClass(vals.length, false, sendCall, nextStamp(), vals, heap, cont);
+    pulse = new PulseClass(value.length, false, sendCall, nextStamp(), value, heap, cont);
     pulse.propagate(sendCall, estream, high);
     return;
   };
@@ -2450,6 +2450,34 @@
     var args;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     return internalE.apply(null, __slice.call(args).concat([this]));
+  };
+  
+  Jolt.ReceiverE = ReceiverE = (function() {
+  
+    __extends(ReceiverE, EventStream_api);
+  
+    function ReceiverE() {
+      ReceiverE.__super__.constructor.apply(this, arguments);
+    }
+  
+    ReceiverE.prototype.ClassName = 'ReceiverE';
+  
+    ReceiverE.factory = function() {
+      return new this;
+    };
+  
+    ReceiverE.prototype.sendEvent = function() {
+      var value;
+      value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return sendEvent.apply(null, [this].concat(__slice.call(value)));
+    };
+  
+    return ReceiverE;
+  
+  })();
+  
+  Jolt.receiverE = receiverE = function() {
+    return ReceiverE.factory();
   };
   
   Jolt.ZeroE = ZeroE = (function() {
