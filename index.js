@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var Behavior, BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, PriorityQueue, Pulse, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isB, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, _say, _say_helper;
+  var Behavior, BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, PriorityQueue, Pulse, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isB, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, zeroE, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -2450,6 +2450,36 @@
     var args;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     return internalE.apply(null, __slice.call(args).concat([this]));
+  };
+  
+  Jolt.ZeroE = ZeroE = (function() {
+  
+    __extends(ZeroE, EventStream_api);
+  
+    function ZeroE() {
+      ZeroE.__super__.constructor.apply(this, arguments);
+    }
+  
+    ZeroE.prototype.ClassName = 'ZeroE';
+  
+    ZeroE.prototype.UPDATER = function(pulse) {
+      throw '<' + this.ClassName + '>.UPDATER: received a pulse; an instance of ZeroE should never receive a pulse';
+    };
+  
+    return ZeroE;
+  
+  })();
+  
+  Jolt.zeroE = zeroE = function() {
+    var args;
+    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return ZeroE.factory.apply(ZeroE, args);
+  };
+  
+  EventStream_api.prototype.zeroE = function() {
+    var args;
+    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return zeroE.apply(null, (args.push(this), args));
   };
   
   exporter = function(ns, target) {
