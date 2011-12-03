@@ -13,5 +13,20 @@ describe 'Jolt.OneE', ->
     should...
   ''', ->
 
-    expect(true).toBe(true)
+    checkIt = []
 
+    myOne = oneE 4, 5, 6
+    myOne.updater = (value...) ->
+      checkIt.push value...
+      value
+
+    myOne_high = oneE_high 1, 2, 3
+    myOne_high.updater = (value...) ->
+      checkIt.push value...
+      value
+
+    waitsFor ->
+      checkIt.length is 6
+
+    runs ->
+      ( expect checkIt ).toEqual [ 1, 2, 3, 4, 5, 6 ]

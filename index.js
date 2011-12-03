@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var Behavior, BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, PriorityQueue, Pulse, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isB, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, zeroE, _say, _say_helper;
+  var Behavior, BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isB, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, oneE, oneE_high, propagateHigh, propagating, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, zeroE, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -2463,7 +2463,7 @@
     ZeroE.prototype.ClassName = 'ZeroE';
   
     ZeroE.prototype.UPDATER = function(pulse) {
-      throw '<' + this.ClassName + '>.UPDATER: received a pulse; an instance of ZeroE should never receive a pulse';
+      throw '<' + this.ClassName + '>.UPDATER: received a pulse; an instance of ' + this.ClassName + ' should never receive a pulse';
     };
   
     return ZeroE;
@@ -2480,6 +2480,83 @@
     var args;
     args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     return zeroE.apply(null, (args.push(this), args));
+  };
+  
+  Jolt.OneE = OneE = (function() {
+  
+    __extends(OneE, EventStream_api);
+  
+    function OneE() {
+      OneE.__super__.constructor.apply(this, arguments);
+    }
+  
+    OneE.prototype.ClassName = 'OneE';
+  
+    OneE.factory = function() {
+      var thisOneE, value;
+      value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      thisOneE = new this;
+      defer(function() {
+        return sendEvent.apply(null, [thisOneE].concat(__slice.call(value)));
+      });
+      return thisOneE;
+    };
+  
+    OneE.prototype.sent = false;
+  
+    OneE.prototype.UPDATER = function(pulse) {
+      if (this.sent) {
+        throw '<' + this.ClassName + '>.UPDATER: received an extra pulse; an instance of ' + this.ClassName + ' should never receive more than 1 pulse';
+      } else {
+        this.sent = true;
+        return OneE.__super__.UPDATER.apply(this, arguments);
+      }
+    };
+  
+    return OneE;
+  
+  })();
+  
+  Jolt.oneE = oneE = function() {
+    var value;
+    value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return OneE.factory.apply(OneE, value);
+  };
+  
+  Jolt.OneE_high = OneE_high = (function() {
+  
+    __extends(OneE_high, OneE);
+  
+    function OneE_high() {
+      OneE_high.__super__.constructor.apply(this, arguments);
+    }
+  
+    OneE_high.prototype.ClassName = 'OneE_high';
+  
+    OneE_high.factory = function() {
+      var sendOneHigh, thisOneE_high, value;
+      value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      thisOneE_high = new this;
+      sendOneHigh = function() {
+        if (!sendOneHigh.already) {
+          sendOneHigh.already = true;
+          return sendEvent.apply(null, [thisOneE_high].concat(__slice.call(value), [propagateHigh]));
+        }
+      };
+      sendOneHigh.already = false;
+      scheduleBefore(beforeQ, sendOneHigh);
+      defer(sendOneHigh);
+      return thisOneE_high;
+    };
+  
+    return OneE_high;
+  
+  })();
+  
+  Jolt.oneE_high = oneE_high = function() {
+    var value;
+    value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return OneE_high.factory.apply(OneE_high, value);
   };
   
   exporter = function(ns, target) {

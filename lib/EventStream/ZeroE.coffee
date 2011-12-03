@@ -3,7 +3,7 @@ Jolt.ZeroE = class ZeroE extends EventStream_api
   ClassName: 'ZeroE'
 
   UPDATER: (pulse) ->
-    throw '<' + @ClassName + '>.UPDATER: received a pulse; an instance of ZeroE should never receive a pulse'
+    throw '<' + @ClassName + '>.UPDATER: received a pulse; an instance of ' + @ClassName + ' should never receive a pulse'
 
 
 Jolt.zeroE = zeroE = (args...) ->
@@ -67,4 +67,3 @@ EventStream_api::zeroE = (args...) ->
 # further information and license texts please refer to:
 #
 # [https://raw.github.com/projexsys/Jolt/master/LICENSES](https://raw.github.com/projexsys/Jolt/master/LICENSES)
-
