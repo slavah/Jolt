@@ -1077,8 +1077,8 @@ describe 'EventStream.prototype.UPDATER', ->
 
   it '''
     for an EventStream that has its '_nary' and '_recur' properties set to true,
-    the "nary logic" should applied between the first and second steps of the
-    "recur logic"
+    the "nary logic" should be effectively applied between the first and second
+    steps of the "recur logic"
   ''', ->
 
     myE = new EventStream
