@@ -33,7 +33,12 @@ describe 'Jolt.InternalE.factory', ->
     myE[5] = InternalE.factory [myE[1]], myE[2], [myE[3], myE[4]]
 
     ( expect myE[5].ClassName ).toBe 'InternalE'
-    ( expect myE[i].sendTo[0] ).toBe myE[5] for i in [1..4]
+
+    waitsFor ->
+      beforeQ.norm.length is 0
+
+    runs ->
+      ( expect myE[i].sendTo[0] ).toBe myE[5] for i in [1..4]
 
 
 describe 'Jolt.internalE', ->
@@ -47,7 +52,7 @@ describe 'Jolt.internalE', ->
   it '''
     should return an InternalE instance, which is inserted into the 'sendTo'
     array-property of the EventStream / InternalE instances passed to the
-    constructor
+    constructor's factory method
   ''', ->
 
     myE = []
@@ -59,7 +64,12 @@ describe 'Jolt.internalE', ->
     myE[5] = internalE myE[1], myE[2], [myE[3]], myE[4]
 
     ( expect myE[5].ClassName ).toBe 'InternalE'
-    ( expect myE[i].sendTo[0] ).toBe myE[5] for i in [1..4]
+
+    waitsFor ->
+      beforeQ.norm.length is 0
+
+    runs ->
+      ( expect myE[i].sendTo[0] ).toBe myE[5] for i in [1..4]
 
 
 describe 'EventStream_api.prototype.internalE', ->
@@ -76,12 +86,21 @@ describe 'EventStream_api.prototype.internalE', ->
 
     ( expect isE myE[2]       ).toBe true
     ( expect myE[2].ClassName ).toBe 'InternalE'
-    ( expect myE[1].sendTo[0] ).toBe myE[2]
 
-    myE[3] = internalE()
-    myE[4] = internalE()
-    myE[5] = internalE()
+    waitsFor ->
+      beforeQ.norm.length is 0
 
-    myE[6] = myE[3].internalE(myE[5], myE[4])
+    runs ->
+      ( expect myE[1].sendTo[0] ).toBe myE[2]
 
-    ( expect myE[i].sendTo[0] ).toBe myE[6] for i in [3..5]
+      myE[3] = internalE()
+      myE[4] = internalE()
+      myE[5] = internalE()
+
+      myE[6] = myE[3].internalE(myE[5], myE[4])
+
+      waitsFor ->
+        beforeQ.norm.length is 0
+
+      runs ->
+        ( expect myE[i].sendTo[0] ).toBe myE[6] for i in [3..5]

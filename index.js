@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var Behavior, BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isB, isE, isNodeJS, isP, isPropagating, lastRank, lastStamp, nextRank, nextStamp, oneE, oneE_high, propagateHigh, propagating, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, sendCall, sendEvent, setPropagating, zeroE, _say, _say_helper;
+  var Behavior, BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isB, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, propagateHigh, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, sendCall, sendEvent, zeroE, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -1754,16 +1754,6 @@
     return ++lastStamp;
   };
   
-  propagating = false;
-  
-  Jolt.isPropagating = isPropagating = function() {
-    return propagating;
-  };
-  
-  Jolt.setPropagating = setPropagating = function(bool) {
-    return propagating = Boolean(bool);
-  };
-  
   Jolt.doNotPropagate = doNotPropagate = {};
   
   doNotPropagate.copy = function() {
@@ -1771,6 +1761,14 @@
   };
   
   Jolt.propagateHigh = propagateHigh = {};
+  
+  Jolt.scheduleHigh = scheduleHigh = {};
+  
+  Jolt.scheduleMid = scheduleMid = {};
+  
+  Jolt.linkHigh = linkHigh = {};
+  
+  Jolt.linkTight = linkTight = {};
   
   Jolt.sendCall = sendCall = {
     name: (function() {
@@ -1835,7 +1833,7 @@
     if (!weakReference.cleanupScheduled) {
       weakReference.cleanupScheduled = true;
       cleanupQ.push(function() {
-        return sender.removeWeakReference(weakReference);
+        return sender.removeWeakReference(weakReference, true);
       });
       if (!cleanupQ.draining) {
         cleanupQ.draining = true;
@@ -1844,31 +1842,108 @@
     }
   };
   
-  Jolt.beforeQ = beforeQ = beforeNextPulse = [];
+  Jolt.beforeQ = beforeQ = beforeNextPulse = {
+    high: [],
+    mid: [],
+    norm: []
+  };
   
-  beforeQ.draining = false;
+  beforeQ.drainingHigh = false;
+  
+  beforeQ.drainingMid = false;
+  
+  beforeQ.drainingNorm = false;
   
   beforeQ.freq = 10;
   
-  beforeQ.drain = function() {
-    if (beforeQ.length) {
-      (beforeQ.shift())();
-      return delay(beforeQ.drain, beforeQ.freq);
+  beforeQ.drainHigh = function() {
+    if (beforeQ.high.length) {
+      (beforeQ.high.shift())();
+      return defer_high(beforeQ.drainHigh);
     } else {
-      return beforeQ.draining = false;
+      return beforeQ.drainingHigh = false;
+    }
+  };
+  
+  beforeQ.drainMid = function() {
+    if (beforeQ.mid.length) {
+      (beforeQ.mid.pop())();
+      return defer(beforeQ.drainMid);
+    } else {
+      return beforeQ.drainingMid = false;
+    }
+  };
+  
+  beforeQ.drainNorm = function() {
+    if (beforeQ.norm.length) {
+      (beforeQ.norm.shift())();
+      return delay(beforeQ.drainNorm, beforeQ.freq);
+    } else {
+      return beforeQ.drainingNorm = false;
+    }
+  };
+  
+  beforeQ.drainAll = function() {
+    var _results;
+    if (beforeQ.high.length) {
+      while (beforeQ.high.length) {
+        (beforeQ.high.shift())();
+      }
+    }
+    if (beforeQ.mid.length) {
+      while (beforeQ.mid.length) {
+        (beforeQ.mid.pop())();
+      }
+    }
+    if (beforeQ.norm.length) {
+      _results = [];
+      while (beforeQ.norm.length) {
+        _results.push((beforeQ.norm.shift())());
+      }
+      return _results;
     }
   };
   
   Jolt.scheduleBefore = scheduleBefore = function() {
-    var args, beforeQ, func;
+    var args, beforeQ, func, which;
     beforeQ = arguments[0], func = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
     if (!beforeQ) beforeQ = beforeNextPulse;
-    beforeQ.push(function() {
-      return func.apply(null, args);
-    });
-    if (!beforeQ.draining) {
-      beforeQ.draining = true;
-      return delay(beforeQ.drain, beforeQ.freq);
+    which = 'norm';
+    if (args[args.length - 1] === scheduleHigh) {
+      which = 'high';
+      args.pop();
+    }
+    if (args[args.length - 1] === scheduleMid) {
+      which = 'mid';
+      args.pop();
+    }
+    switch (which) {
+      case 'high':
+        beforeQ.high.push(function() {
+          return func.apply(null, args);
+        });
+        if (!beforeQ.drainingHigh) {
+          beforeQ.drainingHigh = true;
+          return defer_high(beforeQ.drainHigh);
+        }
+        break;
+      case 'mid':
+        beforeQ.mid.push(function() {
+          return func.apply(null, args);
+        });
+        if (!beforeQ.drainingMid) {
+          beforeQ.drainingMid = true;
+          return defer(beforeQ.drainMid);
+        }
+        break;
+      case 'norm':
+        beforeQ.norm.push(function() {
+          return func.apply(null, args);
+        });
+        if (!beforeQ.drainingNorm) {
+          beforeQ.drainingNorm = true;
+          return delay(beforeQ.drainNorm, beforeQ.freq);
+        }
     }
   };
   
@@ -1919,12 +1994,9 @@
       var PULSE, high, more, nextPulse, queue, qv, receiver, sender, weaklyHeld, _i, _len, _ref;
       sender = arguments[0], receiver = arguments[1], high = arguments[2], more = 4 <= arguments.length ? __slice.call(arguments, 3) : [];
       if (!receiver.weaklyHeld) {
-        if (beforeQ.length && !high) {
-          while (beforeQ.length) {
-            (beforeQ.shift())();
-          }
+        if ((beforeQ.high.length || beforeQ.norm.length) && !high) {
+          beforeQ.drainAll();
         }
-        setPropagating(true);
         queue = new PriorityQueue;
         queue.push({
           estream: receiver,
@@ -1944,7 +2016,7 @@
               receiver = _ref[_i];
               weaklyHeld = weaklyHeld && receiver.weaklyHeld;
               if (receiver.weaklyHeld) {
-                scheduleCleanup(cleanupQ, qv.estream, receiver);
+                qv.estream.removeWeakReference(receiver);
               } else {
                 queue.push({
                   estream: receiver,
@@ -1955,14 +2027,13 @@
             }
             if (qv.estream.sendTo.length && weaklyHeld) {
               qv.estream.weaklyHeld = true;
-              scheduleCleanup(cleanupQ, qv.pulse.sender, qv.estream);
+              qv.pulse.sender.removeWeakReference(qv.estream);
             }
           }
         }
-        setPropagating(false);
         return PULSE.heap;
       } else {
-        scheduleCleanup(cleanupQ, sender, receiver);
+        sender.removeWeakReference(receiver);
         return this.heap;
       }
     };
@@ -1972,7 +2043,6 @@
       sender = arguments[0], receiver = arguments[1], high = arguments[2], more = 4 <= arguments.length ? __slice.call(arguments, 3) : [];
       PULSE = receiver.UPDATER(this);
       if (PULSE !== doNotPropagate && !(isP(PULSE))) {
-        setPropagating(false);
         throw 'receiver\'s UPDATER did not return a pulse object';
       } else {
         return PULSE;
@@ -2013,27 +2083,46 @@
   
     expAnEstreamErr = 'expected an EventStream';
   
-    EventStream.prototype.attachListener = function(receiver) {
+    EventStream.prototype.attachListener = function(receiver, now) {
+      if (now == null) now = false;
       if (!isE(receiver)) {
         throw '<' + this.ClassName + '>.attachListener: ' + expAnEstreamErr;
       }
-      this.constructor.genericAttachListener(this, receiver);
+      if (now) {
+        this.constructor.genericAttachListener(this, receiver);
+      } else {
+        scheduleBefore(beforeQ, (function(sender, receiver) {
+          return sender.attachListener(receiver, true);
+        }), this, receiver);
+      }
       return this;
     };
   
-    EventStream.prototype.removeListener = function(receiver) {
+    EventStream.prototype.removeListener = function(receiver, now) {
+      if (now == null) now = false;
       if (!isE(receiver)) {
         throw '<' + this.ClassName + '>.removeListener: ' + expAnEstreamErr;
       }
-      this.constructor.genericRemoveListener(this, receiver);
+      if (now) {
+        this.constructor.genericRemoveListener(this, receiver);
+      } else {
+        scheduleBefore(beforeQ, (function(sender, receiver) {
+          return sender.removeListener(receiver, true);
+        }), this, receiver);
+      }
       return this;
     };
   
-    EventStream.prototype.removeWeakReference = function(weakReference) {
+    EventStream.prototype.removeWeakReference = function(weakReference, now) {
+      if (now == null) now = false;
       if (!isE(weakReference)) {
         throw '<' + this.ClassName + '>.removeWeakReference: ' + expAnEstreamErr;
       }
-      this.constructor.genericRemoveWeakReference(this, weakReference);
+      if (now) {
+        this.constructor.genericRemoveWeakReference(this, weakReference);
+      } else {
+        scheduleCleanup(cleanupQ, this, weakReference);
+      }
       return this;
     };
   
@@ -2044,69 +2133,52 @@
     cycleError = '.genericAttachListener: cycle detected in propagation graph';
   
     EventStream.genericAttachListener = function(sender, receiver) {
-      var cur, doNextRank, estream, i, q, sentinel, thisClass, _i, _len, _results;
-      if (!isPropagating()) {
-        if (sender.rank === receiver.rank) throw sender.ClassName + cycleError;
-        i = _.indexOf(sender.sendTo, receiver);
-        if (!(i + 1)) {
-          receiver.weaklyHeld = false;
-          sender.sendTo.push(receiver);
-          if (sender.rank > receiver.rank) {
-            doNextRank = [];
-            sentinel = {};
-            sender.__cycleSentinel__ = sentinel;
-            q = [receiver];
-            while (q.length) {
-              cur = q.shift();
-              if (cur.__cycleSentinel__ === sentinel) {
-                sender.sendTo.pop();
-                throw sender.ClassName + cycleError;
-              }
-              doNextRank.push(cur);
-              cur.__cycleSentinel__ = sentinel;
-              q.push.apply(q, cur.sendTo);
+      var cur, doNextRank, estream, i, q, sentinel, _i, _len;
+      if (sender.rank === receiver.rank) throw sender.ClassName + cycleError;
+      i = _.indexOf(sender.sendTo, receiver);
+      if (!(i + 1)) {
+        receiver.weaklyHeld = false;
+        sender.sendTo.push(receiver);
+        if (sender.rank > receiver.rank) {
+          doNextRank = [];
+          sentinel = {};
+          sender.__cycleSentinel__ = sentinel;
+          q = [receiver];
+          while (q.length) {
+            cur = q.shift();
+            if (cur.__cycleSentinel__ === sentinel) {
+              sender.sendTo.pop();
+              throw sender.ClassName + cycleError;
             }
-            _results = [];
-            for (_i = 0, _len = doNextRank.length; _i < _len; _i++) {
-              estream = doNextRank[_i];
-              _results.push(estream.rank = nextRank());
-            }
-            return _results;
+            doNextRank.push(cur);
+            cur.__cycleSentinel__ = sentinel;
+            q.push.apply(q, cur.sendTo);
+          }
+          for (_i = 0, _len = doNextRank.length; _i < _len; _i++) {
+            estream = doNextRank[_i];
+            estream.rank = nextRank();
           }
         }
-      } else {
-        thisClass = this;
-        return scheduleBefore(beforeQ, (function(sender, receiver) {
-          return thisClass.genericAttachListener(sender, receiver);
-        }), sender, receiver);
       }
+      return;
     };
   
     EventStream.genericRemoveListener = function(sender, receiver) {
-      var i, thisClass;
-      if (!isPropagating()) {
-        i = _.indexOf(sender.sendTo, receiver);
-        if (i + 1) return sender.sendTo.splice(i, 1);
-      } else {
-        thisClass = this;
-        return scheduleBefore(beforeQ, (function(sender, receiver) {
-          return thisClass.genericRemoveListener(sender, receiver);
-        }), sender, receiver);
-      }
+      var i;
+      i = _.indexOf(sender.sendTo, receiver);
+      if (i + 1) sender.sendTo.splice(i, 1);
+      return;
     };
   
     EventStream.genericRemoveWeakReference = function(sender, weakReference) {
       var i;
       weakReference.cleanupScheduled = false;
       if (weakReference.weaklyHeld) {
-        if (!isPropagating()) {
-          i = _.indexOf(sender.sendTo, weakReference);
-          if (i + 1) sender.sendTo.splice(i, 1);
-          if (!sender.sendTo.length) return sender.weaklyHeld = true;
-        } else {
-          return scheduleCleanup(cleanupQ, sender, weakReference);
-        }
+        i = _.indexOf(sender.sendTo, weakReference);
+        if (i + 1) sender.sendTo.splice(i, 1);
+        if (!sender.sendTo.length) sender.weaklyHeld = true;
       }
+      return;
     };
   
     EventStream.prototype._mode = null;
@@ -2524,9 +2596,7 @@
       var thisOneE, value;
       value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       thisOneE = new this;
-      defer(function() {
-        return sendEvent.apply(null, [thisOneE].concat(__slice.call(value)));
-      });
+      scheduleBefore.apply(null, [beforeQ, sendEvent, thisOneE].concat(__slice.call(value), [scheduleMid]));
       return thisOneE;
     };
   
@@ -2559,21 +2629,25 @@
       OneE_high.__super__.constructor.apply(this, arguments);
     }
   
+    OneE_high.prototype.attachListener = function(receiver) {
+      return OneE_high.__super__.attachListener.call(this, receiver, true);
+    };
+  
+    OneE_high.prototype.removeListener = function(receiver) {
+      return OneE_high.__super__.removeListener.call(this, receiver, true);
+    };
+  
+    OneE_high.prototype.removeWeakReference = function(weakReference) {
+      return OneE_high.__super__.removeWeakReference.call(this, weakReference, true);
+    };
+  
     OneE_high.prototype.ClassName = 'OneE_high';
   
     OneE_high.factory = function() {
-      var sendOneHigh, thisOneE_high, value;
+      var thisOneE_high, value;
       value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       thisOneE_high = new this;
-      sendOneHigh = function() {
-        if (!sendOneHigh.already) {
-          sendOneHigh.already = true;
-          return sendEvent.apply(null, [thisOneE_high].concat(__slice.call(value), [propagateHigh]));
-        }
-      };
-      sendOneHigh.already = false;
-      scheduleBefore(beforeQ, sendOneHigh);
-      defer(sendOneHigh);
+      scheduleBefore.apply(null, [beforeQ, sendEvent, thisOneE_high].concat(__slice.call(value), [propagateHigh], [scheduleHigh]));
       return thisOneE_high;
     };
   

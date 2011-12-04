@@ -4,7 +4,7 @@ Jolt.OneE = class OneE extends EventStream_api
 
   @factory: (value...) ->
     thisOneE = new this
-    defer -> sendEvent thisOneE, value...
+    scheduleBefore beforeQ, sendEvent, thisOneE, value..., scheduleMid
     thisOneE
 
   sent: false
@@ -75,4 +75,3 @@ Jolt.oneE = oneE = (value...) ->
 # further information and license texts please refer to:
 #
 # [https://raw.github.com/projexsys/Jolt/master/LICENSES](https://raw.github.com/projexsys/Jolt/master/LICENSES)
-

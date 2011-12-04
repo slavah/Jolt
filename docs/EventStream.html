@@ -20,22 +20,31 @@
 
   <span class="nv">expAnEstreamErr = </span><span class="s">&#39;expected an EventStream&#39;</span>
 
-  <span class="nv">attachListener: </span><span class="nf">(receiver) -&gt;</span>
+  <span class="nv">attachListener: </span><span class="nf">(receiver, now = false) -&gt;</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">receiver</span>
       <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: &#39;</span> <span class="o">+</span> <span class="nx">expAnEstreamErr</span>
-    <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericAttachListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
+    <span class="k">if</span> <span class="nx">now</span>
+      <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericAttachListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
+    <span class="k">else</span>
+      <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="p">(</span><span class="nf">(sender, receiver) -&gt;</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">attachListener</span> <span class="nx">receiver</span><span class="p">,</span> <span class="kc">true</span><span class="p">),</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
     <span class="k">this</span>
 
-  <span class="nv">removeListener: </span><span class="nf">(receiver) -&gt;</span>
+  <span class="nv">removeListener: </span><span class="nf">(receiver, now = false) -&gt;</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">receiver</span>
       <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.removeListener: &#39;</span> <span class="o">+</span> <span class="nx">expAnEstreamErr</span>
-    <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericRemoveListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
+    <span class="k">if</span> <span class="nx">now</span>
+      <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericRemoveListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
+    <span class="k">else</span>
+      <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="p">(</span><span class="nf">(sender, receiver) -&gt;</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">removeListener</span> <span class="nx">receiver</span><span class="p">,</span> <span class="kc">true</span><span class="p">),</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
     <span class="k">this</span>
 
-  <span class="nv">removeWeakReference: </span><span class="nf">(weakReference) -&gt;</span>
+  <span class="nv">removeWeakReference: </span><span class="nf">(weakReference, now = false) -&gt;</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">weakReference</span>
       <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.removeWeakReference: &#39;</span> <span class="o">+</span> <span class="nx">expAnEstreamErr</span>
-    <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericRemoveWeakReference</span> <span class="k">this</span><span class="p">,</span> <span class="nx">weakReference</span>
+    <span class="k">if</span> <span class="nx">now</span>
+      <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericRemoveWeakReference</span> <span class="k">this</span><span class="p">,</span> <span class="nx">weakReference</span>
+    <span class="k">else</span>
+      <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="k">this</span><span class="p">,</span> <span class="nx">weakReference</span>
     <span class="k">this</span>
 
   <span class="nv">ClassName: </span><span class="s">&#39;EventStream&#39;</span>
@@ -45,48 +54,40 @@
   <span class="nv">cycleError = </span><span class="s">&#39;.genericAttachListener: cycle detected in propagation graph&#39;</span>
 
   <span class="vi">@genericAttachListener = </span><span class="nf">(sender, receiver) -&gt;</span>
-    <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span><span class="p">()</span>
-      <span class="k">if</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">rank</span> <span class="o">is</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
-        <span class="k">throw</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="nx">cycleError</span>
-      <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">receiver</span>
-      <span class="k">if</span> <span class="o">not</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="nv">receiver.weaklyHeld = </span><span class="kc">false</span>
-        <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">push</span> <span class="nx">receiver</span>
-        <span class="k">if</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">rank</span> <span class="o">&gt;</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
-          <span class="nv">doNextRank = </span><span class="p">[]</span>
-          <span class="nv">sentinel = </span><span class="p">{}</span>
-          <span class="nv">sender.__cycleSentinel__ = </span><span class="nx">sentinel</span>
-          <span class="nv">q = </span><span class="p">[</span> <span class="nx">receiver</span> <span class="p">]</span>
-          <span class="k">while</span> <span class="nx">q</span><span class="p">.</span><span class="nx">length</span>
-            <span class="nv">cur = </span><span class="nx">q</span><span class="p">.</span><span class="nx">shift</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">__cycleSentinel__</span> <span class="o">is</span> <span class="nx">sentinel</span>
-              <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
-              <span class="k">throw</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="nx">cycleError</span>
-            <span class="nx">doNextRank</span><span class="p">.</span><span class="nx">push</span> <span class="nx">cur</span>
-            <span class="nv">cur.__cycleSentinel__ = </span><span class="nx">sentinel</span>
-            <span class="nx">q</span><span class="p">.</span><span class="nx">push</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">...</span>
-          <span class="p">(</span><span class="nv">estream.rank = </span><span class="nx">nextRank</span><span class="p">())</span> <span class="k">for</span> <span class="nx">estream</span> <span class="k">in</span> <span class="nx">doNextRank</span>
-    <span class="k">else</span>
-      <span class="nv">thisClass = </span><span class="k">this</span>
-      <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="p">(</span><span class="nf">(sender, receiver) -&gt;</span> <span class="nx">thisClass</span><span class="p">.</span><span class="nx">genericAttachListener</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span><span class="p">),</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span>
+    <span class="k">if</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">rank</span> <span class="o">is</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
+      <span class="k">throw</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="nx">cycleError</span>
+    <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">receiver</span>
+    <span class="k">if</span> <span class="o">not</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="nv">receiver.weaklyHeld = </span><span class="kc">false</span>
+      <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">push</span> <span class="nx">receiver</span>
+      <span class="k">if</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">rank</span> <span class="o">&gt;</span> <span class="nx">receiver</span><span class="p">.</span><span class="nx">rank</span>
+        <span class="nv">doNextRank = </span><span class="p">[]</span>
+        <span class="nv">sentinel = </span><span class="p">{}</span>
+        <span class="nv">sender.__cycleSentinel__ = </span><span class="nx">sentinel</span>
+        <span class="nv">q = </span><span class="p">[</span> <span class="nx">receiver</span> <span class="p">]</span>
+        <span class="k">while</span> <span class="nx">q</span><span class="p">.</span><span class="nx">length</span>
+          <span class="nv">cur = </span><span class="nx">q</span><span class="p">.</span><span class="nx">shift</span><span class="p">()</span>
+          <span class="k">if</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">__cycleSentinel__</span> <span class="o">is</span> <span class="nx">sentinel</span>
+            <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
+            <span class="k">throw</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="nx">cycleError</span>
+          <span class="nx">doNextRank</span><span class="p">.</span><span class="nx">push</span> <span class="nx">cur</span>
+          <span class="nv">cur.__cycleSentinel__ = </span><span class="nx">sentinel</span>
+          <span class="nx">q</span><span class="p">.</span><span class="nx">push</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">...</span>
+        <span class="p">(</span><span class="nv">estream.rank = </span><span class="nx">nextRank</span><span class="p">())</span> <span class="k">for</span> <span class="nx">estream</span> <span class="k">in</span> <span class="nx">doNextRank</span>
+    <span class="kc">undefined</span>
 
   <span class="vi">@genericRemoveListener = </span><span class="nf">(sender, receiver) -&gt;</span>
-    <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span><span class="p">()</span>
-      <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">receiver</span>
-      <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">splice</span> <span class="nx">i</span><span class="p">,</span> <span class="mi">1</span>
-    <span class="k">else</span>
-      <span class="nv">thisClass = </span><span class="k">this</span>
-      <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="p">(</span><span class="nf">(sender, receiver) -&gt;</span> <span class="nx">thisClass</span><span class="p">.</span><span class="nx">genericRemoveListener</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span><span class="p">),</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span>
+    <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">receiver</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">splice</span> <span class="nx">i</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="kc">undefined</span>
 
   <span class="vi">@genericRemoveWeakReference = </span><span class="nf">(sender, weakReference) -&gt;</span>
     <span class="nv">weakReference.cleanupScheduled = </span><span class="kc">false</span>
     <span class="k">if</span> <span class="nx">weakReference</span><span class="p">.</span><span class="nx">weaklyHeld</span>
-      <span class="k">if</span> <span class="o">not</span> <span class="nx">isPropagating</span><span class="p">()</span>
-        <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">weakReference</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">splice</span> <span class="nx">i</span><span class="p">,</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="o">not</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">length</span> <span class="k">then</span> <span class="nv">sender.weaklyHeld = </span><span class="kc">true</span>
-      <span class="k">else</span>
-        <span class="nx">scheduleCleanup</span> <span class="nx">cleanupQ</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">weakReference</span>
+      <span class="nv">i = </span><span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">,</span> <span class="nx">weakReference</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">then</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">splice</span> <span class="nx">i</span><span class="p">,</span> <span class="mi">1</span>
+      <span class="k">if</span> <span class="o">not</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">sendTo</span><span class="p">.</span><span class="nx">length</span> <span class="k">then</span> <span class="nv">sender.weaklyHeld = </span><span class="kc">true</span>
+    <span class="kc">undefined</span>
 
   <span class="nv">_mode: </span><span class="kc">null</span>
   <span class="nv">mode: </span><span class="nf">(mode) -&gt;</span>

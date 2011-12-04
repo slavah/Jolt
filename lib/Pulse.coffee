@@ -6,20 +6,11 @@ lastStamp = 0
 Jolt.nextStamp = nextStamp = -> ++lastStamp
 
 
-# `Pulse` propagation is, by design, a synchronous operation which in terms of
-# Jolt's own algorightms should always be computationally finite. Practically,
-# this means disallowing modification of event propagation graphs during
-# propagation. The `propagating` flag is therefore toggled at the beginning
-# and end of propagation cycles, by way of its setter function
-# `Jolt.setPropagating`. `EventStream` methods which affect node-relationships
-# use the getter function `Jolt.isPropagating` to determine whether they should
-# proceed or schedule themselves for execution outside of a popagation cycle.
-
-propagating = false
-
-Jolt.isPropagating  = isPropagating  = -> propagating
-Jolt.setPropagating = setPropagating = (bool) -> propagating = Boolean bool
-
+# (stray annotation following deprecation of `propagating` flag/logic, find it a
+# home elsewhere, ast it still conveys design philosophy of Jolt) `Pulse`
+# propagation is, by design, a synchronous operation which in terms of Jolt's
+# own algorightms should always be computationally finite. Practically, this
+# means disallowing modification of event propagation graphs during propagation.
 
 # `Jolt.doNotPropagate` is a sentinel value which signals that event propagation
 # should be halted in the emitting node's branch of a propagation graph.
@@ -32,7 +23,11 @@ doNotPropagate.copy = -> this
 # to `Jolt.sendEvent` signals `Pulse.prototype.propagate` to invoke its `high`
 # logic.
 
-Jolt.propagateHigh  = propagateHigh  = {}
+Jolt.propagateHigh = propagateHigh = {}
+Jolt.scheduleHigh  = scheduleHigh  = {}
+Jolt.scheduleMid   = scheduleMid   = {}
+Jolt.linkHigh      = linkHigh      = {}
+Jolt.linkTight     = linkTight     = {}
 
 
 # `sendCall` facilitates `Jolt.sendEvent` being named and treated as the first
@@ -85,7 +80,7 @@ Jolt.scheduleCleanup = scheduleCleanup = (cleanupQ, sender, weakReference) ->
   if not weakReference.cleanupScheduled
     weakReference.cleanupScheduled = true
     cleanupQ.push ->
-      sender.removeWeakReference weakReference
+      sender.removeWeakReference weakReference, true
     if not cleanupQ.draining
       cleanupQ.draining = true
       delay cleanupQ.drain, cleanupQ.freq
@@ -105,23 +100,65 @@ Jolt.scheduleCleanup = scheduleCleanup = (cleanupQ, sender, weakReference) ->
 # are shifted/exec'd in one step, with respect to the average number of tasks
 # that remain for the "drain all" step that precedes event propagation.
 
-Jolt.beforeQ = beforeQ = beforeNextPulse = []
-beforeQ.draining = false
+Jolt.beforeQ = beforeQ = beforeNextPulse = high: [], mid: [], norm: []
+beforeQ.drainingHigh = false
+beforeQ.drainingMid  = false
+beforeQ.drainingNorm = false
 beforeQ.freq = 10
-beforeQ.drain = ->
-  if beforeQ.length
-    (beforeQ.shift())()
-    delay beforeQ.drain, beforeQ.freq
+beforeQ.drainHigh = ->
+  if beforeQ.high.length
+    (beforeQ.high.shift())()
+    defer_high beforeQ.drainHigh
   else
-    beforeQ.draining = false
+    beforeQ.drainingHigh = false
+beforeQ.drainMid = ->
+  if beforeQ.mid.length
+    (beforeQ.mid.pop())()
+    defer beforeQ.drainMid
+  else
+    beforeQ.drainingMid = false
+beforeQ.drainNorm = ->
+  if beforeQ.norm.length
+    (beforeQ.norm.shift())()
+    delay beforeQ.drainNorm, beforeQ.freq
+  else
+    beforeQ.drainingNorm = false
+beforeQ.drainAll = ->
+  if beforeQ.high.length
+    (beforeQ.high.shift())() while beforeQ.high.length
+  if beforeQ.mid.length
+    (beforeQ.mid.pop())() while beforeQ.mid.length
+  if beforeQ.norm.length
+    (beforeQ.norm.shift())() while beforeQ.norm.length
 
 Jolt.scheduleBefore = scheduleBefore = (beforeQ, func, args...) ->
   if not beforeQ then beforeQ = beforeNextPulse
-  beforeQ.push ->
-    func args...
-  if not beforeQ.draining
-    beforeQ.draining = true
-    delay beforeQ.drain, beforeQ.freq
+  which = 'norm'
+  if args[args.length - 1] is scheduleHigh
+    which = 'high'
+    args.pop()
+  if args[args.length - 1] is scheduleMid
+    which = 'mid'
+    args.pop()
+  switch which
+    when 'high'
+      beforeQ.high.push ->
+        func args...
+      if not beforeQ.drainingHigh
+        beforeQ.drainingHigh = true
+        defer_high beforeQ.drainHigh
+    when 'mid'
+      beforeQ.mid.push ->
+        func args...
+      if not beforeQ.drainingMid
+        beforeQ.drainingMid = true
+        defer beforeQ.drainMid
+    when 'norm'
+      beforeQ.norm.push ->
+        func args...
+      if not beforeQ.drainingNorm
+        beforeQ.drainingNorm = true
+        delay beforeQ.drainNorm, beforeQ.freq
 
 
 # Event propagation order among `EventStream` instances (estreams) that form a
@@ -196,14 +233,12 @@ Jolt.Pulse = class Pulse
     # argument is true.
 
     if not receiver.weaklyHeld
-      if beforeQ.length and not high then (beforeQ.shift())() while beforeQ.length
+      if (beforeQ.high.length or beforeQ.norm.length) and not high then beforeQ.drainAll()
 
-      # Having flipped the `propagating` flag (described above) to true, the
-      # next step is to make an instance of `Jolt.PriorityQueue` and populate
-      # it with the initial receiver. Queue members are hashes with keys
-      # `estream`, `pulse`, and `rank`.
+      # The next step is to make an instance of `Jolt.PriorityQueue` and
+      # populate it with the initial receiver. Queue members are hashes with
+      # keys `estream`, `pulse`, and `rank`.
 
-      setPropagating true
       queue = new PriorityQueue
       queue.push estream: receiver, pulse: this, rank: receiver.rank
 
@@ -268,7 +303,8 @@ Jolt.Pulse = class Pulse
             # queue, and a "cleanup" operation is scheduled
 
             if receiver.weaklyHeld
-              scheduleCleanup cleanupQ, qv.estream, receiver
+              qv.estream.removeWeakReference receiver
+              #scheduleCleanup cleanupQ, qv.estream, receiver
             else
 
               # Each child receiver is paired with `nextPulse`, though note that
@@ -289,16 +325,17 @@ Jolt.Pulse = class Pulse
 
           if qv.estream.sendTo.length and weaklyHeld
             qv.estream.weaklyHeld = true
-            scheduleCleanup cleanupQ, qv.pulse.sender, qv.estream
+            qv.pulse.sender.removeWeakReference qv.estream
+            #scheduleCleanup cleanupQ, qv.pulse.sender, qv.estream
 
       # The propagation cycle is ended by setting the `propagate` flag to false
       # and returning the instance of `HeapStore`
 
-      setPropagating false
       PULSE.heap
 
     else
-      scheduleCleanup cleanupQ, sender, receiver
+      sender.removeWeakReference receiver
+      #scheduleCleanup cleanupQ, sender, receiver
       @heap
 
 
@@ -317,16 +354,9 @@ Jolt.Pulse = class Pulse
     # the continued logic of `Pulse.prototype.propagate`.
 
     if PULSE isnt doNotPropagate and not (isP PULSE)
-      setPropagating false
       throw 'receiver\'s UPDATER did not return a pulse object'
     else
       PULSE
-
-    # (NOTE: In non-catching scenarios in catching/finally branches (see the
-    # implementation of [Pulse_cat.coffee](Pulse_cat.html)), if this step
-    # results in an error being thrown then `propagating` will be "stuck true",
-    # so it's important that estreams attached to `Jolt.CATCH_E` and
-    # `Jolt.FINALLY_E` have their `_PulseClass` properties set to `Pulse_cat`.)
  
  
  

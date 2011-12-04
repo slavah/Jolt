@@ -4,7 +4,7 @@
 
   <span class="vi">@factory: </span><span class="nf">(value...) -&gt;</span>
     <span class="nv">thisOneE = </span><span class="k">new</span> <span class="k">this</span>
-    <span class="nx">defer</span> <span class="o">-&gt;</span> <span class="nx">sendEvent</span> <span class="nx">thisOneE</span><span class="p">,</span> <span class="nx">value</span><span class="p">...</span>
+    <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="nx">sendEvent</span><span class="p">,</span> <span class="nx">thisOneE</span><span class="p">,</span> <span class="nx">value</span><span class="p">...,</span> <span class="nx">scheduleMid</span>
     <span class="nx">thisOneE</span>
 
   <span class="nv">sent: </span><span class="kc">false</span>
