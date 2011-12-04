@@ -444,7 +444,7 @@ describe 'Jolt.EventStream.prototype.attachListener', ->
     ( expect myE[0].sendTo ).toEqual [ myE[1] ]
 
     waitsFor ->
-      beforeQ.length is 0
+      beforeQ.norm.length is 0
 
     runs ->
       ( expect myE[0].sendTo ).toEqual [ myE[1], myE[2] ]
@@ -477,7 +477,7 @@ describe 'Jolt.EventStream.prototype.attachListener', ->
     myE.attachListener myE
 
     waitsFor ->
-      beforeQ.length is 0
+      beforeQ.norm.length is 0
 
     runs ->
       ( expect myE.constructor.genericAttachListener ).toHaveBeenCalled()
@@ -524,7 +524,7 @@ describe 'Jolt.EventStream.prototype.attachListener', ->
     myE[0].attachListener myE[1]
 
     waitsFor ->
-      beforeQ.length is 0
+      beforeQ.norm.length is 0
 
     runs ->
       ( expect myE[0].constructor.genericAttachListener ).toHaveBeenCalled()
@@ -562,7 +562,7 @@ describe 'Jolt.EventStream.prototype.attachListener', ->
     Es = [myE_a, myE_b, myE_c]
 
     waitsFor ->
-      beforeQ.length is 0
+      beforeQ.norm.length is 0
 
     runs ->
       ( expect (i.sendTo for i in myE) ).toEqual [Es, Es, Es, Es, Es]
@@ -593,7 +593,7 @@ describe 'Jolt.EventStream.prototype.attachListener', ->
     myE[4].attachListener myE[0]
 
     waitsFor ->
-      beforeQ.length is 0
+      beforeQ.norm.length is 0
 
     runs ->
 
@@ -658,7 +658,7 @@ describe 'Jolt.EventStream.prototype.removeListener', ->
     myE[0].removeListener myE[1]
 
     waitsFor ->
-      beforeQ.length is 0
+      beforeQ.norm.length is 0
 
     runs ->
       ( expect myE[0].sendTo ).toEqual []
@@ -1324,7 +1324,7 @@ describe 'Jolt.sendEvent', ->
     unless it's called with Jolt.propagateHigh as the last argument
   ''', ->
 
-    ( expect Jolt.beforeQ.length ).toBe 0
+    ( expect Jolt.beforeQ.norm.length ).toBe 0
 
     checkIt = []
 
@@ -1338,7 +1338,7 @@ describe 'Jolt.sendEvent', ->
 
     sendEvent myE
 
-    ( expect Jolt.beforeQ.length ).toBe 0
+    ( expect Jolt.beforeQ.norm.length ).toBe 0
     ( expect checkIt ).toEqual ['x', 'y', 'z']
 
     checkIt = []
@@ -1347,7 +1347,7 @@ describe 'Jolt.sendEvent', ->
 
     sendEvent myE, propagateHigh
 
-    ( expect Jolt.beforeQ.length ).toBe 1
+    ( expect Jolt.beforeQ.norm.length ).toBe 1
     ( expect checkIt ).toEqual []
 
 
@@ -1588,11 +1588,11 @@ describe 'Jolt.sendEvent', ->
 
     sendEvent myE[0]
 
-    ( expect Jolt.beforeQ.length  ).toBe 6
+    ( expect Jolt.beforeQ.norm.length  ).toBe 6
     ( expect Jolt.cleanupQ.length ).toBe 3
 
     waitsFor ->
-      Jolt.beforeQ.length is 0 and Jolt.cleanupQ.length is 0
+      Jolt.beforeQ.norm.length is 0 and Jolt.cleanupQ.length is 0
 
     runs ->
       ( expect myE[0].sendTo ).toEqual [myE[1], myE_dummy[0]]

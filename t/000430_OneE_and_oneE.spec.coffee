@@ -13,4 +13,18 @@ describe 'Jolt.OneE', ->
     should...
   ''', ->
 
-    ( expect true ).toBe true
+    checkIt = []
+
+    up = (value...) ->
+      checkIt.push value...
+      value
+
+    (oneE 1, 2, 3).internalE().updater = up
+    (oneE 'a', 'b', 'c').internalE().updater = up
+    (oneE 4, 5, 6).internalE().updater = up
+
+    waitsFor ->
+      beforeQ.high.length is 0
+
+    runs ->
+      ( expect checkIt ).toEqual [ 1, 2, 3, 'a', 'b', 'c', 4, 5, 6 ]

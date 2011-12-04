@@ -1840,31 +1840,76 @@
     }
   };
   
-  Jolt.beforeQ = beforeQ = beforeNextPulse = [];
+  Jolt.beforeQ = beforeQ = beforeNextPulse = {
+    high: [],
+    norm: []
+  };
   
-  beforeQ.draining = false;
+  beforeQ.drainingHigh = false;
+  
+  beforeQ.drainingNorm = false;
   
   beforeQ.freq = 10;
   
-  beforeQ.drain = function() {
-    if (beforeQ.length) {
-      (beforeQ.shift())();
-      return delay(beforeQ.drain, beforeQ.freq);
+  beforeQ.drainHigh = function() {
+    if (beforeQ.high.length) {
+      (beforeQ.high.pop())();
+      return defer(beforeQ.drainHigh);
     } else {
-      return beforeQ.draining = false;
+      return beforeQ.drainingHigh = false;
+    }
+  };
+  
+  beforeQ.drainNorm = function() {
+    if (beforeQ.norm.length) {
+      (beforeQ.norm.shift())();
+      return delay(beforeQ.drainNorm, beforeQ.freq);
+    } else {
+      return beforeQ.drainingNorm = false;
+    }
+  };
+  
+  beforeQ.drainAll = function() {
+    var _results;
+    if (beforeQ.high.length) {
+      while (beforeQ.high.length) {
+        (beforeQ.high.pop())();
+      }
+    }
+    if (beforeQ.norm.length) {
+      _results = [];
+      while (beforeQ.norm.length) {
+        _results.push((beforeQ.norm.shift())());
+      }
+      return _results;
     }
   };
   
   Jolt.scheduleBefore = scheduleBefore = function() {
-    var args, beforeQ, func;
+    var args, beforeQ, func, high;
     beforeQ = arguments[0], func = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
     if (!beforeQ) beforeQ = beforeNextPulse;
-    beforeQ.push(function() {
-      return func.apply(null, args);
-    });
-    if (!beforeQ.draining) {
-      beforeQ.draining = true;
-      return delay(beforeQ.drain, beforeQ.freq);
+    high = false;
+    if (args[args.length - 1] === scheduleHigh) {
+      high = true;
+      args.pop();
+    }
+    if (high) {
+      beforeQ.high.push(function() {
+        return func.apply(null, args);
+      });
+      if (!beforeQ.drainingHigh) {
+        beforeQ.drainingHigh = true;
+        return defer(beforeQ.drainHigh);
+      }
+    } else {
+      beforeQ.norm.push(function() {
+        return func.apply(null, args);
+      });
+      if (!beforeQ.drainingNorm) {
+        beforeQ.drainingNorm = true;
+        return delay(beforeQ.drainNorm, beforeQ.freq);
+      }
     }
   };
   
@@ -1915,10 +1960,8 @@
       var PULSE, high, more, nextPulse, queue, qv, receiver, sender, weaklyHeld, _i, _len, _ref;
       sender = arguments[0], receiver = arguments[1], high = arguments[2], more = 4 <= arguments.length ? __slice.call(arguments, 3) : [];
       if (!receiver.weaklyHeld) {
-        if (beforeQ.length && !high) {
-          while (beforeQ.length) {
-            (beforeQ.shift())();
-          }
+        if ((beforeQ.high.length || beforeQ.norm.length) && !high) {
+          beforeQ.drainAll();
         }
         queue = new PriorityQueue;
         queue.push({
@@ -2519,9 +2562,7 @@
       var thisOneE, value;
       value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       thisOneE = new this;
-      defer(function() {
-        return sendEvent.apply(null, [thisOneE].concat(__slice.call(value)));
-      });
+      scheduleBefore.apply(null, [beforeQ, sendEvent, thisOneE].concat(__slice.call(value), [scheduleHigh]));
       return thisOneE;
     };
   
@@ -2554,21 +2595,25 @@
       OneE_high.__super__.constructor.apply(this, arguments);
     }
   
+    OneE_high.prototype.attachListener = function(receiver) {
+      return OneE_high.__super__.attachListener.call(this, receiver, true);
+    };
+  
+    OneE_high.prototype.removeListener = function(receiver) {
+      return OneE_high.__super__.removeListener.call(this, receiver, true);
+    };
+  
+    OneE_high.prototype.removeWeakReference = function(weakReference) {
+      return OneE_high.__super__.removeWeakReference.call(this, weakReference, true);
+    };
+  
     OneE_high.prototype.ClassName = 'OneE_high';
   
     OneE_high.factory = function() {
-      var sendOneHigh, thisOneE_high, value;
+      var thisOneE_high, value;
       value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       thisOneE_high = new this;
-      sendOneHigh = function() {
-        if (!sendOneHigh.already) {
-          sendOneHigh.already = true;
-          return sendEvent.apply(null, [thisOneE_high].concat(__slice.call(value), [propagateHigh]));
-        }
-      };
-      sendOneHigh.already = false;
-      scheduleBefore(beforeQ, sendOneHigh);
-      defer(sendOneHigh);
+      scheduleBefore.apply(null, [beforeQ, sendEvent, thisOneE_high].concat(__slice.call(value), [propagateHigh], [scheduleHigh]));
       return thisOneE_high;
     };
   

@@ -99,23 +99,46 @@ Jolt.scheduleCleanup = scheduleCleanup = (cleanupQ, sender, weakReference) ->
 # are shifted/exec'd in one step, with respect to the average number of tasks
 # that remain for the "drain all" step that precedes event propagation.
 
-Jolt.beforeQ = beforeQ = beforeNextPulse = []
-beforeQ.draining = false
+Jolt.beforeQ = beforeQ = beforeNextPulse = high: [], norm: []
+beforeQ.drainingHigh = false
+beforeQ.drainingNorm = false
 beforeQ.freq = 10
-beforeQ.drain = ->
-  if beforeQ.length
-    (beforeQ.shift())()
-    delay beforeQ.drain, beforeQ.freq
+beforeQ.drainHigh = ->
+  if beforeQ.high.length
+    (beforeQ.high.pop())()
+    defer beforeQ.drainHigh
   else
-    beforeQ.draining = false
+    beforeQ.drainingHigh = false
+beforeQ.drainNorm = ->
+  if beforeQ.norm.length
+    (beforeQ.norm.shift())()
+    delay beforeQ.drainNorm, beforeQ.freq
+  else
+    beforeQ.drainingNorm = false
+beforeQ.drainAll = ->
+  if beforeQ.high.length
+    (beforeQ.high.pop())() while beforeQ.high.length
+  if beforeQ.norm.length
+    (beforeQ.norm.shift())() while beforeQ.norm.length
 
 Jolt.scheduleBefore = scheduleBefore = (beforeQ, func, args...) ->
   if not beforeQ then beforeQ = beforeNextPulse
-  beforeQ.push ->
-    func args...
-  if not beforeQ.draining
-    beforeQ.draining = true
-    delay beforeQ.drain, beforeQ.freq
+  high = false
+  if args[args.length - 1] is scheduleHigh
+    high = true
+    args.pop()
+  if high
+    beforeQ.high.push ->
+      func args...
+    if not beforeQ.drainingHigh
+      beforeQ.drainingHigh = true
+      defer beforeQ.drainHigh
+  else
+    beforeQ.norm.push ->
+      func args...
+    if not beforeQ.drainingNorm
+      beforeQ.drainingNorm = true
+      delay beforeQ.drainNorm, beforeQ.freq
 
 
 # Event propagation order among `EventStream` instances (estreams) that form a
@@ -190,7 +213,7 @@ Jolt.Pulse = class Pulse
     # argument is true.
 
     if not receiver.weaklyHeld
-      if beforeQ.length and not high then (beforeQ.shift())() while beforeQ.length
+      if (beforeQ.high.length or beforeQ.norm.length) and not high then beforeQ.drainAll()
 
       # The next step is to make an instance of `Jolt.PriorityQueue` and
       # populate it with the initial receiver. Queue members are hashes with

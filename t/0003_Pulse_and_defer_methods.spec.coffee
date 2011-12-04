@@ -188,19 +188,19 @@ describe 'Jolt.scheduleBefore', ->
     testObj.testFunc = (args...) -> fin = true
     testArgs = [ 'a', 'b', { c: [1] } ]
 
-    ( spyOn Jolt.beforeQ, 'drain' ).andCallThrough()
+    ( spyOn Jolt.beforeQ, 'drainNorm' ).andCallThrough()
     ( spyOn testObj, 'testFunc'   ).andCallThrough()
 
     Jolt.scheduleBefore Jolt.beforeQ, testObj.testFunc, testArgs...
 
-    ( expect beforeQ.length ).toBe 1
+    ( expect beforeQ.norm.length ).toBe 1
 
     waitsFor ->
-      Jolt.beforeQ.length is 0 and fin is true
+      Jolt.beforeQ.norm.length is 0 and fin is true
 
     runs ->
-      ( expect Jolt.beforeQ.drain ).toHaveBeenCalled()
-      ( expect testObj.testFunc   ).toHaveBeenCalledWith testArgs...
+      ( expect Jolt.beforeQ.drainNorm ).toHaveBeenCalled()
+      ( expect testObj.testFunc       ).toHaveBeenCalledWith testArgs...
 
 
 describe 'Jolt.Pulse.prototype.propagate', ->

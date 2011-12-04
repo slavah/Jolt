@@ -1,18 +1,19 @@
 Jolt.OneE_high = class OneE_high extends OneE
 
+  attachListener: (receiver) ->
+    super receiver, true
+
+  removeListener: (receiver) ->
+    super receiver, true
+
+  removeWeakReference: (weakReference) ->
+    super weakReference, true
+
   ClassName: 'OneE_high'
 
   @factory: (value...) ->
     thisOneE_high = new this
-
-    sendOneHigh = ->
-      if not sendOneHigh.already
-        sendOneHigh.already = true
-        sendEvent thisOneE_high, value..., propagateHigh
-    sendOneHigh.already = false
-
-    scheduleBefore beforeQ, sendOneHigh
-    defer sendOneHigh
+    scheduleBefore beforeQ, sendEvent, thisOneE_high, value..., propagateHigh, scheduleHigh
     thisOneE_high
 
 
