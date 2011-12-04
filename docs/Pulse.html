@@ -73,20 +73,20 @@ that remain for the "drain all" step that precedes event propagation.</p>       
 <span class="nv">beforeQ.freq = </span><span class="mi">10</span>
 <span class="nv">beforeQ.drainHigh = </span><span class="o">-&gt;</span>
   <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">high</span><span class="p">.</span><span class="nx">length</span>
-    <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">high</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span>
     <span class="nx">defer_high</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainHigh</span>
+    <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">high</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span>
   <span class="k">else</span>
     <span class="nv">beforeQ.drainingHigh = </span><span class="kc">false</span>
 <span class="nv">beforeQ.drainMid = </span><span class="o">-&gt;</span>
   <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">mid</span><span class="p">.</span><span class="nx">length</span>
-    <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">mid</span><span class="p">.</span><span class="nx">pop</span><span class="p">())()</span>
     <span class="nx">defer</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainMid</span>
+    <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">mid</span><span class="p">.</span><span class="nx">pop</span><span class="p">())()</span>
   <span class="k">else</span>
     <span class="nv">beforeQ.drainingMid = </span><span class="kc">false</span>
 <span class="nv">beforeQ.drainNorm = </span><span class="o">-&gt;</span>
   <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">length</span>
-    <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span>
     <span class="nx">delay</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainNorm</span><span class="p">,</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">freq</span>
+    <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span>
   <span class="k">else</span>
     <span class="nv">beforeQ.drainingNorm = </span><span class="kc">false</span>
 <span class="nv">beforeQ.drainAll = </span><span class="o">-&gt;</span>
