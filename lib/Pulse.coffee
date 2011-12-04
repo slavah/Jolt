@@ -25,6 +25,7 @@ doNotPropagate.copy = -> this
 
 Jolt.propagateHigh = propagateHigh = {}
 Jolt.scheduleHigh  = scheduleHigh  = {}
+Jolt.scheduleMid   = scheduleMid   = {}
 Jolt.linkHigh      = linkHigh      = {}
 Jolt.linkTight     = linkTight     = {}
 
@@ -99,16 +100,23 @@ Jolt.scheduleCleanup = scheduleCleanup = (cleanupQ, sender, weakReference) ->
 # are shifted/exec'd in one step, with respect to the average number of tasks
 # that remain for the "drain all" step that precedes event propagation.
 
-Jolt.beforeQ = beforeQ = beforeNextPulse = high: [], norm: []
+Jolt.beforeQ = beforeQ = beforeNextPulse = high: [], mid: [], norm: []
 beforeQ.drainingHigh = false
+beforeQ.drainingMid  = false
 beforeQ.drainingNorm = false
 beforeQ.freq = 10
 beforeQ.drainHigh = ->
   if beforeQ.high.length
-    (beforeQ.high.pop())()
+    (beforeQ.high.shift())()
     defer_high beforeQ.drainHigh
   else
     beforeQ.drainingHigh = false
+beforeQ.drainMid = ->
+  if beforeQ.mid.length
+    (beforeQ.mid.pop())()
+    defer beforeQ.drainMid
+  else
+    beforeQ.drainingMid = false
 beforeQ.drainNorm = ->
   if beforeQ.norm.length
     (beforeQ.norm.shift())()
@@ -117,28 +125,40 @@ beforeQ.drainNorm = ->
     beforeQ.drainingNorm = false
 beforeQ.drainAll = ->
   if beforeQ.high.length
-    (beforeQ.high.pop())() while beforeQ.high.length
+    (beforeQ.high.shift())() while beforeQ.high.length
+  if beforeQ.mid.length
+    (beforeQ.mid.pop())() while beforeQ.mid.length
   if beforeQ.norm.length
     (beforeQ.norm.shift())() while beforeQ.norm.length
 
 Jolt.scheduleBefore = scheduleBefore = (beforeQ, func, args...) ->
   if not beforeQ then beforeQ = beforeNextPulse
-  high = false
+  which = 'norm'
   if args[args.length - 1] is scheduleHigh
-    high = true
+    which = 'high'
     args.pop()
-  if high
-    beforeQ.high.push ->
-      func args...
-    if not beforeQ.drainingHigh
-      beforeQ.drainingHigh = true
-      defer_high beforeQ.drainHigh
-  else
-    beforeQ.norm.push ->
-      func args...
-    if not beforeQ.drainingNorm
-      beforeQ.drainingNorm = true
-      delay beforeQ.drainNorm, beforeQ.freq
+  if args[args.length - 1] is scheduleMid
+    which = 'mid'
+    args.pop()
+  switch which
+    when 'high'
+      beforeQ.high.push ->
+        func args...
+      if not beforeQ.drainingHigh
+        beforeQ.drainingHigh = true
+        defer_high beforeQ.drainHigh
+    when 'mid'
+      beforeQ.mid.push ->
+        func args...
+      if not beforeQ.drainingMid
+        beforeQ.drainingMid = true
+        defer beforeQ.drainMid
+    when 'norm'
+      beforeQ.norm.push ->
+        func args...
+      if not beforeQ.drainingNorm
+        beforeQ.drainingNorm = true
+        delay beforeQ.drainNorm, beforeQ.freq
 
 
 # Event propagation order among `EventStream` instances (estreams) that form a

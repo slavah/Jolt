@@ -24,7 +24,7 @@ describe 'Jolt.OneE', ->
     (oneE 4, 5, 6).internalE().updater = up
 
     waitsFor ->
-      beforeQ.high.length is 0
+      checkIt.length is 9
 
     runs ->
       ( expect checkIt ).toEqual [ 1, 2, 3, 'a', 'b', 'c', 4, 5, 6 ]
