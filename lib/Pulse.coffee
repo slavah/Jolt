@@ -107,20 +107,20 @@ beforeQ.drainingNorm = false
 beforeQ.freq = 10
 beforeQ.drainHigh = ->
   if beforeQ.high.length
-    (beforeQ.high.shift())()
     defer_high beforeQ.drainHigh
+    (beforeQ.high.shift())()
   else
     beforeQ.drainingHigh = false
 beforeQ.drainMid = ->
   if beforeQ.mid.length
-    (beforeQ.mid.pop())()
     defer beforeQ.drainMid
+    (beforeQ.mid.pop())()
   else
     beforeQ.drainingMid = false
 beforeQ.drainNorm = ->
   if beforeQ.norm.length
-    (beforeQ.norm.shift())()
     delay beforeQ.drainNorm, beforeQ.freq
+    (beforeQ.norm.shift())()
   else
     beforeQ.drainingNorm = false
 beforeQ.drainAll = ->

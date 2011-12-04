@@ -1858,8 +1858,8 @@
   
   beforeQ.drainHigh = function() {
     if (beforeQ.high.length) {
-      (beforeQ.high.shift())();
-      return defer_high(beforeQ.drainHigh);
+      defer_high(beforeQ.drainHigh);
+      return (beforeQ.high.shift())();
     } else {
       return beforeQ.drainingHigh = false;
     }
@@ -1867,8 +1867,8 @@
   
   beforeQ.drainMid = function() {
     if (beforeQ.mid.length) {
-      (beforeQ.mid.pop())();
-      return defer(beforeQ.drainMid);
+      defer(beforeQ.drainMid);
+      return (beforeQ.mid.pop())();
     } else {
       return beforeQ.drainingMid = false;
     }
@@ -1876,8 +1876,8 @@
   
   beforeQ.drainNorm = function() {
     if (beforeQ.norm.length) {
-      (beforeQ.norm.shift())();
-      return delay(beforeQ.drainNorm, beforeQ.freq);
+      delay(beforeQ.drainNorm, beforeQ.freq);
+      return (beforeQ.norm.shift())();
     } else {
       return beforeQ.drainingNorm = false;
     }
