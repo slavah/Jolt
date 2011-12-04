@@ -1854,7 +1854,7 @@
   beforeQ.drainHigh = function() {
     if (beforeQ.high.length) {
       (beforeQ.high.pop())();
-      return defer(beforeQ.drainHigh);
+      return defer_high(beforeQ.drainHigh);
     } else {
       return beforeQ.drainingHigh = false;
     }
@@ -1900,7 +1900,7 @@
       });
       if (!beforeQ.drainingHigh) {
         beforeQ.drainingHigh = true;
-        return defer(beforeQ.drainHigh);
+        return defer_high(beforeQ.drainHigh);
       }
     } else {
       beforeQ.norm.push(function() {

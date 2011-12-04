@@ -106,7 +106,7 @@ beforeQ.freq = 10
 beforeQ.drainHigh = ->
   if beforeQ.high.length
     (beforeQ.high.pop())()
-    defer beforeQ.drainHigh
+    defer_high beforeQ.drainHigh
   else
     beforeQ.drainingHigh = false
 beforeQ.drainNorm = ->
@@ -132,7 +132,7 @@ Jolt.scheduleBefore = scheduleBefore = (beforeQ, func, args...) ->
       func args...
     if not beforeQ.drainingHigh
       beforeQ.drainingHigh = true
-      defer beforeQ.drainHigh
+      defer_high beforeQ.drainHigh
   else
     beforeQ.norm.push ->
       func args...
