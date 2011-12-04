@@ -30,4 +30,4 @@ describe 'Jolt.ZeroE', ->
     # and for errors introduced from code external to the Jolt library, it
     # means, I think, documenting the need to set propagating false when catching
     # exceptions apart from using Pulse_cat ... again, much thought is needed
-    #setPropagating false
+    setPropagating false
