@@ -1366,7 +1366,7 @@ describe 'Jolt.sendEvent', ->
 
     taskArgs = ['x', 'y', 'z']
 
-    Jolt.beforeQ.push -> aTask i for i in taskArgs
+    Jolt.beforeQ.norm.push -> aTask i for i in taskArgs
 
     myE = new EventStream
 
@@ -1377,7 +1377,7 @@ describe 'Jolt.sendEvent', ->
 
     checkIt = []
 
-    Jolt.beforeQ.push -> aTask 'aaa'
+    Jolt.beforeQ.norm.push -> aTask 'aaa'
 
     sendEvent myE, propagateHigh
 
@@ -1401,6 +1401,8 @@ describe 'Jolt.sendEvent', ->
     hold_stamp = null
 
     checkProps = ['arity', 'junction', 'stamp', 'value']
+
+    expectations = []
 
     class Pulse_ext extends Pulse
       PROPAGATE: (args...) ->
@@ -1439,8 +1441,6 @@ describe 'Jolt.sendEvent', ->
     myE[0].attachListener myE[3]
     myE[0].attachListener myE[1]
 
-    myE[3].weaklyHeld = true
-
     myE[1].s()
     myE[1].attachListener myE[4]
     myE[1].attachListener myE[2]
@@ -1458,134 +1458,140 @@ describe 'Jolt.sendEvent', ->
     myE[7].attachListener myE[9]
     myE[7].attachListener myE[8]
 
-    myE[8].weaklyHeld = true
-
-    myE[9].weaklyHeld = true
-
-    testVals = ['a', 'b', 'c', 'd', 'e', 'f']
-
-    expectations = [
-
-      {
-        arity: 6
-        junction: false
-        name: 'myE_0'
-        value: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
-      }
-
-      {
-        arity: 6
-        junction: false
-        name: 'myE_1'
-        value: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
-      }
-
-      {
-        arity: 6
-        junction: false
-        name: 'myE_4'
-        value: [ ['a'], ['b'], ['c'], ['d'], ['e'], ['f'] ]
-      }
-
-      {
-        arity: 1
-        junction: false
-        name: 'myE_5'
-        value: [ [ 'a', 'b', 'c', 'd', 'e', 'f' ] ]
-      }
-
-      {
-        arity: 1
-        junction: false
-        name: 'myE_7'
-        value: [ [ ['a'], ['b'], ['c'], ['d'], ['e'], ['f'] ] ]
-      }
-
-    ]
-
-    sendEvent myE[0], testVals...
-
-    ( expect Jolt.cleanupQ.length    ).toBe 4
-
-    ( expect myE[0].sendTo           ).toEqual  [myE[3], myE[1]]
-    ( expect myE[3].cleanupScheduled ).toBe true
-
-    ( expect myE[7].sendTo           ).toEqual  [myE[9], myE[8]]
-    ( expect myE[7].cleanupScheduled ).toBe true
-
-    ( expect myE[8].cleanupScheduled ).toBe true
-    ( expect myE[9].cleanupScheduled ).toBe true
-
     waitsFor ->
-      fin.length is 4 and heap_save.nodes.length is 6
+      beforeQ.norm.length is 0
 
     runs ->
-      ( expect heap_save.nodes ).toEqual [
-        [ Jolt.sendCall, myE[0] ]
-        [ myE[0], myE[1] ]
-        [ myE[1], myE[2] ]
-        [ myE[1], myE[4] ]
-        [ myE[1], myE[5] ]
-        [ myE[4], myE[7] ]
+      myE[3].weaklyHeld = true
+
+      myE[8].weaklyHeld = true
+
+      myE[9].weaklyHeld = true
+
+      testVals = ['a', 'b', 'c', 'd', 'e', 'f']
+
+      expectations = [
+
+        {
+          arity: 6
+          junction: false
+          name: 'myE_0'
+          value: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
+        }
+
+        {
+          arity: 6
+          junction: false
+          name: 'myE_1'
+          value: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
+        }
+
+        {
+          arity: 6
+          junction: false
+          name: 'myE_4'
+          value: [ ['a'], ['b'], ['c'], ['d'], ['e'], ['f'] ]
+        }
+
+        {
+          arity: 1
+          junction: false
+          name: 'myE_5'
+          value: [ [ 'a', 'b', 'c', 'd', 'e', 'f' ] ]
+        }
+
+        {
+          arity: 1
+          junction: false
+          name: 'myE_7'
+          value: [ [ ['a'], ['b'], ['c'], ['d'], ['e'], ['f'] ] ]
+        }
+
       ]
 
-      ( expect fin ).toEqual [
-        myE[3]
-        myE[9]
-        myE[8]
-        myE[7]
-      ]
+      sendEvent myE[0], testVals...
+
+      ( expect Jolt.cleanupQ.length    ).toBe 4
+
+      ( expect myE[0].sendTo           ).toEqual  [myE[3], myE[1]]
+      ( expect myE[3].cleanupScheduled ).toBe true
+
+      ( expect myE[7].sendTo           ).toEqual  [myE[9], myE[8]]
+      ( expect myE[7].cleanupScheduled ).toBe true
+
+      ( expect myE[8].cleanupScheduled ).toBe true
+      ( expect myE[9].cleanupScheduled ).toBe true
 
       waitsFor ->
-        Jolt.cleanupQ.length is 0
+        fin.length is 4 and heap_save.nodes.length is 6
 
       runs ->
-        ( expect myE[0].sendTo ).toEqual [myE[1]]
-        ( expect myE[7].sendTo ).toEqual []
-        ( expect myE[4].sendTo ).toEqual []
-
-        ( expect myE[4].weaklyHeld ).toBe true
-
-        counter = -1
-
-        myE[5].z()
-
-        expectations = [
-
-          {
-            arity: 6
-            junction: false
-            name: 'myE_0'
-            value: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
-          }
-
-          {
-            arity: 6
-            junction: false
-            name: 'myE_1'
-            value: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
-          }
-
-          {
-            arity: 6
-            junction: false
-            name: 'myE_5'
-            value: [ ['a'], ['b'], ['c'], ['d'], ['e'], ['f'] ]
-          }
-
+        ( expect heap_save.nodes ).toEqual [
+          [ Jolt.sendCall, myE[0] ]
+          [ myE[0], myE[1] ]
+          [ myE[1], myE[2] ]
+          [ myE[1], myE[4] ]
+          [ myE[1], myE[5] ]
+          [ myE[4], myE[7] ]
         ]
 
-        sendEvent myE[0], testVals...
-
-        ( expect Jolt.cleanupQ.length    ).toBe 1
-        ( expect myE[4].cleanupScheduled ).toBe true
-        ( expect myE[1].sendTo           ).toEqual [myE[4], myE[2], myE[5]]
+        ( expect fin ).toEqual [
+          myE[3]
+          myE[9]
+          myE[8]
+          myE[7]
+        ]
 
         waitsFor ->
           Jolt.cleanupQ.length is 0
 
         runs ->
-          ( expect myE[1].sendTo ).toEqual [myE[2], myE[5]]
+          ( expect myE[0].sendTo ).toEqual [myE[1]]
+          ( expect myE[7].sendTo ).toEqual []
+          ( expect myE[4].sendTo ).toEqual []
+
+          ( expect myE[4].weaklyHeld ).toBe true
+
+          counter = -1
+
+          myE[5].z()
+
+          expectations = [
+
+            {
+              arity: 6
+              junction: false
+              name: 'myE_0'
+              value: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
+            }
+
+            {
+              arity: 6
+              junction: false
+              name: 'myE_1'
+              value: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
+            }
+
+            {
+              arity: 6
+              junction: false
+              name: 'myE_5'
+              value: [ ['a'], ['b'], ['c'], ['d'], ['e'], ['f'] ]
+            }
+
+          ]
+
+          sendEvent myE[0], testVals...
+
+          ( expect Jolt.cleanupQ.length    ).toBe 1
+          ( expect myE[4].cleanupScheduled ).toBe true
+          ( expect myE[1].sendTo           ).toEqual [myE[4], myE[2], myE[5]]
+
+          waitsFor ->
+            Jolt.cleanupQ.length is 0
+
+          runs ->
+            ( expect myE[1].sendTo ).toEqual [myE[2], myE[5]]
 
 
   it '''
@@ -1610,25 +1616,30 @@ describe 'Jolt.sendEvent', ->
     i = 0
     for j in myE
       j.attachListener myE_dummy[1]
-      j.attachListener myE_dummy[2]
-      if i < 2 then j.attachListener myE[i + 1]
+      if i is 0 then j.attachListener myE_dummy[2]
+      if i  < 2 then j.attachListener myE[i + 1]
       i++
 
-    myE_dummy[2].weaklyHeld = true
-
-    ( expect myE[0].sendTo ).toEqual [myE_dummy[1], myE_dummy[2], myE[1]]
-    ( expect myE[1].sendTo ).toEqual [myE_dummy[1], myE_dummy[2], myE[2]]
-    ( expect myE[2].sendTo ).toEqual [myE_dummy[1], myE_dummy[2]]
-
-    sendEvent myE[0]
-
-    ( expect Jolt.beforeQ.norm.length  ).toBe 6
-    ( expect Jolt.cleanupQ.length ).toBe 3
-
     waitsFor ->
-      Jolt.beforeQ.norm.length is 0 and Jolt.cleanupQ.length is 0
+      beforeQ.norm.length is 0
 
     runs ->
-      ( expect myE[0].sendTo ).toEqual [myE[1], myE_dummy[0]]
-      ( expect myE[1].sendTo ).toEqual [myE[2], myE_dummy[0]]
-      ( expect myE[2].sendTo ).toEqual [myE_dummy[0]]
+      ( expect myE[0].sendTo ).toEqual [myE_dummy[1], myE_dummy[2], myE[1]]
+      ( expect myE[1].sendTo ).toEqual [myE_dummy[1], myE[2]]
+      ( expect myE[2].sendTo ).toEqual [myE_dummy[1]]
+
+      myE_dummy[2].weaklyHeld = true
+
+      sendEvent myE[0]
+
+      ( expect Jolt.beforeQ.norm.length  ).toBe 6
+      ( expect Jolt.cleanupQ.length      ).toBe 1
+
+      waitsFor ->
+        Jolt.beforeQ.norm.length is 0 and Jolt.cleanupQ.length is 0
+
+      runs ->
+        ( expect myE[0].sendTo ).toEqual [myE[1], myE_dummy[0]]
+        ( expect myE[1].sendTo ).toEqual [myE[2], myE_dummy[0]]
+        ( expect myE[2].sendTo ).toEqual [myE_dummy[0]]
+
