@@ -690,13 +690,17 @@ describe 'Jolt.EventStream.prototype.removeWeakReference', ->
     myE = []
     myE[i] = new EventStream for i in [0..1]
 
-    myE[1].cleanupScheduled = true
-
     myE[0].attachListener myE[1]
 
     myE[0].removeWeakReference myE[1]
 
-    ( expect myE[1].cleanupScheduled ).toBe false
+    ( expect myE[1].cleanupScheduled ).toBe true
+
+    waitsFor ->
+      cleanupQ.length is 0
+
+    runs ->
+      ( expect myE[1].cleanupScheduled ).toBe false
 
 
   it '''
@@ -711,21 +715,38 @@ describe 'Jolt.EventStream.prototype.removeWeakReference', ->
 
     myE[0].attachListener myE[1]
     myE[0].attachListener myE[3]
-    myE[3].weaklyHeld = true
 
-    ( expect myE[0].sendTo ).toEqual [myE[1], myE[3]]
+    waitsFor ->
+      beforeQ.norm.length is 0
 
-    myE[0].removeWeakReference myE[2]
+    runs ->
+      ( expect myE[0].sendTo ).toEqual [myE[1], myE[3]]
 
-    ( expect myE[0].sendTo ).toEqual [myE[1], myE[3]]
+      myE[3].weaklyHeld = true
 
-    myE[0].removeWeakReference myE[1]
+      myE[0].removeWeakReference myE[2], true
 
-    ( expect myE[0].sendTo ).toEqual [myE[1], myE[3]]
+      waitsFor ->
+        cleanupQ.length is 0
 
-    myE[0].removeWeakReference myE[3]
+      runs ->
+        ( expect myE[0].sendTo ).toEqual [myE[1], myE[3]]
 
-    ( expect myE[0].sendTo ).toEqual [myE[1]]
+        myE[0].removeWeakReference myE[1], true
+
+        waitsFor ->
+          cleanupQ.length is 0
+
+        runs ->
+          ( expect myE[0].sendTo ).toEqual [myE[1], myE[3]]
+
+          myE[0].removeWeakReference myE[3], true
+
+          waitsFor ->
+            cleanupQ.length is 0
+
+          runs ->
+            ( expect myE[0].sendTo ).toEqual [myE[1]]
 
 
   it '''
@@ -741,27 +762,40 @@ describe 'Jolt.EventStream.prototype.removeWeakReference', ->
     ( expect myE[0].weaklyHeld ).toBe false
 
     myE[0].attachListener myE[1]
-    myE[1].weaklyHeld = true
 
-    myE[0].removeWeakReference myE[1]
+    waitsFor ->
+      beforeQ.norm.length is 0
 
-    ( expect myE[0].weaklyHeld ).toBe true
+    runs ->
+      myE[1].weaklyHeld = true
 
-    myE[0].weaklyHeld = false
+      myE[0].removeWeakReference myE[1], true
 
-    myE[0].attachListener myE[1]
-    myE[0].attachListener myE[2]
+      ( expect myE[0].weaklyHeld ).toBe true
 
-    myE[1].weaklyHeld = true
-    myE[2].weaklyHeld = true
+      myE[0].weaklyHeld = false
 
-    myE[0].removeWeakReference myE[1]
+      myE[0].attachListener myE[1]
+      myE[0].attachListener myE[2]
 
-    ( expect myE[0].weaklyHeld ).toBe false
+      waitsFor ->
+        beforeQ.norm.length is 0
 
-    myE[0].removeWeakReference myE[2]
+      runs ->
+        myE[1].weaklyHeld = true
+        myE[2].weaklyHeld = true
 
-    ( expect myE[0].weaklyHeld ).toBe true
+        myE[0].removeWeakReference myE[1], true
+
+        ( expect myE[0].weaklyHeld ).toBe false
+
+        myE[0].removeWeakReference myE[2]
+
+        waitsFor ->
+          cleanupQ.length is 0
+
+        runs ->
+          ( expect myE[0].weaklyHeld ).toBe true
 
 
 describe 'EventStream.prototype.UPDATER', ->
