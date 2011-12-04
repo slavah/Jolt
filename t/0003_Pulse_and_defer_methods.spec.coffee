@@ -138,7 +138,7 @@ describe 'Jolt.scheduleCleanup', ->
 
     fin = false
 
-    mockSender = removeWeakReference: (weakReference) ->
+    mockSender = removeWeakReference: (weakReference, now = false) ->
       'mock method'
       fin = true
 
@@ -156,7 +156,7 @@ describe 'Jolt.scheduleCleanup', ->
 
     runs ->
       ( expect Jolt.cleanupQ.drain            ).toHaveBeenCalled()
-      ( expect mockSender.removeWeakReference ).toHaveBeenCalledWith mockWeakReference
+      ( expect mockSender.removeWeakReference ).toHaveBeenCalledWith mockWeakReference, true
 
 
   it '''

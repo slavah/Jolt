@@ -427,27 +427,60 @@ describe 'Jolt.EventStream.prototype.attachListener', ->
 
   it '''
     should push an EventStream into the method's EventStream's 'sendTo'
-    array-property
+    array-property; the op should take place immediately if the 'now' argument
+    passed to 'attachListener' is truthy, otherwise the op will be queued in
+    Jolt.beforeQ
   ''', ->
 
     myE = []
-    myE[i] = new EventStream for i in [0..1]
+    myE[i] = new EventStream for i in [0..2]
 
-    myE[0].attachListener myE[1]
+    myE[0].attachListener myE[1], true
 
-    ( expect myE[0].sendTo[0] ).toBe myE[1]
+    ( expect myE[0].sendTo ).toEqual [ myE[1] ]
+
+    myE[0].attachListener myE[2]
+
+    ( expect myE[0].sendTo ).toEqual [ myE[1] ]
+
+    waitsFor ->
+      beforeQ.length is 0
+
+    runs ->
+      ( expect myE[0].sendTo ).toEqual [ myE[1], myE[2] ]
 
 
   it '''
     should throw an error if an EventStream is attached as a listener to itself
   ''', ->
 
-    myE  = new EventStream
+    class EventStream_ext extends EventStream
+
+    myE  = new EventStream_ext
 
     tryIt = ->
-      myE.attachListener myE
+      myE.attachListener myE, true
 
-    ( expect tryIt ).toThrow 'EventStream.genericAttachListener: cycle detected in propagation graph'
+    checkError = 'EventStream.genericAttachListener: cycle detected in propagation graph'
+
+    ( expect tryIt ).toThrow checkError
+
+    myEcgAL = myE.constructor.genericAttachListener
+    myE.constructor.genericAttachListener = (args...) ->
+      try
+        myEcgAL args...
+      catch error
+        ( expect error ).toBe checkError
+
+    ( spyOn myE.constructor, 'genericAttachListener' ).andCallThrough()
+
+    myE.attachListener myE
+
+    waitsFor ->
+      beforeQ.length is 0
+
+    runs ->
+      ( expect myE.constructor.genericAttachListener ).toHaveBeenCalled()
 
 
   it '''
@@ -458,14 +491,43 @@ describe 'Jolt.EventStream.prototype.attachListener', ->
     myE[i] = new EventStream for i in [0..4]
 
     tryIt = ->
-      myE[1].attachListener myE[2]
-      myE[1].attachListener myE[3]
-      myE[3].attachListener myE[4]
-      myE[4].attachListener myE[0]
+      myE[1].attachListener myE[2], true
+      myE[1].attachListener myE[3], true
+      myE[3].attachListener myE[4], true
+      myE[4].attachListener myE[0], true
 
-      myE[0].attachListener myE[1]
+      myE[0].attachListener myE[1], true
 
-    ( expect tryIt ).toThrow 'EventStream.genericAttachListener: cycle detected in propagation graph'
+    checkError = 'EventStream.genericAttachListener: cycle detected in propagation graph'
+
+    ( expect tryIt ).toThrow checkError
+
+    class EventStream_ext extends EventStream
+
+    myE[i] = new EventStream_ext for i in [0..4]
+
+    myE_0_cgAL = myE[0].constructor.genericAttachListener
+
+    myE[0].constructor.genericAttachListener = (args...) ->
+      try
+        myE_0_cgAL args...
+      catch error
+        ( expect error ).toBe checkError
+
+    ( spyOn myE[0].constructor, 'genericAttachListener' ).andCallThrough()
+
+    myE[1].attachListener myE[2]
+    myE[1].attachListener myE[3]
+    myE[3].attachListener myE[4]
+    myE[4].attachListener myE[0]
+
+    myE[0].attachListener myE[1]
+
+    waitsFor ->
+      beforeQ.length is 0
+
+    runs ->
+      ( expect myE[0].constructor.genericAttachListener ).toHaveBeenCalled()
 
 
   it '''
@@ -475,8 +537,8 @@ describe 'Jolt.EventStream.prototype.attachListener', ->
     myE = []
     myE[i] = new EventStream for i in [0..1]
 
-    myE[0].attachListener myE[1]
-    myE[0].attachListener myE[1]
+    myE[0].attachListener myE[1], true
+    myE[0].attachListener myE[1], true
 
     ( expect myE[0].sendTo.length ).toBe 1
 
@@ -499,7 +561,11 @@ describe 'Jolt.EventStream.prototype.attachListener', ->
 
     Es = [myE_a, myE_b, myE_c]
 
-    ( expect (i.sendTo for i in myE) ).toEqual [Es, Es, Es, Es, Es]
+    waitsFor ->
+      beforeQ.length is 0
+
+    runs ->
+      ( expect (i.sendTo for i in myE) ).toEqual [Es, Es, Es, Es, Es]
 
 
   it '''
@@ -526,19 +592,27 @@ describe 'Jolt.EventStream.prototype.attachListener', ->
 
     myE[4].attachListener myE[0]
 
-    ( expect (i.rank for i in myE) ).toEqual (ranks[4] + j for j in ([1..4].concat 0))
+    waitsFor ->
+      beforeQ.length is 0
 
-    ( expect myE[3].sendTo ).toEqual []
+    runs ->
 
-    ranks[2] = myE[2].rank
+      ( expect (i.rank for i in myE) ).toEqual (ranks[4] + j for j in ([1..4].concat 0))
 
-    try
-      tryIt = -> myE[3].attachListener myE[2]
-      ( expect tryIt ).toThrow 'EventStream.genericAttachListener: cycle detected in propagation graph'
-      tryIt()
-    catch error
       ( expect myE[3].sendTo ).toEqual []
-      ( expect myE[2].rank   ).toBe ranks[2]
+
+      ranks[2] = myE[2].rank
+
+      checkError = 'EventStream.genericAttachListener: cycle detected in propagation graph'
+
+      try
+        tryIt = -> myE[3].attachListener myE[2], true
+        ( expect tryIt ).toThrow checkError
+        tryIt()
+      catch error
+        ( expect error ).toBe checkError
+        ( expect myE[3].sendTo ).toEqual []
+        ( expect myE[2].rank   ).toBe ranks[2]
 
 
 describe 'Jolt.EventStream.prototype.removeListener', ->
@@ -568,17 +642,26 @@ describe 'Jolt.EventStream.prototype.removeListener', ->
     myE = []
     myE[i] = new EventStream for i in [0..2]
 
-    myE[0].attachListener myE[1]
+    myE[0].attachListener myE[1], true
 
     ( expect myE[0].sendTo ).toEqual [myE[1]]
 
-    myE[0].removeListener myE[2]
+    myE[0].removeListener myE[2], true
 
     ( expect myE[0].sendTo ).toEqual [myE[1]]
 
-    myE[0].removeListener myE[1]
+    myE[0].removeListener myE[1], true
 
     ( expect myE[0].sendTo ).toEqual []
+
+    myE[0].attachListener myE[1], true
+    myE[0].removeListener myE[1]
+
+    waitsFor ->
+      beforeQ.length is 0
+
+    runs ->
+      ( expect myE[0].sendTo ).toEqual []
 
 
 describe 'Jolt.EventStream.prototype.removeWeakReference', ->

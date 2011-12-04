@@ -20,22 +20,31 @@ Jolt.EventStream = class EventStream
 
   expAnEstreamErr = 'expected an EventStream'
 
-  attachListener: (receiver) ->
+  attachListener: (receiver, now = false) ->
     if not isE receiver
       throw '<' + @ClassName + '>.attachListener: ' + expAnEstreamErr
-    @constructor.genericAttachListener this, receiver
+    if now
+      @constructor.genericAttachListener this, receiver
+    else
+      scheduleBefore beforeQ, ((sender, receiver) -> sender.attachListener receiver, true), this, receiver
     this
 
-  removeListener: (receiver) ->
+  removeListener: (receiver, now = false) ->
     if not isE receiver
       throw '<' + @ClassName + '>.removeListener: ' + expAnEstreamErr
-    @constructor.genericRemoveListener this, receiver
+    if now
+      @constructor.genericRemoveListener this, receiver
+    else
+      scheduleBefore beforeQ, ((sender, receiver) -> sender.removeListener receiver, true), this, receiver
     this
 
-  removeWeakReference: (weakReference) ->
+  removeWeakReference: (weakReference, now = false) ->
     if not isE weakReference
       throw '<' + @ClassName + '>.removeWeakReference: ' + expAnEstreamErr
-    @constructor.genericRemoveWeakReference this, weakReference
+    if now
+      @constructor.genericRemoveWeakReference this, weakReference
+    else
+      scheduleCleanup cleanupQ, this, weakReference
     this
 
   ClassName: 'EventStream'
@@ -45,48 +54,40 @@ Jolt.EventStream = class EventStream
   cycleError = '.genericAttachListener: cycle detected in propagation graph'
 
   @genericAttachListener = (sender, receiver) ->
-    if not isPropagating()
-      if sender.rank is receiver.rank
-        throw sender.ClassName + cycleError
-      i = _.indexOf sender.sendTo, receiver
-      if not (i + 1)
-        receiver.weaklyHeld = false
-        sender.sendTo.push receiver
-        if sender.rank > receiver.rank
-          doNextRank = []
-          sentinel = {}
-          sender.__cycleSentinel__ = sentinel
-          q = [ receiver ]
-          while q.length
-            cur = q.shift()
-            if cur.__cycleSentinel__ is sentinel
-              sender.sendTo.pop()
-              throw sender.ClassName + cycleError
-            doNextRank.push cur
-            cur.__cycleSentinel__ = sentinel
-            q.push cur.sendTo...
-          (estream.rank = nextRank()) for estream in doNextRank
-    else
-      thisClass = this
-      scheduleBefore beforeQ, ((sender, receiver) -> thisClass.genericAttachListener sender, receiver), sender, receiver
+    if sender.rank is receiver.rank
+      throw sender.ClassName + cycleError
+    i = _.indexOf sender.sendTo, receiver
+    if not (i + 1)
+      receiver.weaklyHeld = false
+      sender.sendTo.push receiver
+      if sender.rank > receiver.rank
+        doNextRank = []
+        sentinel = {}
+        sender.__cycleSentinel__ = sentinel
+        q = [ receiver ]
+        while q.length
+          cur = q.shift()
+          if cur.__cycleSentinel__ is sentinel
+            sender.sendTo.pop()
+            throw sender.ClassName + cycleError
+          doNextRank.push cur
+          cur.__cycleSentinel__ = sentinel
+          q.push cur.sendTo...
+        (estream.rank = nextRank()) for estream in doNextRank
+    undefined
 
   @genericRemoveListener = (sender, receiver) ->
-    if not isPropagating()
-      i = _.indexOf sender.sendTo, receiver
-      if (i + 1) then sender.sendTo.splice i, 1
-    else
-      thisClass = this
-      scheduleBefore beforeQ, ((sender, receiver) -> thisClass.genericRemoveListener sender, receiver), sender, receiver
+    i = _.indexOf sender.sendTo, receiver
+    if (i + 1) then sender.sendTo.splice i, 1
+    undefined
 
   @genericRemoveWeakReference = (sender, weakReference) ->
     weakReference.cleanupScheduled = false
     if weakReference.weaklyHeld
-      if not isPropagating()
-        i = _.indexOf sender.sendTo, weakReference
-        if (i + 1) then sender.sendTo.splice i, 1
-        if not sender.sendTo.length then sender.weaklyHeld = true
-      else
-        scheduleCleanup cleanupQ, sender, weakReference
+      i = _.indexOf sender.sendTo, weakReference
+      if (i + 1) then sender.sendTo.splice i, 1
+      if not sender.sendTo.length then sender.weaklyHeld = true
+    undefined
 
   _mode: null
   mode: (mode) ->
