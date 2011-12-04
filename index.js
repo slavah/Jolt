@@ -1823,6 +1823,7 @@
   
   cleanupQ.drain = function() {
     if (cleanupQ.length) {
+      setPropagating(false);
       (cleanupQ.shift())();
       return delay(cleanupQ.drain, cleanupQ.freq);
     } else {
@@ -1852,6 +1853,7 @@
   
   beforeQ.drain = function() {
     if (beforeQ.length) {
+      setPropagating(false);
       (beforeQ.shift())();
       return delay(beforeQ.drain, beforeQ.freq);
     } else {

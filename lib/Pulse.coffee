@@ -75,6 +75,7 @@ cleanupQ.draining = false
 cleanupQ.freq = 100
 cleanupQ.drain = ->
   if cleanupQ.length
+    setPropagating false
     (cleanupQ.shift())()
     delay cleanupQ.drain, cleanupQ.freq
   else
@@ -110,6 +111,7 @@ beforeQ.draining = false
 beforeQ.freq = 10
 beforeQ.drain = ->
   if beforeQ.length
+    setPropagating false
     (beforeQ.shift())()
     delay beforeQ.drain, beforeQ.freq
   else
