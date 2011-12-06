@@ -2085,33 +2085,55 @@
     expAnEstreamErr = 'expected an EventStream';
   
     EventStream.prototype.attachListener = function(receiver, now) {
+      var rcvr, _i, _len, _results;
       if (now == null) now = false;
-      if (!isE(receiver)) {
-        throw '<' + this.ClassName + '>.attachListener: ' + expAnEstreamErr;
-      }
-      if (now) {
-        this.constructor.genericAttachListener(this, receiver);
+      if (_.isArray(receiver)) {
+        return receiver = _.flatten(receiver);
       } else {
-        scheduleBefore(beforeQ, (function(sender, receiver) {
-          return sender.attachListener(receiver, true);
-        }), this, receiver);
+        receiver = [receiver];
+        _results = [];
+        for (_i = 0, _len = receiver.length; _i < _len; _i++) {
+          rcvr = receiver[_i];
+          if (!isE(rcvr)) {
+            throw '<' + this.ClassName + '>.attachListener: ' + expAnEstreamErr;
+          }
+          if (now) {
+            this.constructor.genericAttachListener(this, rcvr);
+          } else {
+            scheduleBefore(beforeQ, (function(sender, receiver) {
+              return sender.attachListener(receiver, true);
+            }), this, rcvr);
+          }
+          _results.push(this);
+        }
+        return _results;
       }
-      return this;
     };
   
     EventStream.prototype.removeListener = function(receiver, now) {
+      var rcvr, _i, _len, _results;
       if (now == null) now = false;
-      if (!isE(receiver)) {
-        throw '<' + this.ClassName + '>.removeListener: ' + expAnEstreamErr;
-      }
-      if (now) {
-        this.constructor.genericRemoveListener(this, receiver);
+      if (_.isArray(receiver)) {
+        return receiver = _.flatten(receiver);
       } else {
-        scheduleBefore(beforeQ, (function(sender, receiver) {
-          return sender.removeListener(receiver, true);
-        }), this, receiver);
+        receiver = [receiver];
+        _results = [];
+        for (_i = 0, _len = receiver.length; _i < _len; _i++) {
+          rcvr = receiver[_i];
+          if (!isE(rcvr)) {
+            throw '<' + this.ClassName + '>.removeListener: ' + expAnEstreamErr;
+          }
+          if (now) {
+            this.constructor.genericRemoveListener(this, rcvr);
+          } else {
+            scheduleBefore(beforeQ, (function(sender, receiver) {
+              return sender.removeListener(receiver, true);
+            }), this, rcvr);
+          }
+          _results.push(this);
+        }
+        return _results;
       }
-      return this;
     };
   
     EventStream.prototype.removeWeakReference = function(weakReference, now) {

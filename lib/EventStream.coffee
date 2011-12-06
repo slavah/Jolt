@@ -22,22 +22,32 @@ Jolt.EventStream = class EventStream
   expAnEstreamErr = 'expected an EventStream'
 
   attachListener: (receiver, now = false) ->
-    if not isE receiver
-      throw '<' + @ClassName + '>.attachListener: ' + expAnEstreamErr
-    if now
-      @constructor.genericAttachListener this, receiver
+    if _.isArray receiver
+      receiver = _.flatten receiver
     else
-      scheduleBefore beforeQ, ((sender, receiver) -> sender.attachListener receiver, true), this, receiver
-    this
+      receiver = [ receiver ]
+      for rcvr in receiver
+        if not isE rcvr
+          throw '<' + @ClassName + '>.attachListener: ' + expAnEstreamErr
+        if now
+          @constructor.genericAttachListener this, rcvr
+        else
+          scheduleBefore beforeQ, ((sender, receiver) -> sender.attachListener receiver, true), this, rcvr
+        this
 
   removeListener: (receiver, now = false) ->
-    if not isE receiver
-      throw '<' + @ClassName + '>.removeListener: ' + expAnEstreamErr
-    if now
-      @constructor.genericRemoveListener this, receiver
+    if _.isArray receiver
+      receiver = _.flatten receiver
     else
-      scheduleBefore beforeQ, ((sender, receiver) -> sender.removeListener receiver, true), this, receiver
-    this
+      receiver = [ receiver ]
+      for rcvr in receiver
+        if not isE rcvr
+          throw '<' + @ClassName + '>.removeListener: ' + expAnEstreamErr
+        if now
+          @constructor.genericRemoveListener this, rcvr
+        else
+          scheduleBefore beforeQ, ((sender, receiver) -> sender.removeListener receiver, true), this, rcvr
+        this
 
   removeWeakReference: (weakReference, now = false) ->
     if not isE weakReference
