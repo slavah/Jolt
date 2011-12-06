@@ -1868,7 +1868,7 @@
   beforeQ.drainMid = function() {
     if (beforeQ.mid.length) {
       defer(beforeQ.drainMid);
-      return (beforeQ.mid.pop())();
+      if (!beforeQ.drainingHigh) return (beforeQ.mid.pop())();
     } else {
       return beforeQ.drainingMid = false;
     }
@@ -1877,7 +1877,7 @@
   beforeQ.drainNorm = function() {
     if (beforeQ.norm.length) {
       delay(beforeQ.drainNorm, beforeQ.freq);
-      return (beforeQ.norm.shift())();
+      if (!beforeQ.drainingHigh) return (beforeQ.norm.shift())();
     } else {
       return beforeQ.drainingNorm = false;
     }
