@@ -6,9 +6,6 @@ Jolt.OneE_high = class OneE_high extends OneE
   removeListener: (receiver) ->
     super receiver, true
 
-  removeWeakReference: (weakReference) ->
-    super weakReference, true
-
   ClassName: 'OneE_high'
 
   @factory: (value...) ->

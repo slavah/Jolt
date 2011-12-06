@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var Behavior, BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isB, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, propagateHigh, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, sendCall, sendEvent, zeroE, _say, _say_helper;
+  var BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, propagateHigh, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, sendCall, sendEvent, zeroE, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -2060,7 +2060,7 @@
   };
   
   Jolt.isE = isE = function(estream) {
-    return (estream instanceof EventStream) && !(isB(estream));
+    return estream instanceof EventStream;
   };
   
   Jolt.EventStream = EventStream = (function() {
@@ -2461,22 +2461,6 @@
     return;
   };
   
-  Jolt.Behavior = Behavior = (function() {
-  
-    __extends(Behavior, EventStream);
-  
-    function Behavior() {
-      Behavior.__super__.constructor.apply(this, arguments);
-    }
-  
-    return Behavior;
-  
-  })();
-  
-  Jolt.isB = isB = function(behavior) {
-    return behavior instanceof Behavior;
-  };
-  
   Jolt.EventStream_api = EventStream_api = (function() {
   
     __extends(EventStream_api, EventStream);
@@ -2636,10 +2620,6 @@
   
     OneE_high.prototype.removeListener = function(receiver) {
       return OneE_high.__super__.removeListener.call(this, receiver, true);
-    };
-  
-    OneE_high.prototype.removeWeakReference = function(weakReference) {
-      return OneE_high.__super__.removeWeakReference.call(this, weakReference, true);
     };
   
     OneE_high.prototype.ClassName = 'OneE_high';

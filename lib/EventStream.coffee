@@ -3,7 +3,7 @@ nextRank = -> ++lastRank
 
 
 Jolt.isE = isE = (estream) ->
-  (estream instanceof EventStream) and not (isB estream)
+  estream instanceof EventStream
 
 
 Jolt.EventStream = class EventStream
@@ -277,17 +277,6 @@ Jolt.sendEvent = sendEvent = (estream, value...) ->
   pulse = new PulseClass value.length, false, sendCall, nextStamp(), value, heap, cont
   pulse.propagate sendCall, estream, high
   undefined
-
-
-# `Jolt.Behavior` is stubbed in here, though the working re/definition is given
-# in [Behavior.cofee](Behavior.html)
-Jolt.Behavior = class Behavior extends EventStream
-
-
-# For `Jolt.isE` to operate prior to the working definition of `Jolt.Behavior`,
-# `Jolt.isB` needs its own working definition.
-Jolt.isB = isB = (behavior) ->
-  behavior instanceof Behavior
  
  
  
