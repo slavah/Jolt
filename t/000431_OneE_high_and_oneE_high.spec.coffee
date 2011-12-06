@@ -15,11 +15,11 @@ describe 'Jolt.OneE_high', ->
 
     checkIt = []
 
-    (oneE 4, 5, 6).internalE().updater = (value...) ->
+    (oneE 4, 5, 6).internalE().internalE().updater = (value...) ->
       checkIt.push value...
       value
 
-    (oneE_high 1, 2, 3).internalE().updater = (value...) ->
+    (oneE_high 1, 2, 3).internalE().internalE().updater = (value...) ->
       checkIt.push value...
       value
 

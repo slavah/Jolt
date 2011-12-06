@@ -2615,10 +2615,20 @@
     }
   
     OneE_high.prototype.attachListener = function(receiver) {
+      var rAL;
+      rAL = receiver.attachListener;
+      receiver.attachListener = function(rcvr) {
+        return rAL.call(receiver, rcvr, true);
+      };
       return OneE_high.__super__.attachListener.call(this, receiver, true);
     };
   
     OneE_high.prototype.removeListener = function(receiver) {
+      var rRL;
+      rRL = receiver.removeListener;
+      receiver.removeListener = function(rcvr) {
+        return rRL.call(receiver, rcvr, true);
+      };
       return OneE_high.__super__.removeListener.call(this, receiver, true);
     };
   
