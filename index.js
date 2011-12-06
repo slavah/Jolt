@@ -2072,6 +2072,7 @@
       this.rank = nextRank();
       this.absRank = this.rank;
       this.sendTo = [];
+      this.linksTo = [];
       if (recvFrom.length) {
         _ref = _.flatten(__slice.call(recvFrom));
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {

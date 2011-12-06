@@ -13,7 +13,8 @@ Jolt.EventStream = class EventStream
     @rank = nextRank()
     @absRank = @rank
 
-    @sendTo = []
+    @sendTo  = []
+    @linksTo = []
 
     if recvFrom.length
       (estream.attachListener this) for estream in (_.flatten [ recvFrom... ])
