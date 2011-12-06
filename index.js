@@ -1868,7 +1868,7 @@
   beforeQ.drainMid = function() {
     if (beforeQ.mid.length) {
       defer(beforeQ.drainMid);
-      if (!beforeQ.drainingHigh) return (beforeQ.mid.pop())();
+      return (beforeQ.mid.pop())();
     } else {
       return beforeQ.drainingMid = false;
     }
