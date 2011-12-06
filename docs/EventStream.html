@@ -3,7 +3,7 @@
 
 
 <span class="nv">Jolt.isE = isE = </span><span class="nf">(estream) -&gt;</span>
-  <span class="p">(</span><span class="nx">estream</span> <span class="k">instanceof</span> <span class="nx">EventStream</span><span class="p">)</span> <span class="o">and</span> <span class="o">not</span> <span class="p">(</span><span class="nx">isB</span> <span class="nx">estream</span><span class="p">)</span>
+  <span class="nx">estream</span> <span class="k">instanceof</span> <span class="nx">EventStream</span>
 
 
 <span class="nv">Jolt.EventStream = </span><span class="k">class</span> <span class="nx">EventStream</span>
@@ -14,6 +14,7 @@
     <span class="vi">@absRank = </span><span class="nx">@rank</span>
 
     <span class="vi">@sendTo = </span><span class="p">[]</span>
+    <span class="vi">@linkTo = </span><span class="p">[]</span>
 
     <span class="k">if</span> <span class="nx">recvFrom</span><span class="p">.</span><span class="nx">length</span>
       <span class="p">(</span><span class="nx">estream</span><span class="p">.</span><span class="nx">attachListener</span> <span class="k">this</span><span class="p">)</span> <span class="k">for</span> <span class="nx">estream</span> <span class="k">in</span> <span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">flatten</span> <span class="p">[</span> <span class="nx">recvFrom</span><span class="p">...</span> <span class="p">])</span>
@@ -21,22 +22,32 @@
   <span class="nv">expAnEstreamErr = </span><span class="s">&#39;expected an EventStream&#39;</span>
 
   <span class="nv">attachListener: </span><span class="nf">(receiver, now = false) -&gt;</span>
-    <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">receiver</span>
-      <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: &#39;</span> <span class="o">+</span> <span class="nx">expAnEstreamErr</span>
-    <span class="k">if</span> <span class="nx">now</span>
-      <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericAttachListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
+    <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isArray</span> <span class="nx">receiver</span>
+      <span class="nv">receiver = </span><span class="nx">_</span><span class="p">.</span><span class="nx">flatten</span> <span class="nx">receiver</span>
     <span class="k">else</span>
-      <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="p">(</span><span class="nf">(sender, receiver) -&gt;</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">attachListener</span> <span class="nx">receiver</span><span class="p">,</span> <span class="kc">true</span><span class="p">),</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
-    <span class="k">this</span>
+      <span class="nv">receiver = </span><span class="p">[</span> <span class="nx">receiver</span> <span class="p">]</span>
+      <span class="k">for</span> <span class="nx">rcvr</span> <span class="k">in</span> <span class="nx">receiver</span>
+        <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">rcvr</span>
+          <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: &#39;</span> <span class="o">+</span> <span class="nx">expAnEstreamErr</span>
+        <span class="k">if</span> <span class="nx">now</span>
+          <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericAttachListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">rcvr</span>
+        <span class="k">else</span>
+          <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="p">(</span><span class="nf">(sender, receiver) -&gt;</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">attachListener</span> <span class="nx">receiver</span><span class="p">,</span> <span class="kc">true</span><span class="p">),</span> <span class="k">this</span><span class="p">,</span> <span class="nx">rcvr</span>
+        <span class="k">this</span>
 
   <span class="nv">removeListener: </span><span class="nf">(receiver, now = false) -&gt;</span>
-    <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">receiver</span>
-      <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.removeListener: &#39;</span> <span class="o">+</span> <span class="nx">expAnEstreamErr</span>
-    <span class="k">if</span> <span class="nx">now</span>
-      <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericRemoveListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
+    <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isArray</span> <span class="nx">receiver</span>
+      <span class="nv">receiver = </span><span class="nx">_</span><span class="p">.</span><span class="nx">flatten</span> <span class="nx">receiver</span>
     <span class="k">else</span>
-      <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="p">(</span><span class="nf">(sender, receiver) -&gt;</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">removeListener</span> <span class="nx">receiver</span><span class="p">,</span> <span class="kc">true</span><span class="p">),</span> <span class="k">this</span><span class="p">,</span> <span class="nx">receiver</span>
-    <span class="k">this</span>
+      <span class="nv">receiver = </span><span class="p">[</span> <span class="nx">receiver</span> <span class="p">]</span>
+      <span class="k">for</span> <span class="nx">rcvr</span> <span class="k">in</span> <span class="nx">receiver</span>
+        <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">rcvr</span>
+          <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.removeListener: &#39;</span> <span class="o">+</span> <span class="nx">expAnEstreamErr</span>
+        <span class="k">if</span> <span class="nx">now</span>
+          <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericRemoveListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">rcvr</span>
+        <span class="k">else</span>
+          <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="p">(</span><span class="nf">(sender, receiver) -&gt;</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">removeListener</span> <span class="nx">receiver</span><span class="p">,</span> <span class="kc">true</span><span class="p">),</span> <span class="k">this</span><span class="p">,</span> <span class="nx">rcvr</span>
+        <span class="k">this</span>
 
   <span class="nv">removeWeakReference: </span><span class="nf">(weakReference, now = false) -&gt;</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">weakReference</span>
@@ -275,10 +286,7 @@
   <span class="nv">PulseClass = </span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">()</span>
   <span class="nv">pulse = </span><span class="k">new</span> <span class="nx">PulseClass</span> <span class="nx">value</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">sendCall</span><span class="p">,</span> <span class="nx">nextStamp</span><span class="p">(),</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">heap</span><span class="p">,</span> <span class="nx">cont</span>
   <span class="nx">pulse</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">sendCall</span><span class="p">,</span> <span class="nx">estream</span><span class="p">,</span> <span class="nx">high</span>
-  <span class="kc">undefined</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p><code>Jolt.Behavior</code> is stubbed in here, though the working re/definition is given
-in <a href="Behavior.html">Behavior.cofee</a></p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.Behavior = </span><span class="k">class</span> <span class="nx">Behavior</span> <span class="k">extends</span> <span class="nx">EventStream</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>For <code>Jolt.isE</code> to operate prior to the working definition of <code>Jolt.Behavior</code>,
-<code>Jolt.isB</code> needs its own working definition.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.isB = isB = </span><span class="nf">(behavior) -&gt;</span>
-  <span class="nx">behavior</span> <span class="k">instanceof</span> <span class="nx">Behavior</span>
+  <span class="kc">undefined</span>
  
  
  
@@ -298,7 +306,7 @@ in <a href="Behavior.html">Behavior.cofee</a></p>             </td>             
  
  
  
- </pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
+ </pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
 
 <p>Jolt - Reactive Objects for JavaScript</p>
 
