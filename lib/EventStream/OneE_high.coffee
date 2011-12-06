@@ -1,13 +1,16 @@
 Jolt.OneE_high = class OneE_high extends OneE
 
   attachListener: (receiver) ->
+    rAL = receiver.attachListener
+    receiver.attachListener = (rcvr) ->
+      rAL.call receiver, rcvr, true
     super receiver, true
 
   removeListener: (receiver) ->
+    rRL = receiver.removeListener
+    receiver.removeListener = (rcvr) ->
+      rRL.call receiver, rcvr, true
     super receiver, true
-
-  removeWeakReference: (weakReference) ->
-    super weakReference, true
 
   ClassName: 'OneE_high'
 

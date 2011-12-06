@@ -3,7 +3,7 @@ nextRank = -> ++lastRank
 
 
 Jolt.isE = isE = (estream) ->
-  (estream instanceof EventStream) and not (isB estream)
+  estream instanceof EventStream
 
 
 Jolt.EventStream = class EventStream
@@ -14,6 +14,7 @@ Jolt.EventStream = class EventStream
     @absRank = @rank
 
     @sendTo = []
+    @linkTo = []
 
     if recvFrom.length
       (estream.attachListener this) for estream in (_.flatten [ recvFrom... ])
@@ -21,22 +22,32 @@ Jolt.EventStream = class EventStream
   expAnEstreamErr = 'expected an EventStream'
 
   attachListener: (receiver, now = false) ->
-    if not isE receiver
-      throw '<' + @ClassName + '>.attachListener: ' + expAnEstreamErr
-    if now
-      @constructor.genericAttachListener this, receiver
+    if _.isArray receiver
+      receiver = _.flatten receiver
     else
-      scheduleBefore beforeQ, ((sender, receiver) -> sender.attachListener receiver, true), this, receiver
-    this
+      receiver = [ receiver ]
+      for rcvr in receiver
+        if not isE rcvr
+          throw '<' + @ClassName + '>.attachListener: ' + expAnEstreamErr
+        if now
+          @constructor.genericAttachListener this, rcvr
+        else
+          scheduleBefore beforeQ, ((sender, receiver) -> sender.attachListener receiver, true), this, rcvr
+        this
 
   removeListener: (receiver, now = false) ->
-    if not isE receiver
-      throw '<' + @ClassName + '>.removeListener: ' + expAnEstreamErr
-    if now
-      @constructor.genericRemoveListener this, receiver
+    if _.isArray receiver
+      receiver = _.flatten receiver
     else
-      scheduleBefore beforeQ, ((sender, receiver) -> sender.removeListener receiver, true), this, receiver
-    this
+      receiver = [ receiver ]
+      for rcvr in receiver
+        if not isE rcvr
+          throw '<' + @ClassName + '>.removeListener: ' + expAnEstreamErr
+        if now
+          @constructor.genericRemoveListener this, rcvr
+        else
+          scheduleBefore beforeQ, ((sender, receiver) -> sender.removeListener receiver, true), this, rcvr
+        this
 
   removeWeakReference: (weakReference, now = false) ->
     if not isE weakReference
@@ -276,17 +287,6 @@ Jolt.sendEvent = sendEvent = (estream, value...) ->
   pulse = new PulseClass value.length, false, sendCall, nextStamp(), value, heap, cont
   pulse.propagate sendCall, estream, high
   undefined
-
-
-# `Jolt.Behavior` is stubbed in here, though the working re/definition is given
-# in [Behavior.cofee](Behavior.html)
-Jolt.Behavior = class Behavior extends EventStream
-
-
-# For `Jolt.isE` to operate prior to the working definition of `Jolt.Behavior`,
-# `Jolt.isB` needs its own working definition.
-Jolt.isB = isB = (behavior) ->
-  behavior instanceof Behavior
  
  
  

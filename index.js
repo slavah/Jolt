@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var Behavior, BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isB, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, propagateHigh, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, sendCall, sendEvent, zeroE, _say, _say_helper;
+  var BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, propagateHigh, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, sendCall, sendEvent, zeroE, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -1868,7 +1868,7 @@
   beforeQ.drainMid = function() {
     if (beforeQ.mid.length) {
       defer(beforeQ.drainMid);
-      return (beforeQ.mid.pop())();
+      if (!beforeQ.drainingHigh) return (beforeQ.mid.pop())();
     } else {
       return beforeQ.drainingMid = false;
     }
@@ -1877,7 +1877,7 @@
   beforeQ.drainNorm = function() {
     if (beforeQ.norm.length) {
       delay(beforeQ.drainNorm, beforeQ.freq);
-      return (beforeQ.norm.shift())();
+      if (!beforeQ.drainingHigh) return (beforeQ.norm.shift())();
     } else {
       return beforeQ.drainingNorm = false;
     }
@@ -2060,7 +2060,7 @@
   };
   
   Jolt.isE = isE = function(estream) {
-    return (estream instanceof EventStream) && !(isB(estream));
+    return estream instanceof EventStream;
   };
   
   Jolt.EventStream = EventStream = (function() {
@@ -2072,6 +2072,7 @@
       this.rank = nextRank();
       this.absRank = this.rank;
       this.sendTo = [];
+      this.linkTo = [];
       if (recvFrom.length) {
         _ref = _.flatten(__slice.call(recvFrom));
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -2084,33 +2085,55 @@
     expAnEstreamErr = 'expected an EventStream';
   
     EventStream.prototype.attachListener = function(receiver, now) {
+      var rcvr, _i, _len, _results;
       if (now == null) now = false;
-      if (!isE(receiver)) {
-        throw '<' + this.ClassName + '>.attachListener: ' + expAnEstreamErr;
-      }
-      if (now) {
-        this.constructor.genericAttachListener(this, receiver);
+      if (_.isArray(receiver)) {
+        return receiver = _.flatten(receiver);
       } else {
-        scheduleBefore(beforeQ, (function(sender, receiver) {
-          return sender.attachListener(receiver, true);
-        }), this, receiver);
+        receiver = [receiver];
+        _results = [];
+        for (_i = 0, _len = receiver.length; _i < _len; _i++) {
+          rcvr = receiver[_i];
+          if (!isE(rcvr)) {
+            throw '<' + this.ClassName + '>.attachListener: ' + expAnEstreamErr;
+          }
+          if (now) {
+            this.constructor.genericAttachListener(this, rcvr);
+          } else {
+            scheduleBefore(beforeQ, (function(sender, receiver) {
+              return sender.attachListener(receiver, true);
+            }), this, rcvr);
+          }
+          _results.push(this);
+        }
+        return _results;
       }
-      return this;
     };
   
     EventStream.prototype.removeListener = function(receiver, now) {
+      var rcvr, _i, _len, _results;
       if (now == null) now = false;
-      if (!isE(receiver)) {
-        throw '<' + this.ClassName + '>.removeListener: ' + expAnEstreamErr;
-      }
-      if (now) {
-        this.constructor.genericRemoveListener(this, receiver);
+      if (_.isArray(receiver)) {
+        return receiver = _.flatten(receiver);
       } else {
-        scheduleBefore(beforeQ, (function(sender, receiver) {
-          return sender.removeListener(receiver, true);
-        }), this, receiver);
+        receiver = [receiver];
+        _results = [];
+        for (_i = 0, _len = receiver.length; _i < _len; _i++) {
+          rcvr = receiver[_i];
+          if (!isE(rcvr)) {
+            throw '<' + this.ClassName + '>.removeListener: ' + expAnEstreamErr;
+          }
+          if (now) {
+            this.constructor.genericRemoveListener(this, rcvr);
+          } else {
+            scheduleBefore(beforeQ, (function(sender, receiver) {
+              return sender.removeListener(receiver, true);
+            }), this, rcvr);
+          }
+          _results.push(this);
+        }
+        return _results;
       }
-      return this;
     };
   
     EventStream.prototype.removeWeakReference = function(weakReference, now) {
@@ -2460,22 +2483,6 @@
     return;
   };
   
-  Jolt.Behavior = Behavior = (function() {
-  
-    __extends(Behavior, EventStream);
-  
-    function Behavior() {
-      Behavior.__super__.constructor.apply(this, arguments);
-    }
-  
-    return Behavior;
-  
-  })();
-  
-  Jolt.isB = isB = function(behavior) {
-    return behavior instanceof Behavior;
-  };
-  
   Jolt.EventStream_api = EventStream_api = (function() {
   
     __extends(EventStream_api, EventStream);
@@ -2630,15 +2637,21 @@
     }
   
     OneE_high.prototype.attachListener = function(receiver) {
+      var rAL;
+      rAL = receiver.attachListener;
+      receiver.attachListener = function(rcvr) {
+        return rAL.call(receiver, rcvr, true);
+      };
       return OneE_high.__super__.attachListener.call(this, receiver, true);
     };
   
     OneE_high.prototype.removeListener = function(receiver) {
+      var rRL;
+      rRL = receiver.removeListener;
+      receiver.removeListener = function(rcvr) {
+        return rRL.call(receiver, rcvr, true);
+      };
       return OneE_high.__super__.removeListener.call(this, receiver, true);
-    };
-  
-    OneE_high.prototype.removeWeakReference = function(weakReference) {
-      return OneE_high.__super__.removeWeakReference.call(this, weakReference, true);
     };
   
     OneE_high.prototype.ClassName = 'OneE_high';

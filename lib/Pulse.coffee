@@ -114,13 +114,15 @@ beforeQ.drainHigh = ->
 beforeQ.drainMid = ->
   if beforeQ.mid.length
     defer beforeQ.drainMid
-    (beforeQ.mid.pop())()
+    if not beforeQ.drainingHigh
+      (beforeQ.mid.pop())()
   else
     beforeQ.drainingMid = false
 beforeQ.drainNorm = ->
   if beforeQ.norm.length
     delay beforeQ.drainNorm, beforeQ.freq
-    (beforeQ.norm.shift())()
+    if not beforeQ.drainingHigh
+      (beforeQ.norm.shift())()
   else
     beforeQ.drainingNorm = false
 beforeQ.drainAll = ->
