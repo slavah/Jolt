@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, scheduleNorm, sendCall, sendEvent, zeroE, _say, _say_helper;
+  var BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, scheduleNorm, sendCall, sendEvent, sendEvent_drainAll, sendEvent_drainHighThenNormThenMid, sendEvent_drainNorm, sendEvent_nodrain, zeroE, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -1854,7 +1854,7 @@
   
   beforeQ.drainingNorm = false;
   
-  beforeQ.freq = 10;
+  beforeQ.norm.freq = 10;
   
   beforeQ.drainHigh = function() {
     if (beforeQ.high.length) {
@@ -1868,7 +1868,7 @@
   beforeQ.drainMid = function() {
     if (beforeQ.mid.length) {
       defer(beforeQ.drainMid);
-      return (beforeQ.mid.pop())();
+      return (beforeQ.mid.shift())();
     } else {
       return beforeQ.drainingMid = false;
     }
@@ -1876,49 +1876,25 @@
   
   beforeQ.drainNorm = function() {
     if (beforeQ.norm.length) {
-      delay(beforeQ.drainNorm, beforeQ.freq);
+      delay(beforeQ.drainNorm, beforeQ.norm.freq);
       if (!beforeQ.drainingHigh) return (beforeQ.norm.shift())();
     } else {
       return beforeQ.drainingNorm = false;
     }
   };
   
-  beforeQ.drainAll = function() {
-    var _results;
-    if (beforeQ.high.length) {
-      while (beforeQ.high.length) {
-        (beforeQ.high.shift())();
-      }
-    }
-    if (beforeQ.mid.length) {
-      while (beforeQ.mid.length) {
-        (beforeQ.mid.pop())();
-      }
-    }
-    if (beforeQ.norm.length) {
-      _results = [];
-      while (beforeQ.norm.length) {
-        _results.push((beforeQ.norm.shift())());
-      }
-      return _results;
-    }
-  };
-  
   Jolt.scheduleBefore = scheduleBefore = function() {
-    var args, beforeQ, func, which;
+    var args, beforeQ, func, which, _which;
     beforeQ = arguments[0], func = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
     if (!beforeQ) beforeQ = beforeNextPulse;
-    which = 'norm';
-    if (args[args.length - 1] === scheduleHigh) {
-      which = 'high';
-      args.pop();
-    }
-    if (args[args.length - 1] === scheduleMid) {
-      which = 'mid';
+    which = scheduleNorm;
+    _which = args[args.length - 1];
+    if ((_which === scheduleHigh) || (_which === scheduleMid) || (_which === scheduleNorm)) {
+      which = _which;
       args.pop();
     }
     switch (which) {
-      case 'high':
+      case scheduleHigh:
         beforeQ.high.push(function() {
           return func.apply(null, args);
         });
@@ -1927,7 +1903,7 @@
           return defer_high(beforeQ.drainHigh);
         }
         break;
-      case 'mid':
+      case scheduleMid:
         beforeQ.mid.push(function() {
           return func.apply(null, args);
         });
@@ -1936,13 +1912,13 @@
           return defer(beforeQ.drainMid);
         }
         break;
-      case 'norm':
+      case scheduleNorm:
         beforeQ.norm.push(function() {
           return func.apply(null, args);
         });
         if (!beforeQ.drainingNorm) {
           beforeQ.drainingNorm = true;
-          return delay(beforeQ.drainNorm, beforeQ.freq);
+          return delay(beforeQ.drainNorm, beforeQ.norm.freq);
         }
     }
   };
@@ -1991,8 +1967,8 @@
     };
   
     Pulse.prototype.propagate = function() {
-      var PULSE, high, more, nextPulse, queue, qv, receiver, sender, weaklyHeld, _i, _len, _ref;
-      sender = arguments[0], receiver = arguments[1], high = arguments[2], more = 4 <= arguments.length ? __slice.call(arguments, 3) : [];
+      var PULSE, more, nextPulse, queue, qv, receiver, sender, weaklyHeld, _i, _len, _ref;
+      sender = arguments[0], receiver = arguments[1], more = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
       if (!receiver.weaklyHeld) {
         queue = new PriorityQueue;
         queue.push({
@@ -2004,7 +1980,7 @@
           qv = queue.pop();
           qv.pulse.heap.nodes.push([qv.pulse.sender, qv.estream]);
           PULSE = qv.pulse.copy(qv.estream.PulseClass());
-          nextPulse = PULSE.PROPAGATE.apply(PULSE, [PULSE.sender, qv.estream, high].concat(__slice.call(more)));
+          nextPulse = PULSE.PROPAGATE.apply(PULSE, [PULSE.sender, qv.estream].concat(__slice.call(more)));
           weaklyHeld = true;
           if (nextPulse !== doNotPropagate) {
             nextPulse.sender = qv.estream;
@@ -2036,8 +2012,8 @@
     };
   
     Pulse.prototype.PROPAGATE = function() {
-      var PULSE, high, more, receiver, sender;
-      sender = arguments[0], receiver = arguments[1], high = arguments[2], more = 4 <= arguments.length ? __slice.call(arguments, 3) : [];
+      var PULSE, more, receiver, sender;
+      sender = arguments[0], receiver = arguments[1], more = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
       PULSE = receiver.UPDATER(this);
       if (PULSE !== doNotPropagate && !(isP(PULSE))) {
         throw 'receiver\'s UPDATER did not return a pulse object';
@@ -2454,8 +2430,30 @@
   
   })();
   
-  Jolt.sendEvent = sendEvent = function() {
-    var PulseClass, cont, cont_maybe, estream, heap, high, high_maybe, pulse, value;
+  /*
+  Jolt.sendEvent = sendEvent = (estream, value...) ->
+    cont = undefined
+    cont_maybe = value[value.length - 1]
+    if cont_maybe instanceof ContInfo
+      cont = cont_maybe
+      value.pop()
+    high = false
+    if cont
+      high_maybe = value[value.length - 1]
+    else
+      high_maybe = cont_maybe
+    if high_maybe is propagateHigh
+      high = true
+      value.pop()
+    heap = undefined
+    PulseClass = estream.PulseClass()
+    pulse = new PulseClass value.length, false, sendCall, nextStamp(), value, heap, cont
+    pulse.propagate sendCall, estream, high
+    undefined
+  */
+  
+  Jolt.sendEvent_nodrain = sendEvent_nodrain = function() {
+    var PulseClass, cont, cont_maybe, estream, heap, pulse, value;
     estream = arguments[0], value = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
     cont = void 0;
     cont_maybe = value[value.length - 1];
@@ -2463,20 +2461,44 @@
       cont = cont_maybe;
       value.pop();
     }
-    high = false;
-    if (cont) {
-      high_maybe = value[value.length - 1];
-    } else {
-      high_maybe = cont_maybe;
-    }
-    if (high_maybe === propagateHigh) {
-      high = true;
-      value.pop();
-    }
     heap = void 0;
     PulseClass = estream.PulseClass();
     pulse = new PulseClass(value.length, false, sendCall, nextStamp(), value, heap, cont);
-    pulse.propagate(sendCall, estream, high);
+    pulse.propagate(sendCall, estream);
+    return;
+  };
+  
+  Jolt.sendEvent = Jolt.sendEvent_drainAll = Jolt.sendEvent_drainHighThenNormThenMid = sendEvent = sendEvent_drainAll = sendEvent_drainHighThenNormThenMid = function() {
+    var estream, value;
+    estream = arguments[0], value = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    if (beforeQ.high.length) {
+      while (beforeQ.high.length) {
+        (beforeQ.high.shift())();
+      }
+    }
+    if (beforeQ.norm.length) {
+      while (beforeQ.norm.length) {
+        (beforeQ.norm.shift())();
+      }
+    }
+    if (beforeQ.mid.length) {
+      while (beforeQ.mid.length) {
+        (beforeQ.mid.pop())();
+      }
+    }
+    sendEvent_nodrain.apply(null, [estream].concat(__slice.call(value)));
+    return;
+  };
+  
+  Jolt.sendEvent_drainNorm = sendEvent_drainNorm = function() {
+    var estream, value;
+    estream = arguments[0], value = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    if (beforeQ.norm.length) {
+      while (beforeQ.norm.length) {
+        (beforeQ.norm.shift())();
+      }
+    }
+    sendEvent_nodrain.apply(null, [estream].concat(__slice.call(value)));
     return;
   };
   
@@ -2600,7 +2622,7 @@
       var thisOneE, value;
       value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       thisOneE = new this;
-      scheduleBefore.apply(null, [beforeQ, sendEvent, thisOneE].concat(__slice.call(value), [scheduleMid]));
+      scheduleBefore.apply(null, [beforeQ, sendEvent_drainNorm, thisOneE].concat(__slice.call(value), [scheduleMid]));
       return thisOneE;
     };
   
@@ -2657,7 +2679,7 @@
       var thisOneE_high, value;
       value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       thisOneE_high = new this;
-      scheduleBefore.apply(null, [beforeQ, sendEvent, thisOneE_high].concat(__slice.call(value), [propagateHigh], [scheduleHigh]));
+      scheduleBefore.apply(null, [beforeQ, sendEvent_nodrain, thisOneE_high].concat(__slice.call(value), [scheduleHigh]));
       return thisOneE_high;
     };
   
