@@ -298,7 +298,7 @@ Jolt.sendEvent = Jolt.sendEvent_drainAll = Jolt.sendEvent_drainHighThenNormThenM
   if beforeQ.norm.length
     (beforeQ.norm.shift())() while beforeQ.norm.length
   if beforeQ.mid.length
-    (beforeQ.mid.pop())() while beforeQ.mid.length
+    (beforeQ.mid.shift())() while beforeQ.mid.length
   sendEvent_nodrain estream, value...
   undefined
  

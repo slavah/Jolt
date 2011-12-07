@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, doNotPropagate, exporter, internalE, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, scheduleNorm, sendCall, sendEvent, sendEvent_drainAll, sendEvent_drainHighThenNorm, sendEvent_drainHighThenNormThenMid, sendEvent_nodrain, zeroE, _say, _say_helper;
+  var BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, delay, doNotPropagate, exporter, internalE, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, scheduleNorm, sendCall, sendEvent, sendEvent_drainAll, sendEvent_drainHighThenNorm, sendEvent_drainHighThenNormThenMid, sendEvent_nodrain, zeroE, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -1781,6 +1781,10 @@
     setTimeout = window.setTimeout;
   }
   
+  Jolt.defer = defer = _.defer;
+  
+  Jolt.delay = delay = _.delay;
+  
   Jolt.cleanupQ = cleanupQ = cleanupWeakReference = [];
   
   cleanupQ.draining = false;
@@ -1789,7 +1793,7 @@
   
   cleanupQ.drain = function() {
     if (cleanupQ.length) {
-      setTimeout(cleanupQ.drain, cleanupQ.freq);
+      delay(cleanupQ.drain, cleanupQ.freq);
       (cleanupQ.shift())();
     } else {
       cleanupQ.draining = false;
@@ -1806,7 +1810,7 @@
       });
       if (!cleanupQ.draining) {
         cleanupQ.draining = true;
-        setTimeout(cleanupQ.drain, cleanupQ.freq);
+        delay(cleanupQ.drain, cleanupQ.freq);
       }
     }
     return;
@@ -1828,11 +1832,7 @@
   
   beforeQ.drainHigh = function() {
     if (beforeQ.high.length) {
-      if (isNodeJS) {
-        process.nextTick(beforeQ.drainHigh);
-      } else {
-        setTimeout(beforeQ.drainHigh, 0);
-      }
+      defer(beforeQ.drainHigh);
       (beforeQ.high.shift())();
     } else {
       beforeQ.drainingHigh = false;
@@ -1842,7 +1842,7 @@
   
   beforeQ.drainMid = function() {
     if (beforeQ.mid.length) {
-      setTimeout(beforeQ.drainMid, 0);
+      defer(beforeQ.drainMid);
       (beforeQ.mid.shift())();
     } else {
       beforeQ.drainingMid = false;
@@ -1852,7 +1852,7 @@
   
   beforeQ.drainNorm = function() {
     if (beforeQ.norm.length) {
-      setTimeout(beforeQ.drainNorm, beforeQ.norm.freq);
+      delay(beforeQ.drainNorm, beforeQ.norm.freq);
       if (!beforeQ.drainingHigh) (beforeQ.norm.shift())();
     } else {
       beforeQ.drainingNorm = false;
@@ -1877,11 +1877,7 @@
         });
         if (!beforeQ.drainingHigh) {
           beforeQ.drainingHigh = true;
-          if (isNodeJS) {
-            process.nextTick(beforeQ.drainHigh);
-          } else {
-            setTimeout(beforeQ.drainHigh, 0);
-          }
+          defer(beforeQ.drainHigh);
         }
         break;
       case scheduleMid:
@@ -1890,7 +1886,7 @@
         });
         if (!beforeQ.drainingMid) {
           beforeQ.drainingMid = true;
-          setTimeout(beforeQ.drainMid, 0);
+          defer(beforeQ.drainMid);
         }
         break;
       case scheduleNorm:
@@ -1899,7 +1895,7 @@
         });
         if (!beforeQ.drainingNorm) {
           beforeQ.drainingNorm = true;
-          setTimeout(beforeQ.drainNorm, beforeQ.norm.freq);
+          delay(beforeQ.drainNorm, beforeQ.norm.freq);
         }
     }
     return;
@@ -2460,7 +2456,7 @@
     }
     if (beforeQ.mid.length) {
       while (beforeQ.mid.length) {
-        (beforeQ.mid.pop())();
+        (beforeQ.mid.shift())();
       }
     }
     sendEvent_nodrain.apply(null, [estream].concat(__slice.call(value)));
