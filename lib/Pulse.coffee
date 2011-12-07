@@ -23,7 +23,6 @@ doNotPropagate.copy = -> this
 # to `Jolt.sendEvent` signals `Pulse.prototype.propagate` to invoke its `high`
 # logic.
 
-#Jolt.propagateHigh = propagateHigh = {}
 Jolt.scheduleHigh  = scheduleHigh  = {}
 Jolt.scheduleMid   = scheduleMid   = {}
 Jolt.scheduleNorm  = scheduleNorm  = {}
@@ -48,14 +47,7 @@ Jolt.sendCall = sendCall = name: (-> 'Jolt.sendEvent'), removeWeakReference: ->
 # kept in mind when composing functions to call through `Jolt.defer`:
 # [https://bugzilla.mozilla.org/show_bug.cgi?id=394769](https://bugzilla.mozilla.org/show_bug.cgi?id=394769)
 
-if isNodeJS
-  Jolt.defer_high = defer_high = (func, args...) -> process.nextTick -> func args...
-  Jolt.delay = delay = (func, ms, args...) -> setTimeout (-> func args...), ms
-else
-  Jolt.defer_high = defer_high = (func, args...) -> defer func, args...
-  Jolt.delay = delay = (func, ms, args...) -> window.setTimeout (-> func args...), ms
-
-Jolt.defer = defer = (func, args...) -> delay func, 0, args...
+setTimeout ?= window.setTimeout
 
 
 # If an `EventStream` instance is flagged as "weaklyHeld", as observed during
@@ -72,10 +64,11 @@ cleanupQ.draining = false
 cleanupQ.freq = 100
 cleanupQ.drain = ->
   if cleanupQ.length
+    setTimeout cleanupQ.drain, cleanupQ.freq
     (cleanupQ.shift())()
-    delay cleanupQ.drain, cleanupQ.freq
   else
     cleanupQ.draining = false
+  undefined
 
 Jolt.scheduleCleanup = scheduleCleanup = (cleanupQ, sender, weakReference) ->
   if not cleanupQ then cleanupQ = cleanupWeakReference
@@ -85,7 +78,8 @@ Jolt.scheduleCleanup = scheduleCleanup = (cleanupQ, sender, weakReference) ->
       sender.removeWeakReference weakReference, true
     if not cleanupQ.draining
       cleanupQ.draining = true
-      delay cleanupQ.drain, cleanupQ.freq
+      setTimeout cleanupQ.drain, cleanupQ.freq
+  undefined
 
 
 # Propagation graph modifications are disallowed during propagation, and any
@@ -109,30 +103,29 @@ beforeQ.drainingNorm = false
 beforeQ.norm.freq = 10
 beforeQ.drainHigh = ->
   if beforeQ.high.length
-    defer_high beforeQ.drainHigh
+    if isNodeJS
+      process.nextTick beforeQ.drainHigh
+    else
+      setTimeout beforeQ.drainHigh, 0
     (beforeQ.high.shift())()
   else
     beforeQ.drainingHigh = false
+  undefined
 beforeQ.drainMid = ->
   if beforeQ.mid.length
-    defer beforeQ.drainMid
+    setTimeout beforeQ.drainMid, 0
     (beforeQ.mid.shift())()
   else
     beforeQ.drainingMid = false
+  undefined
 beforeQ.drainNorm = ->
   if beforeQ.norm.length
-    delay beforeQ.drainNorm, beforeQ.norm.freq
+    setTimeout beforeQ.drainNorm, beforeQ.norm.freq
     if not beforeQ.drainingHigh
       (beforeQ.norm.shift())()
   else
     beforeQ.drainingNorm = false
-#beforeQ.drainAll = ->
-#  if beforeQ.high.length
-#    (beforeQ.high.shift())() while beforeQ.high.length
-#  if beforeQ.mid.length
-#    (beforeQ.mid.pop())() while beforeQ.mid.length
-#  if beforeQ.norm.length
-#    (beforeQ.norm.shift())() while beforeQ.norm.length
+  undefined
 
 Jolt.scheduleBefore = scheduleBefore = (beforeQ, func, args...) ->
   if not beforeQ then beforeQ = beforeNextPulse
@@ -147,19 +140,23 @@ Jolt.scheduleBefore = scheduleBefore = (beforeQ, func, args...) ->
         func args...
       if not beforeQ.drainingHigh
         beforeQ.drainingHigh = true
-        defer_high beforeQ.drainHigh
+        if isNodeJS
+          process.nextTick beforeQ.drainHigh
+        else
+          setTimeout beforeQ.drainHigh, 0
     when scheduleMid
       beforeQ.mid.push ->
         func args...
       if not beforeQ.drainingMid
         beforeQ.drainingMid = true
-        defer beforeQ.drainMid
+        setTimeout beforeQ.drainMid, 0
     when scheduleNorm
       beforeQ.norm.push ->
         func args...
       if not beforeQ.drainingNorm
         beforeQ.drainingNorm = true
-        delay beforeQ.drainNorm, beforeQ.norm.freq
+        setTimeout beforeQ.drainNorm, beforeQ.norm.freq
+  undefined
 
 
 # Event propagation order among `EventStream` instances (estreams) that form a
@@ -234,7 +231,6 @@ Jolt.Pulse = class Pulse
     # argument is true.
 
     if not receiver.weaklyHeld
-      #if (beforeQ.high.length or beforeQ.norm.length) and not high then beforeQ.drainAll()
 
       # The next step is to make an instance of `Jolt.PriorityQueue` and
       # populate it with the initial receiver. Queue members are hashes with
@@ -305,7 +301,6 @@ Jolt.Pulse = class Pulse
 
             if receiver.weaklyHeld
               qv.estream.removeWeakReference receiver
-              #scheduleCleanup cleanupQ, qv.estream, receiver
             else
 
               # Each child receiver is paired with `nextPulse`, though note that
@@ -327,7 +322,6 @@ Jolt.Pulse = class Pulse
           if qv.estream.sendTo.length and weaklyHeld
             qv.estream.weaklyHeld = true
             qv.pulse.sender.removeWeakReference qv.estream
-            #scheduleCleanup cleanupQ, qv.pulse.sender, qv.estream
 
       # The propagation cycle is ended by setting the `propagate` flag to false
       # and returning the instance of `HeapStore`
@@ -336,7 +330,6 @@ Jolt.Pulse = class Pulse
 
     else
       sender.removeWeakReference receiver
-      #scheduleCleanup cleanupQ, sender, receiver
       @heap
 
 

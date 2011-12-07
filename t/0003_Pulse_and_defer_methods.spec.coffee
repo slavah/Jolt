@@ -7,6 +7,7 @@ if isNodeJS
 beforeEach ->
   Jolt.globalize()
 
+###
 describe 'Jolt.delay', ->
 
   it '''
@@ -95,7 +96,7 @@ if isNodeJS
         ( expect vals[0] ).toBe 'c'
         ( expect vals[1] ).toBe 'b'
         ( expect vals[2] ).toBe 'a'
-
+###
 
 describe 'Jolt.Pulse', ->
 
