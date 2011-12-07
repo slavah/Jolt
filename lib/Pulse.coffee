@@ -23,9 +23,10 @@ doNotPropagate.copy = -> this
 # to `Jolt.sendEvent` signals `Pulse.prototype.propagate` to invoke its `high`
 # logic.
 
-Jolt.propagateHigh = propagateHigh = {}
+#Jolt.propagateHigh = propagateHigh = {}
 Jolt.scheduleHigh  = scheduleHigh  = {}
 Jolt.scheduleMid   = scheduleMid   = {}
+Jolt.scheduleNorm  = scheduleNorm  = {}
 Jolt.linkHigh      = linkHigh      = {}
 Jolt.linkTight     = linkTight     = {}
 
@@ -234,7 +235,7 @@ Jolt.Pulse = class Pulse
     # argument is true.
 
     if not receiver.weaklyHeld
-      if (beforeQ.high.length or beforeQ.norm.length) and not high then beforeQ.drainAll()
+      #if (beforeQ.high.length or beforeQ.norm.length) and not high then beforeQ.drainAll()
 
       # The next step is to make an instance of `Jolt.PriorityQueue` and
       # populate it with the initial receiver. Queue members are hashes with

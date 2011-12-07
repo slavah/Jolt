@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, propagateHigh, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, sendCall, sendEvent, zeroE, _say, _say_helper;
+  var BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, scheduleNorm, sendCall, sendEvent, zeroE, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -1760,11 +1760,11 @@
     return this;
   };
   
-  Jolt.propagateHigh = propagateHigh = {};
-  
   Jolt.scheduleHigh = scheduleHigh = {};
   
   Jolt.scheduleMid = scheduleMid = {};
+  
+  Jolt.scheduleNorm = scheduleNorm = {};
   
   Jolt.linkHigh = linkHigh = {};
   
@@ -1994,9 +1994,6 @@
       var PULSE, high, more, nextPulse, queue, qv, receiver, sender, weaklyHeld, _i, _len, _ref;
       sender = arguments[0], receiver = arguments[1], high = arguments[2], more = 4 <= arguments.length ? __slice.call(arguments, 3) : [];
       if (!receiver.weaklyHeld) {
-        if ((beforeQ.high.length || beforeQ.norm.length) && !high) {
-          beforeQ.drainAll();
-        }
         queue = new PriorityQueue;
         queue.push({
           estream: receiver,
