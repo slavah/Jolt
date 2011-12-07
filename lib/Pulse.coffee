@@ -23,9 +23,11 @@ doNotPropagate.copy = -> this
 # to `Jolt.sendEvent` signals `Pulse.prototype.propagate` to invoke its `high`
 # logic.
 
-Jolt.propagateHigh = propagateHigh = {}
+#Jolt.propagateHigh = propagateHigh = {}
 Jolt.scheduleHigh  = scheduleHigh  = {}
 Jolt.scheduleMid   = scheduleMid   = {}
+Jolt.scheduleNorm  = scheduleNorm  = {}
+
 Jolt.linkHigh      = linkHigh      = {}
 Jolt.linkTight     = linkTight     = {}
 
@@ -104,7 +106,7 @@ Jolt.beforeQ = beforeQ = beforeNextPulse = high: [], mid: [], norm: []
 beforeQ.drainingHigh = false
 beforeQ.drainingMid  = false
 beforeQ.drainingNorm = false
-beforeQ.freq = 10
+beforeQ.norm.freq = 10
 beforeQ.drainHigh = ->
   if beforeQ.high.length
     defer_high beforeQ.drainHigh
@@ -114,52 +116,50 @@ beforeQ.drainHigh = ->
 beforeQ.drainMid = ->
   if beforeQ.mid.length
     defer beforeQ.drainMid
-    (beforeQ.mid.pop())()
+    (beforeQ.mid.shift())()
   else
     beforeQ.drainingMid = false
 beforeQ.drainNorm = ->
   if beforeQ.norm.length
-    delay beforeQ.drainNorm, beforeQ.freq
+    delay beforeQ.drainNorm, beforeQ.norm.freq
     if not beforeQ.drainingHigh
       (beforeQ.norm.shift())()
   else
     beforeQ.drainingNorm = false
-beforeQ.drainAll = ->
-  if beforeQ.high.length
-    (beforeQ.high.shift())() while beforeQ.high.length
-  if beforeQ.mid.length
-    (beforeQ.mid.pop())() while beforeQ.mid.length
-  if beforeQ.norm.length
-    (beforeQ.norm.shift())() while beforeQ.norm.length
+#beforeQ.drainAll = ->
+#  if beforeQ.high.length
+#    (beforeQ.high.shift())() while beforeQ.high.length
+#  if beforeQ.mid.length
+#    (beforeQ.mid.pop())() while beforeQ.mid.length
+#  if beforeQ.norm.length
+#    (beforeQ.norm.shift())() while beforeQ.norm.length
 
 Jolt.scheduleBefore = scheduleBefore = (beforeQ, func, args...) ->
   if not beforeQ then beforeQ = beforeNextPulse
-  which = 'norm'
-  if args[args.length - 1] is scheduleHigh
-    which = 'high'
-    args.pop()
-  if args[args.length - 1] is scheduleMid
-    which = 'mid'
+  which  = scheduleNorm
+  _which = args[args.length - 1]
+  if (_which is scheduleHigh) or (_which is scheduleMid) or (_which is scheduleNorm)
+    which = _which
     args.pop()
   switch which
-    when 'high'
+    when scheduleHigh
       beforeQ.high.push ->
         func args...
       if not beforeQ.drainingHigh
         beforeQ.drainingHigh = true
         defer_high beforeQ.drainHigh
-    when 'mid'
+    when scheduleMid
       beforeQ.mid.push ->
         func args...
       if not beforeQ.drainingMid
         beforeQ.drainingMid = true
         defer beforeQ.drainMid
-    when 'norm'
+    when scheduleNorm
       beforeQ.norm.push ->
         func args...
       if not beforeQ.drainingNorm
         beforeQ.drainingNorm = true
-        delay beforeQ.drainNorm, beforeQ.freq
+        delay beforeQ.drainNorm, beforeQ.norm.freq
 
 
 # Event propagation order among `EventStream` instances (estreams) that form a
@@ -224,7 +224,7 @@ Jolt.Pulse = class Pulse
   # `more...` also facilitates derivate implementations which need additional
   # control flags.
 
-  propagate: (sender, receiver, high, more...) ->
+  propagate: (sender, receiver, more...) ->
 
     # If an estream is flagged as `weaklyHeld` then propagation will halt
     # immediately and a cleanup op gets scheduled (in the corresponding `else`
@@ -234,7 +234,7 @@ Jolt.Pulse = class Pulse
     # argument is true.
 
     if not receiver.weaklyHeld
-      if (beforeQ.high.length or beforeQ.norm.length) and not high then beforeQ.drainAll()
+      #if (beforeQ.high.length or beforeQ.norm.length) and not high then beforeQ.drainAll()
 
       # The next step is to make an instance of `Jolt.PriorityQueue` and
       # populate it with the initial receiver. Queue members are hashes with
@@ -269,7 +269,7 @@ Jolt.Pulse = class Pulse
         # receiving estream, forms the basis of the succeeding steps in the
         # cycle.
 
-        nextPulse = PULSE.PROPAGATE PULSE.sender, qv.estream, high, more...
+        nextPulse = PULSE.PROPAGATE PULSE.sender, qv.estream, more...
 
         # Certain estream transformers rely on logic whereby parent nodes in a
         # propagation graph should be flagged as `weaklyHeld` if all their child
@@ -340,7 +340,7 @@ Jolt.Pulse = class Pulse
       @heap
 
 
-  PROPAGATE: (sender, receiver, high, more...) ->
+  PROPAGATE: (sender, receiver, more...) ->
 
     # The "inner propagation" method, `Pulse.prototype.PROPAGATE`, invokes the
     # "transformation" steps (for each receiving estream) of the propagation

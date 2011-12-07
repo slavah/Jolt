@@ -268,24 +268,38 @@ Jolt.EventStream = class EventStream
   weaklyHeld: false
 
 
-Jolt.sendEvent = sendEvent = (estream, value...) ->
+Jolt.sendEvent_nodrain = sendEvent_nodrain = (estream, value...) ->
   cont = undefined
   cont_maybe = value[value.length - 1]
   if cont_maybe instanceof ContInfo
     cont = cont_maybe
     value.pop()
-  high = false
-  if cont
-    high_maybe = value[value.length - 1]
-  else
-    high_maybe = cont_maybe
-  if high_maybe is propagateHigh
-    high = true
-    value.pop()
   heap = undefined
   PulseClass = estream.PulseClass()
   pulse = new PulseClass value.length, false, sendCall, nextStamp(), value, heap, cont
-  pulse.propagate sendCall, estream, high
+  pulse.propagate sendCall, estream
+  undefined
+
+
+Jolt.sendEvent_drainHighThenNorm = sendEvent_drainHighThenNorm = (estream, value...) ->
+  if beforeQ.high.length
+    (beforeQ.high.shift())() while beforeQ.high.length
+  if beforeQ.norm.length
+    (beforeQ.norm.shift())() while beforeQ.norm.length
+  sendEvent_nodrain estream, value...
+  undefined
+
+
+Jolt.sendEvent = Jolt.sendEvent_drainAll = Jolt.sendEvent_drainHighThenNormThenMid \
+= sendEvent = sendEvent_drainAll = sendEvent_drainHighThenNormThenMid \
+= (estream, value...) ->
+  if beforeQ.high.length
+    (beforeQ.high.shift())() while beforeQ.high.length
+  if beforeQ.norm.length
+    (beforeQ.norm.shift())() while beforeQ.norm.length
+  if beforeQ.mid.length
+    (beforeQ.mid.pop())() while beforeQ.mid.length
+  sendEvent_nodrain estream, value...
   undefined
  
  

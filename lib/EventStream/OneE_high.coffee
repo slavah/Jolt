@@ -16,7 +16,7 @@ Jolt.OneE_high = class OneE_high extends OneE
 
   @factory: (value...) ->
     thisOneE_high = new this
-    scheduleBefore beforeQ, sendEvent, thisOneE_high, value..., propagateHigh, scheduleHigh
+    scheduleBefore beforeQ, sendEvent_nodrain, thisOneE_high, value..., scheduleHigh
     thisOneE_high
 
 
