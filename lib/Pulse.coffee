@@ -48,6 +48,8 @@ Jolt.sendCall = sendCall = name: (-> 'Jolt.sendEvent'), removeWeakReference: ->
 # [https://bugzilla.mozilla.org/show_bug.cgi?id=394769](https://bugzilla.mozilla.org/show_bug.cgi?id=394769)
 
 setTimeout ?= window.setTimeout
+Jolt.defer = defer = _.defer
+Jolt.delay = delay = _.delay
 
 
 # If an `EventStream` instance is flagged as "weaklyHeld", as observed during
@@ -64,7 +66,7 @@ cleanupQ.draining = false
 cleanupQ.freq = 100
 cleanupQ.drain = ->
   if cleanupQ.length
-    setTimeout cleanupQ.drain, cleanupQ.freq
+    delay cleanupQ.drain, cleanupQ.freq
     (cleanupQ.shift())()
   else
     cleanupQ.draining = false
@@ -78,7 +80,7 @@ Jolt.scheduleCleanup = scheduleCleanup = (cleanupQ, sender, weakReference) ->
       sender.removeWeakReference weakReference, true
     if not cleanupQ.draining
       cleanupQ.draining = true
-      setTimeout cleanupQ.drain, cleanupQ.freq
+      delay cleanupQ.drain, cleanupQ.freq
   undefined
 
 
@@ -103,24 +105,21 @@ beforeQ.drainingNorm = false
 beforeQ.norm.freq = 10
 beforeQ.drainHigh = ->
   if beforeQ.high.length
-    if isNodeJS
-      process.nextTick beforeQ.drainHigh
-    else
-      setTimeout beforeQ.drainHigh, 0
+    defer beforeQ.drainHigh
     (beforeQ.high.shift())()
   else
     beforeQ.drainingHigh = false
   undefined
 beforeQ.drainMid = ->
   if beforeQ.mid.length
-    setTimeout beforeQ.drainMid, 0
+    defer beforeQ.drainMid
     (beforeQ.mid.shift())()
   else
     beforeQ.drainingMid = false
   undefined
 beforeQ.drainNorm = ->
   if beforeQ.norm.length
-    setTimeout beforeQ.drainNorm, beforeQ.norm.freq
+    delay beforeQ.drainNorm, beforeQ.norm.freq
     if not beforeQ.drainingHigh
       (beforeQ.norm.shift())()
   else
@@ -140,22 +139,19 @@ Jolt.scheduleBefore = scheduleBefore = (beforeQ, func, args...) ->
         func args...
       if not beforeQ.drainingHigh
         beforeQ.drainingHigh = true
-        if isNodeJS
-          process.nextTick beforeQ.drainHigh
-        else
-          setTimeout beforeQ.drainHigh, 0
+        defer beforeQ.drainHigh
     when scheduleMid
       beforeQ.mid.push ->
         func args...
       if not beforeQ.drainingMid
         beforeQ.drainingMid = true
-        setTimeout beforeQ.drainMid, 0
+        defer beforeQ.drainMid
     when scheduleNorm
       beforeQ.norm.push ->
         func args...
       if not beforeQ.drainingNorm
         beforeQ.drainingNorm = true
-        setTimeout beforeQ.drainNorm, beforeQ.norm.freq
+        delay beforeQ.drainNorm, beforeQ.norm.freq
   undefined
 
 
