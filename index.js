@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, scheduleNorm, sendCall, sendEvent, sendEvent_drainAll, sendEvent_drainHighThenNorm, sendEvent_drainHighThenNormThenMid, sendEvent_nodrain, zeroE, _say, _say_helper;
+  var BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, doNotPropagate, exporter, internalE, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, scheduleNorm, sendCall, sendEvent, sendEvent_drainAll, sendEvent_drainHighThenNorm, sendEvent_drainHighThenNormThenMid, sendEvent_nodrain, zeroE, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -1777,41 +1777,9 @@
     removeWeakReference: function() {}
   };
   
-  if (isNodeJS) {
-    Jolt.defer_high = defer_high = function() {
-      var args, func;
-      func = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      return process.nextTick(function() {
-        return func.apply(null, args);
-      });
-    };
-    Jolt.delay = delay = function() {
-      var args, func, ms;
-      func = arguments[0], ms = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
-      return setTimeout((function() {
-        return func.apply(null, args);
-      }), ms);
-    };
-  } else {
-    Jolt.defer_high = defer_high = function() {
-      var args, func;
-      func = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      return defer.apply(null, [func].concat(__slice.call(args)));
-    };
-    Jolt.delay = delay = function() {
-      var args, func, ms;
-      func = arguments[0], ms = arguments[1], args = 3 <= arguments.length ? __slice.call(arguments, 2) : [];
-      return window.setTimeout((function() {
-        return func.apply(null, args);
-      }), ms);
-    };
+  if (typeof setTimeout === "undefined" || setTimeout === null) {
+    setTimeout = window.setTimeout;
   }
-  
-  Jolt.defer = defer = function() {
-    var args, func;
-    func = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-    return delay.apply(null, [func, 0].concat(__slice.call(args)));
-  };
   
   Jolt.cleanupQ = cleanupQ = cleanupWeakReference = [];
   
@@ -1821,11 +1789,12 @@
   
   cleanupQ.drain = function() {
     if (cleanupQ.length) {
+      setTimeout(cleanupQ.drain, cleanupQ.freq);
       (cleanupQ.shift())();
-      return delay(cleanupQ.drain, cleanupQ.freq);
     } else {
-      return cleanupQ.draining = false;
+      cleanupQ.draining = false;
     }
+    return;
   };
   
   Jolt.scheduleCleanup = scheduleCleanup = function(cleanupQ, sender, weakReference) {
@@ -1837,9 +1806,10 @@
       });
       if (!cleanupQ.draining) {
         cleanupQ.draining = true;
-        return delay(cleanupQ.drain, cleanupQ.freq);
+        setTimeout(cleanupQ.drain, cleanupQ.freq);
       }
     }
+    return;
   };
   
   Jolt.beforeQ = beforeQ = beforeNextPulse = {
@@ -1858,29 +1828,36 @@
   
   beforeQ.drainHigh = function() {
     if (beforeQ.high.length) {
-      defer_high(beforeQ.drainHigh);
-      return (beforeQ.high.shift())();
+      if (isNodeJS) {
+        process.nextTick(beforeQ.drainHigh);
+      } else {
+        setTimeout(beforeQ.drainHigh, 0);
+      }
+      (beforeQ.high.shift())();
     } else {
-      return beforeQ.drainingHigh = false;
+      beforeQ.drainingHigh = false;
     }
+    return;
   };
   
   beforeQ.drainMid = function() {
     if (beforeQ.mid.length) {
-      defer(beforeQ.drainMid);
-      return (beforeQ.mid.shift())();
+      setTimeout(beforeQ.drainMid, 0);
+      (beforeQ.mid.shift())();
     } else {
-      return beforeQ.drainingMid = false;
+      beforeQ.drainingMid = false;
     }
+    return;
   };
   
   beforeQ.drainNorm = function() {
     if (beforeQ.norm.length) {
-      delay(beforeQ.drainNorm, beforeQ.norm.freq);
-      if (!beforeQ.drainingHigh) return (beforeQ.norm.shift())();
+      setTimeout(beforeQ.drainNorm, beforeQ.norm.freq);
+      if (!beforeQ.drainingHigh) (beforeQ.norm.shift())();
     } else {
-      return beforeQ.drainingNorm = false;
+      beforeQ.drainingNorm = false;
     }
+    return;
   };
   
   Jolt.scheduleBefore = scheduleBefore = function() {
@@ -1900,7 +1877,11 @@
         });
         if (!beforeQ.drainingHigh) {
           beforeQ.drainingHigh = true;
-          return defer_high(beforeQ.drainHigh);
+          if (isNodeJS) {
+            process.nextTick(beforeQ.drainHigh);
+          } else {
+            setTimeout(beforeQ.drainHigh, 0);
+          }
         }
         break;
       case scheduleMid:
@@ -1909,7 +1890,7 @@
         });
         if (!beforeQ.drainingMid) {
           beforeQ.drainingMid = true;
-          return defer(beforeQ.drainMid);
+          setTimeout(beforeQ.drainMid, 0);
         }
         break;
       case scheduleNorm:
@@ -1918,9 +1899,10 @@
         });
         if (!beforeQ.drainingNorm) {
           beforeQ.drainingNorm = true;
-          return delay(beforeQ.drainNorm, beforeQ.norm.freq);
+          setTimeout(beforeQ.drainNorm, beforeQ.norm.freq);
         }
     }
+    return;
   };
   
   Jolt.HeapStore = HeapStore = (function() {
@@ -2061,52 +2043,52 @@
       var rcvr, _i, _len, _results;
       if (now == null) now = false;
       if (_.isArray(receiver)) {
-        return receiver = _.flatten(receiver);
+        receiver = _.flatten(receiver);
       } else {
         receiver = [receiver];
-        _results = [];
-        for (_i = 0, _len = receiver.length; _i < _len; _i++) {
-          rcvr = receiver[_i];
-          if (!isE(rcvr)) {
-            throw '<' + this.ClassName + '>.attachListener: ' + expAnEstreamErr;
-          }
-          if (now) {
-            this.constructor.genericAttachListener(this, rcvr);
-          } else {
-            scheduleBefore(beforeQ, (function(sender, receiver) {
-              return sender.attachListener(receiver, true);
-            }), this, rcvr);
-          }
-          _results.push(this);
-        }
-        return _results;
       }
+      _results = [];
+      for (_i = 0, _len = receiver.length; _i < _len; _i++) {
+        rcvr = receiver[_i];
+        if (!isE(rcvr)) {
+          throw '<' + this.ClassName + '>.attachListener: ' + expAnEstreamErr;
+        }
+        if (now) {
+          this.constructor.genericAttachListener(this, rcvr);
+        } else {
+          scheduleBefore(beforeQ, (function(sender, receiver) {
+            return sender.attachListener(receiver, true);
+          }), this, rcvr);
+        }
+        _results.push(this);
+      }
+      return _results;
     };
   
     EventStream.prototype.removeListener = function(receiver, now) {
       var rcvr, _i, _len, _results;
       if (now == null) now = false;
       if (_.isArray(receiver)) {
-        return receiver = _.flatten(receiver);
+        receiver = _.flatten(receiver);
       } else {
         receiver = [receiver];
-        _results = [];
-        for (_i = 0, _len = receiver.length; _i < _len; _i++) {
-          rcvr = receiver[_i];
-          if (!isE(rcvr)) {
-            throw '<' + this.ClassName + '>.removeListener: ' + expAnEstreamErr;
-          }
-          if (now) {
-            this.constructor.genericRemoveListener(this, rcvr);
-          } else {
-            scheduleBefore(beforeQ, (function(sender, receiver) {
-              return sender.removeListener(receiver, true);
-            }), this, rcvr);
-          }
-          _results.push(this);
-        }
-        return _results;
       }
+      _results = [];
+      for (_i = 0, _len = receiver.length; _i < _len; _i++) {
+        rcvr = receiver[_i];
+        if (!isE(rcvr)) {
+          throw '<' + this.ClassName + '>.removeListener: ' + expAnEstreamErr;
+        }
+        if (now) {
+          this.constructor.genericRemoveListener(this, rcvr);
+        } else {
+          scheduleBefore(beforeQ, (function(sender, receiver) {
+            return sender.removeListener(receiver, true);
+          }), this, rcvr);
+        }
+        _results.push(this);
+      }
+      return _results;
     };
   
     EventStream.prototype.removeWeakReference = function(weakReference, now) {
