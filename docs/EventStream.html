@@ -26,28 +26,28 @@
       <span class="nv">receiver = </span><span class="nx">_</span><span class="p">.</span><span class="nx">flatten</span> <span class="nx">receiver</span>
     <span class="k">else</span>
       <span class="nv">receiver = </span><span class="p">[</span> <span class="nx">receiver</span> <span class="p">]</span>
-      <span class="k">for</span> <span class="nx">rcvr</span> <span class="k">in</span> <span class="nx">receiver</span>
-        <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">rcvr</span>
-          <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: &#39;</span> <span class="o">+</span> <span class="nx">expAnEstreamErr</span>
-        <span class="k">if</span> <span class="nx">now</span>
-          <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericAttachListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">rcvr</span>
-        <span class="k">else</span>
-          <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="p">(</span><span class="nf">(sender, receiver) -&gt;</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">attachListener</span> <span class="nx">receiver</span><span class="p">,</span> <span class="kc">true</span><span class="p">),</span> <span class="k">this</span><span class="p">,</span> <span class="nx">rcvr</span>
-        <span class="k">this</span>
+    <span class="k">for</span> <span class="nx">rcvr</span> <span class="k">in</span> <span class="nx">receiver</span>
+      <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">rcvr</span>
+        <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.attachListener: &#39;</span> <span class="o">+</span> <span class="nx">expAnEstreamErr</span>
+      <span class="k">if</span> <span class="nx">now</span>
+        <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericAttachListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">rcvr</span>
+      <span class="k">else</span>
+        <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="p">(</span><span class="nf">(sender, receiver) -&gt;</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">attachListener</span> <span class="nx">receiver</span><span class="p">,</span> <span class="kc">true</span><span class="p">),</span> <span class="k">this</span><span class="p">,</span> <span class="nx">rcvr</span>
+      <span class="k">this</span>
 
   <span class="nv">removeListener: </span><span class="nf">(receiver, now = false) -&gt;</span>
     <span class="k">if</span> <span class="nx">_</span><span class="p">.</span><span class="nx">isArray</span> <span class="nx">receiver</span>
       <span class="nv">receiver = </span><span class="nx">_</span><span class="p">.</span><span class="nx">flatten</span> <span class="nx">receiver</span>
     <span class="k">else</span>
       <span class="nv">receiver = </span><span class="p">[</span> <span class="nx">receiver</span> <span class="p">]</span>
-      <span class="k">for</span> <span class="nx">rcvr</span> <span class="k">in</span> <span class="nx">receiver</span>
-        <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">rcvr</span>
-          <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.removeListener: &#39;</span> <span class="o">+</span> <span class="nx">expAnEstreamErr</span>
-        <span class="k">if</span> <span class="nx">now</span>
-          <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericRemoveListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">rcvr</span>
-        <span class="k">else</span>
-          <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="p">(</span><span class="nf">(sender, receiver) -&gt;</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">removeListener</span> <span class="nx">receiver</span><span class="p">,</span> <span class="kc">true</span><span class="p">),</span> <span class="k">this</span><span class="p">,</span> <span class="nx">rcvr</span>
-        <span class="k">this</span>
+    <span class="k">for</span> <span class="nx">rcvr</span> <span class="k">in</span> <span class="nx">receiver</span>
+      <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">rcvr</span>
+        <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.removeListener: &#39;</span> <span class="o">+</span> <span class="nx">expAnEstreamErr</span>
+      <span class="k">if</span> <span class="nx">now</span>
+        <span class="nx">@constructor</span><span class="p">.</span><span class="nx">genericRemoveListener</span> <span class="k">this</span><span class="p">,</span> <span class="nx">rcvr</span>
+      <span class="k">else</span>
+        <span class="nx">scheduleBefore</span> <span class="nx">beforeQ</span><span class="p">,</span> <span class="p">(</span><span class="nf">(sender, receiver) -&gt;</span> <span class="nx">sender</span><span class="p">.</span><span class="nx">removeListener</span> <span class="nx">receiver</span><span class="p">,</span> <span class="kc">true</span><span class="p">),</span> <span class="k">this</span><span class="p">,</span> <span class="nx">rcvr</span>
+      <span class="k">this</span>
 
   <span class="nv">removeWeakReference: </span><span class="nf">(weakReference, now = false) -&gt;</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">isE</span> <span class="nx">weakReference</span>
