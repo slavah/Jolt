@@ -1326,6 +1326,7 @@ describe 'Jolt.sendEvent', ->
     ( expect checkIt ).toEqual ['Jolt.sendEvent','myE_0','myE_0','myE_2']
 
 
+  ###
   it '''
     should call <EventStream>._PulseClass.prototype.propagate/PROPAGATE with
     the 'high' argument set to true if it's called with Jolt.propagateHigh as
@@ -1383,7 +1384,7 @@ describe 'Jolt.sendEvent', ->
 
     ( expect Jolt.beforeQ.norm.length ).toBe 1
     ( expect checkIt ).toEqual []
-
+  ###
 
   it '''
     should propagate a pulse through chained EventStreams, preserving the

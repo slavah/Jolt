@@ -268,24 +268,38 @@
   <span class="nv">weaklyHeld: </span><span class="kc">false</span>
 
 
-<span class="nv">Jolt.sendEvent = sendEvent = </span><span class="nf">(estream, value...) -&gt;</span>
+<span class="nv">Jolt.sendEvent_nodrain = sendEvent_nodrain = </span><span class="nf">(estream, value...) -&gt;</span>
   <span class="nv">cont = </span><span class="kc">undefined</span>
   <span class="nv">cont_maybe = </span><span class="nx">value</span><span class="p">[</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
   <span class="k">if</span> <span class="nx">cont_maybe</span> <span class="k">instanceof</span> <span class="nx">ContInfo</span>
     <span class="nv">cont = </span><span class="nx">cont_maybe</span>
     <span class="nx">value</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
-  <span class="nv">high = </span><span class="kc">false</span>
-  <span class="k">if</span> <span class="nx">cont</span>
-    <span class="nv">high_maybe = </span><span class="nx">value</span><span class="p">[</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
-  <span class="k">else</span>
-    <span class="nv">high_maybe = </span><span class="nx">cont_maybe</span>
-  <span class="k">if</span> <span class="nx">high_maybe</span> <span class="o">is</span> <span class="nx">propagateHigh</span>
-    <span class="nv">high = </span><span class="kc">true</span>
-    <span class="nx">value</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
   <span class="nv">heap = </span><span class="kc">undefined</span>
   <span class="nv">PulseClass = </span><span class="nx">estream</span><span class="p">.</span><span class="nx">PulseClass</span><span class="p">()</span>
   <span class="nv">pulse = </span><span class="k">new</span> <span class="nx">PulseClass</span> <span class="nx">value</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">sendCall</span><span class="p">,</span> <span class="nx">nextStamp</span><span class="p">(),</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">heap</span><span class="p">,</span> <span class="nx">cont</span>
-  <span class="nx">pulse</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">sendCall</span><span class="p">,</span> <span class="nx">estream</span><span class="p">,</span> <span class="nx">high</span>
+  <span class="nx">pulse</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">sendCall</span><span class="p">,</span> <span class="nx">estream</span>
+  <span class="kc">undefined</span>
+
+
+<span class="nv">Jolt.sendEvent_drainHighThenNorm = sendEvent_drainHighThenNorm = </span><span class="nf">(estream, value...) -&gt;</span>
+  <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">high</span><span class="p">.</span><span class="nx">length</span>
+    <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">high</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span> <span class="k">while</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">high</span><span class="p">.</span><span class="nx">length</span>
+  <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">length</span>
+    <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span> <span class="k">while</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">length</span>
+  <span class="nx">sendEvent_nodrain</span> <span class="nx">estream</span><span class="p">,</span> <span class="nx">value</span><span class="p">...</span>
+  <span class="kc">undefined</span>
+
+
+<span class="nv">Jolt.sendEvent = Jolt.sendEvent_drainAll = </span><span class="nx">Jolt</span><span class="p">.</span><span class="nx">sendEvent_drainHighThenNormThenMid</span> <span class="o">\</span>
+<span class="o">=</span> <span class="nv">sendEvent = sendEvent_drainAll = </span><span class="nx">sendEvent_drainHighThenNormThenMid</span> <span class="o">\</span>
+<span class="o">=</span> <span class="nf">(estream, value...) -&gt;</span>
+  <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">high</span><span class="p">.</span><span class="nx">length</span>
+    <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">high</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span> <span class="k">while</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">high</span><span class="p">.</span><span class="nx">length</span>
+  <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">length</span>
+    <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span> <span class="k">while</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">length</span>
+  <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">mid</span><span class="p">.</span><span class="nx">length</span>
+    <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">mid</span><span class="p">.</span><span class="nx">pop</span><span class="p">())()</span> <span class="k">while</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">mid</span><span class="p">.</span><span class="nx">length</span>
+  <span class="nx">sendEvent_nodrain</span> <span class="nx">estream</span><span class="p">,</span> <span class="nx">value</span><span class="p">...</span>
   <span class="kc">undefined</span>
  
  
