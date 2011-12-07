@@ -1556,7 +1556,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, scheduleNorm, sendCall, sendEvent, sendEvent_drainAll, sendEvent_drainHighThenNormThenMid, sendEvent_drainNorm, sendEvent_nodrain, zeroE, _say, _say_helper;
+  var BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, defer_high, delay, doNotPropagate, exporter, internalE, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, scheduleNorm, sendCall, sendEvent, sendEvent_drainAll, sendEvent_drainHighThenNorm, sendEvent_drainHighThenNormThenMid, sendEvent_nodrain, zeroE, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -2430,28 +2430,6 @@
   
   })();
   
-  /*
-  Jolt.sendEvent = sendEvent = (estream, value...) ->
-    cont = undefined
-    cont_maybe = value[value.length - 1]
-    if cont_maybe instanceof ContInfo
-      cont = cont_maybe
-      value.pop()
-    high = false
-    if cont
-      high_maybe = value[value.length - 1]
-    else
-      high_maybe = cont_maybe
-    if high_maybe is propagateHigh
-      high = true
-      value.pop()
-    heap = undefined
-    PulseClass = estream.PulseClass()
-    pulse = new PulseClass value.length, false, sendCall, nextStamp(), value, heap, cont
-    pulse.propagate sendCall, estream, high
-    undefined
-  */
-  
   Jolt.sendEvent_nodrain = sendEvent_nodrain = function() {
     var PulseClass, cont, cont_maybe, estream, heap, pulse, value;
     estream = arguments[0], value = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
@@ -2465,6 +2443,23 @@
     PulseClass = estream.PulseClass();
     pulse = new PulseClass(value.length, false, sendCall, nextStamp(), value, heap, cont);
     pulse.propagate(sendCall, estream);
+    return;
+  };
+  
+  Jolt.sendEvent_drainHighThenNorm = sendEvent_drainHighThenNorm = function() {
+    var estream, value;
+    estream = arguments[0], value = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    if (beforeQ.high.length) {
+      while (beforeQ.high.length) {
+        (beforeQ.high.shift())();
+      }
+    }
+    if (beforeQ.norm.length) {
+      while (beforeQ.norm.length) {
+        (beforeQ.norm.shift())();
+      }
+    }
+    sendEvent_nodrain.apply(null, [estream].concat(__slice.call(value)));
     return;
   };
   
@@ -2484,18 +2479,6 @@
     if (beforeQ.mid.length) {
       while (beforeQ.mid.length) {
         (beforeQ.mid.pop())();
-      }
-    }
-    sendEvent_nodrain.apply(null, [estream].concat(__slice.call(value)));
-    return;
-  };
-  
-  Jolt.sendEvent_drainNorm = sendEvent_drainNorm = function() {
-    var estream, value;
-    estream = arguments[0], value = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-    if (beforeQ.norm.length) {
-      while (beforeQ.norm.length) {
-        (beforeQ.norm.shift())();
       }
     }
     sendEvent_nodrain.apply(null, [estream].concat(__slice.call(value)));
@@ -2622,7 +2605,7 @@
       var thisOneE, value;
       value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       thisOneE = new this;
-      scheduleBefore.apply(null, [beforeQ, sendEvent_drainNorm, thisOneE].concat(__slice.call(value), [scheduleMid]));
+      scheduleBefore.apply(null, [beforeQ, sendEvent_drainHighThenNorm, thisOneE].concat(__slice.call(value), [scheduleMid]));
       return thisOneE;
     };
   

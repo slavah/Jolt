@@ -4,7 +4,7 @@ Jolt.OneE = class OneE extends EventStream_api
 
   @factory: (value...) ->
     thisOneE = new this
-    scheduleBefore beforeQ, sendEvent_drainNorm, thisOneE, value..., scheduleMid
+    scheduleBefore beforeQ, sendEvent_drainHighThenNorm, thisOneE, value..., scheduleMid
     thisOneE
 
   sent: false
