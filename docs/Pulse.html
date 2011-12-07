@@ -23,7 +23,9 @@ unecessarily completing them all at once, thus freeing up the CPU.
 around the runtime's <code>setTimeout</code> facility, and <code>process.nextTick</code> in the case
 of node.js. The following "bug" affecting mozilla-derived runtimes should be
 kept in mind when composing functions to call through <code>Jolt.defer</code>:
-<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=394769">https://bugzilla.mozilla.org/show_bug.cgi?id=394769</a></p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">setTimeout</span> <span class="o">?=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">setTimeout</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>If an <code>EventStream</code> instance is flagged as "weaklyHeld", as observed during
+<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=394769">https://bugzilla.mozilla.org/show_bug.cgi?id=394769</a></p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">setTimeout</span> <span class="o">?=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">setTimeout</span>
+<span class="nv">Jolt.defer = defer = </span><span class="nx">_</span><span class="p">.</span><span class="nx">defer</span>
+<span class="nv">Jolt.delay = delay = </span><span class="nx">_</span><span class="p">.</span><span class="nx">delay</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>If an <code>EventStream</code> instance is flagged as "weaklyHeld", as observed during
 event propagation, it should be pruned from the <code>sendTo</code> array-property of the
 node in the propagation graph which referenced it. Such "cleanup" operations
 are queued in <code>Jolt.cleanupQ</code>. The current implementation of the queue's
@@ -35,7 +37,7 @@ queue length grows beyond a certain upper threshold.</p>             </td>      
 <span class="nv">cleanupQ.freq = </span><span class="mi">100</span>
 <span class="nv">cleanupQ.drain = </span><span class="o">-&gt;</span>
   <span class="k">if</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">length</span>
-    <span class="nx">setTimeout</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">drain</span><span class="p">,</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">freq</span>
+    <span class="nx">delay</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">drain</span><span class="p">,</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">freq</span>
     <span class="p">(</span><span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span>
   <span class="k">else</span>
     <span class="nv">cleanupQ.draining = </span><span class="kc">false</span>
@@ -49,7 +51,7 @@ queue length grows beyond a certain upper threshold.</p>             </td>      
       <span class="nx">sender</span><span class="p">.</span><span class="nx">removeWeakReference</span> <span class="nx">weakReference</span><span class="p">,</span> <span class="kc">true</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">draining</span>
       <span class="nv">cleanupQ.draining = </span><span class="kc">true</span>
-      <span class="nx">setTimeout</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">drain</span><span class="p">,</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">freq</span>
+      <span class="nx">delay</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">drain</span><span class="p">,</span> <span class="nx">cleanupQ</span><span class="p">.</span><span class="nx">freq</span>
   <span class="kc">undefined</span></pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>Propagation graph modifications are disallowed during propagation, and any
 such operations attempted during propagation are automatically deferred by
 queueing them in <code>Jolt.beforeQ</code>. The "before" in the name is related to the
@@ -69,24 +71,21 @@ that remain for the "drain all" step that precedes event propagation.</p>       
 <span class="nv">beforeQ.norm.freq = </span><span class="mi">10</span>
 <span class="nv">beforeQ.drainHigh = </span><span class="o">-&gt;</span>
   <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">high</span><span class="p">.</span><span class="nx">length</span>
-    <span class="k">if</span> <span class="nx">isNodeJS</span>
-      <span class="nx">process</span><span class="p">.</span><span class="nx">nextTick</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainHigh</span>
-    <span class="k">else</span>
-      <span class="nx">setTimeout</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainHigh</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="nx">defer</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainHigh</span>
     <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">high</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span>
   <span class="k">else</span>
     <span class="nv">beforeQ.drainingHigh = </span><span class="kc">false</span>
   <span class="kc">undefined</span>
 <span class="nv">beforeQ.drainMid = </span><span class="o">-&gt;</span>
   <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">mid</span><span class="p">.</span><span class="nx">length</span>
-    <span class="nx">setTimeout</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainMid</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="nx">defer</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainMid</span>
     <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">mid</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span>
   <span class="k">else</span>
     <span class="nv">beforeQ.drainingMid = </span><span class="kc">false</span>
   <span class="kc">undefined</span>
 <span class="nv">beforeQ.drainNorm = </span><span class="o">-&gt;</span>
   <span class="k">if</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">length</span>
-    <span class="nx">setTimeout</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainNorm</span><span class="p">,</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">freq</span>
+    <span class="nx">delay</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainNorm</span><span class="p">,</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">freq</span>
     <span class="k">if</span> <span class="o">not</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainingHigh</span>
       <span class="p">(</span><span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">shift</span><span class="p">())()</span>
   <span class="k">else</span>
@@ -106,22 +105,19 @@ that remain for the "drain all" step that precedes event propagation.</p>       
         <span class="nx">func</span> <span class="nx">args</span><span class="p">...</span>
       <span class="k">if</span> <span class="o">not</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainingHigh</span>
         <span class="nv">beforeQ.drainingHigh = </span><span class="kc">true</span>
-        <span class="k">if</span> <span class="nx">isNodeJS</span>
-          <span class="nx">process</span><span class="p">.</span><span class="nx">nextTick</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainHigh</span>
-        <span class="k">else</span>
-          <span class="nx">setTimeout</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainHigh</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="nx">defer</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainHigh</span>
     <span class="k">when</span> <span class="nx">scheduleMid</span>
       <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">mid</span><span class="p">.</span><span class="nx">push</span> <span class="o">-&gt;</span>
         <span class="nx">func</span> <span class="nx">args</span><span class="p">...</span>
       <span class="k">if</span> <span class="o">not</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainingMid</span>
         <span class="nv">beforeQ.drainingMid = </span><span class="kc">true</span>
-        <span class="nx">setTimeout</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainMid</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="nx">defer</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainMid</span>
     <span class="k">when</span> <span class="nx">scheduleNorm</span>
       <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">push</span> <span class="o">-&gt;</span>
         <span class="nx">func</span> <span class="nx">args</span><span class="p">...</span>
       <span class="k">if</span> <span class="o">not</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainingNorm</span>
         <span class="nv">beforeQ.drainingNorm = </span><span class="kc">true</span>
-        <span class="nx">setTimeout</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainNorm</span><span class="p">,</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">freq</span>
+        <span class="nx">delay</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">drainNorm</span><span class="p">,</span> <span class="nx">beforeQ</span><span class="p">.</span><span class="nx">norm</span><span class="p">.</span><span class="nx">freq</span>
   <span class="kc">undefined</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <p>Event propagation order among <code>EventStream</code> instances (estreams) that form a
 propagation graph is governed by a binary heap algorithm. As an event
 propagates through the graph, each step is recorded along the way in an
