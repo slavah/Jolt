@@ -7,7 +7,7 @@ if isNodeJS
 beforeEach ->
   Jolt.globalize()
 
-###
+
 describe 'Jolt.delay', ->
 
   it '''
@@ -60,43 +60,6 @@ describe 'Jolt.defer', ->
       ( expect vals[0] ).toBe 'b'
       ( expect vals[1] ).toBe 'a'
 
-
-if isNodeJS
-  # for non-nodeJS runtimes, defer and defer_high are equivalent,
-  # so this is a nodeJS-only test
-  describe 'Jolt.defer_high', ->
-
-    it '''
-      should defer a function call across the event loop, with a higher
-      priority than defer
-    ''', ->
-
-      fin  = false
-      fin2 = false
-
-      vals = []
-
-      func = (val) ->
-        vals.push val
-        fin = true
-
-      func2 = (val) ->
-        vals.push val
-        fin2 = true
-
-      defer      func,  'a'
-      defer_high func2, 'b'
-      func              'c'
-      fin = false
-
-      waitsFor ->
-        fin and fin2
-
-      runs ->
-        ( expect vals[0] ).toBe 'c'
-        ( expect vals[1] ).toBe 'b'
-        ( expect vals[2] ).toBe 'a'
-###
 
 describe 'Jolt.Pulse', ->
 
