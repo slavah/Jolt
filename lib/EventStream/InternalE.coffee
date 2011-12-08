@@ -60,7 +60,7 @@ EventStream_api::internalE = (args...) ->
 # objects exported by this software, which comprise its API. In
 # addition, the copyright holders of this software give you permission
 # to combine it with free software libraries that are released under the
-# GNU LESSER GENERAL PUBLIC LICENSE (GNU LGPL). You may copy and
+# GNU Lesser General Public License (GNU LGPL). You may copy and
 # distribute such a system following the terms of the GNU GPL for this
 # software and the GNU LGPL for the libraries. If you modify this
 # software, you may extend this exception to your version of the
