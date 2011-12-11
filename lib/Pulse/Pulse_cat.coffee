@@ -1,9 +1,9 @@
 Jolt.Pulse_cat = Jolt.Pulse_catch_and_trace \
 = Pulse_cat = class Pulse_catch_and_trace extends Pulse
 
-  propagate: (pulse, sender, receiver, high, isHeap, isCatch, isFinally) ->
+  propagate: (sender, receiver, isHeap, isCatch, isFinally) ->
 
-    HEAP = pulse.heap
+    HEAP = @heap
 
     # wrong! not sure how to do this yet...
     traceTime = 123
@@ -12,24 +12,20 @@ Jolt.Pulse_cat = Jolt.Pulse_catch_and_trace \
 
       timeStart = new Date
 
-      stamp = pulse.stamp
+      stamp = @stamp
 
-      heapP = new Pulse_cat 2, \
+      heapP = new @constructor 2, \
       false, \
       sender, \
       stamp, \
       ['start', timeStart], \
       new HeapStore stamp
 
-      @constructor.prototype.propagate heapP, \
-      heapP.sender, \
+      heapP.propagate heapP.sender, \
       HEAP_E, \
-      true, \
       true, \
       false, \
       false
-
-      setPropagating true
 
     else
       'do'
@@ -38,7 +34,7 @@ Jolt.Pulse_cat = Jolt.Pulse_catch_and_trace \
     caught = null
 
     try
-      HEAP = super pulse, sender, receiver, high, isHeap, isCatch, isFinally
+      HEAP = super sender, receiver, isHeap, isCatch, isFinally
 
     catch error
       caught = error
@@ -48,17 +44,15 @@ Jolt.Pulse_cat = Jolt.Pulse_catch_and_trace \
 
         timeEnd = new Date
 
-        heapP = new Pulse_cat 5, \
+        heapP = new @constructor 5, \
         false, \
         sender, \
         stamp, \
         ['end', timeEnd, (timeEnd - timeStart), traceTime, HEAP], \
         new HeapStore stamp
 
-        @constructor.prototype.propagate heapP, \
-        heapP.sender, \
+        heapP.propagate heapP.sender, \
         HEAP_E, \
-        true, \
         true, \
         false, \
         false
@@ -73,7 +67,7 @@ Jolt.Pulse_cat = Jolt.Pulse_catch_and_trace \
     HEAP
 
 
-  PROPAGATE: (pulse, sender, receiver, high, isHeap, isCatch, isFinally) ->
+  PROPAGATE: (sender, receiver, isHeap, isCatch, isFinally) ->
 
     caught = false
 
@@ -81,16 +75,16 @@ Jolt.Pulse_cat = Jolt.Pulse_catch_and_trace \
 
     timeNow = new Date
 
-    fnames = ['tranRCV','tranVAL','tranOUT']
+    fnames = ['tranIN','tranVAL','tranOUT']
 
     times = {}
 
     try
       prePulse =
-        arity:    pulse.arity
-        junction: pulse.junction
-        stamp:    pulse.stamp
-        value:   (pulse.value.slice 0)
+        arity:    @arity
+        junction: @junction
+        stamp:    @stamp
+        value:   (@value.slice 0)
 
       subs = {}
       subs[fn] = receiver[fn] for fn in fnames
@@ -103,7 +97,7 @@ Jolt.Pulse_cat = Jolt.Pulse_catch_and_trace \
           P
       doSub fn for fn in fnames
 
-      PULSE = receiver.UPDATER pulse
+      PULSE = receiver.UPDATER this
 
       if PULSE isnt doNotPropagate and not (isP PULSE)
         PULSE = null
@@ -112,51 +106,42 @@ Jolt.Pulse_cat = Jolt.Pulse_catch_and_trace \
     catch error
       if (not isHeap) and (not isCatch) and (not isFinally)
         caught = true
-        stamp = pulse.stamp
+        stamp = @stamp
 
-        errP = new Pulse_cat 5, \
+        errP = new @constructor 5, \
         false, \
         receiver, \
         stamp, \
         [error, prePulse, sender, receiver, timeNow], \
         new HeapStore stamp
 
-        @constructor.prototype.propagate errP, \
-        errP.sender, \
+        errP.propagate errP.sender, \
         CATCH_E, \
-        true, \
         false, \
         true, \
         false
 
-        setPropagating true
-
       else
-        setPropagating false
         throw error
 
     finally
       receiver[fn] = subs[fn] for fn in fnames
 
       if (not isHeap) and (not isCatch) and (not isFinally) and (not caught)
-        stamp = pulse.stamp
+        stamp = @stamp
 
-        finP = new Pulse_cat 4, \
+        finP = new @constructor 4, \
         false, \
         receiver, \
         stamp, \
         [prePulse, PULSE, sender, receiver, timeNow, times], \
         new HeapStore stamp
 
-        @constructor.prototype.propagate finP, \
-        finP.sender, \
+        finP.propagate finP.sender, \
         FINALLY_E, \
-        true, \
         false, \
         false, \
         true
-
-        setPropagating true
 
     PULSE ?= doNotPropagate
 
@@ -176,7 +161,7 @@ Jolt.defaultHeapE = defaultHeapE = HEAP_E.mapE((where, timeNow, timeElapsed, tra
         #{timeNow}
         epoch: #{timeNow.valueOf()}
       """
-      say message, false, 'green'
+      say message, 'green'
     when 'end'
       message = """
         ----HEAP-END-----
@@ -187,7 +172,7 @@ Jolt.defaultHeapE = defaultHeapE = HEAP_E.mapE((where, timeNow, timeElapsed, tra
         trace:    #{0}
         est. net: #{0}
       """
-      say message, false, 'blue'
+      say message, 'blue'
 ).name('Jolt.defaultHeapE').PulseClass Pulse_cat
 
 
@@ -228,7 +213,7 @@ Jolt.defaultCatchE = defaultCatchE = CATCH_E.mapE((error, prePulse, sender, rece
     value:     #{JSON.stringify prePulse.value}
   """
 
-  say message, true
+  sayError message, 'bright', 'red'
 ).name('Jolt.defaultCatchE').PulseClass Pulse_cat
 
 
@@ -264,7 +249,7 @@ Jolt.defaultFinallyE = defaultFinallyE = FINALLY_E.mapE((prePulse, PULSE, sender
     value:     #{JSON.stringify PULSE.value}
     -----PROFILE-----
       (time in ms)
-    tranRCV: #{times.tranRCV}
+    tranIN:  #{times.tranIN}
     tranVAL: #{times.tranVAL}
     tranOUT: #{times.tranOUT}
   """
