@@ -2719,7 +2719,7 @@
       var args, fn;
       fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       if (!(_.isFunction(fn))) {
-        throw '<' + this.prototype.ClassName + '>.factory: 1st argument must be a function';
+        throw this.prototype.ClassName + '.factory: 1st argument must be a function';
       }
       return (function(func, args, ctor) {
         ctor.prototype = func.prototype;
