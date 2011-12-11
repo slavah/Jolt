@@ -5,7 +5,7 @@
 
   <span class="nv">ClassName: </span><span class="s">&#39;MappedE&#39;</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>rewrite this factory method to support extractEfromB semantics</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="vi">@factory: </span><span class="nf">(fn, args...) -&gt;</span>
     <span class="k">if</span> <span class="o">not</span> <span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">isFunction</span> <span class="nx">fn</span><span class="p">)</span>
-      <span class="k">throw</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="nx">@prototype</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="s">&#39;&gt;.factory: 1st argument must be a function&#39;</span>
+      <span class="k">throw</span> <span class="nx">@prototype</span><span class="p">.</span><span class="nx">ClassName</span> <span class="o">+</span> <span class="s">&#39;.factory: 1st argument must be a function&#39;</span>
     <span class="k">new</span> <span class="k">this</span> <span class="nx">fn</span><span class="p">,</span> <span class="nx">args</span><span class="p">...</span>
 
   <span class="nv">updater: </span><span class="nf">(value...) -&gt;</span>
