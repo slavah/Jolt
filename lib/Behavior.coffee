@@ -36,8 +36,6 @@ Jolt.Behavior = class Behavior extends EventStream
 
     @_changes = null
 
-  # --- #
-
   changes: ->
     if not @_changes? then @_changes = changesE(this)
     @_changes
@@ -57,13 +55,10 @@ Jolt.Behavior = class Behavior extends EventStream
 
     PULSE
 
-  # --- #
-
   # rewrite this factory method to support extractEfromB semantics
   @factory: (args...) ->
     new this args...
 
-# --- #
 
 Jolt.valueNow = valueNow = (behavior) -> behavior.last.value
 
