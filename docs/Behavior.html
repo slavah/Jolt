@@ -10,10 +10,15 @@
     <span class="k">if</span> <span class="nx">name</span>
       <span class="vi">@_name = </span><span class="nx">name</span> <span class="o">+</span> <span class="s">&#39; changes&#39;</span>
     <span class="k">else</span>
-      <span class="vi">@_name = </span><span class="s">&#39;absRank &#39;</span> <span class="o">+</span> <span class="nx">behavior</span><span class="p">.</span><span class="nx">absRank</span> <span class="o">+</span> <span class="s">&#39; changes&#39;</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">ClassName: </span><span class="s">&#39;ChangesE&#39;</span>
+      <span class="vi">@_name = </span><span class="s">&#39;absRank &#39;</span> <span class="o">+</span> <span class="nx">behavior</span><span class="p">.</span><span class="nx">absRank</span> <span class="o">+</span> <span class="s">&#39; changes&#39;</span>
+
+  <span class="nv">ClassName: </span><span class="s">&#39;ChangesE&#39;</span>
 
   <span class="vi">@factory: </span><span class="nf">(behavior) -&gt;</span>
-    <span class="k">new</span> <span class="k">this</span> <span class="nx">behavior</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">changesE = </span><span class="nf">(behavior) -&gt;</span>
+    <span class="k">new</span> <span class="k">this</span> <span class="nx">behavior</span>
+
+
+<span class="nv">changesE = </span><span class="nf">(behavior) -&gt;</span>
   <span class="nx">ChangesE</span><span class="p">.</span><span class="nx">factory</span> <span class="nx">behavior</span>
 
 
@@ -45,7 +50,7 @@
       <span class="nv">arity: </span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span>
       <span class="nv">value: </span><span class="nx">value</span>
 
-    <span class="nx">PULSE</span></pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>rewrite this factory method to support extractEfromB semantics</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="vi">@factory: </span><span class="nf">(args...) -&gt;</span>
+    <span class="nx">PULSE</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>rewrite this factory method to support extractEfromB semantics</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="vi">@factory: </span><span class="nf">(args...) -&gt;</span>
     <span class="k">new</span> <span class="k">this</span> <span class="nx">args</span><span class="p">...</span>
 
 
@@ -77,7 +82,7 @@
  
  
  
- </pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
+ </pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
 
 <p>Jolt - Reactive Objects for JavaScript</p>
 
