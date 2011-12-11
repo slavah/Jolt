@@ -8,7 +8,7 @@ Jolt.MappedE = class MappedE extends EventStream_api
   # rewrite this factory method to support extractEfromB semantics
   @factory: (fn, args...) ->
     if not (_.isFunction fn)
-      throw '<' + @prototype.ClassName + '>.factory: 1st argument must be a function'
+      throw @prototype.ClassName + '.factory: 1st argument must be a function'
     new this fn, args...
 
   updater: (value...) ->
