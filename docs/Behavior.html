@@ -36,15 +36,15 @@
 
   <span class="nv">UPDATER: </span><span class="nf">(pulse) -&gt;</span>
 
-    <span class="k">super</span>
+    <span class="nv">PULSE = </span><span class="k">super</span> <span class="nx">pulse</span>
 
-    <span class="nv">value = </span><span class="nx">pulse</span><span class="p">.</span><span class="nx">value</span>
+    <span class="nv">value = </span><span class="nx">PULSE</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">slice</span> <span class="mi">0</span>
     <span class="vi">@last =</span>
       <span class="nv">arity: </span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span>
       <span class="nv">value: </span><span class="nx">value</span>
 
-    <span class="nx">pulse</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="vi">@factory: </span><span class="nf">(args...) -&gt;</span>
-    <span class="k">new</span> <span class="k">this</span> <span class="nx">args</span><span class="p">...</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.valueNow = valueNow = </span><span class="nf">(behavior) -&gt;</span> <span class="nx">behavior</span><span class="p">.</span><span class="nx">last</span><span class="p">.</span><span class="nx">value</span>
+    <span class="nx">PULSE</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>rewrite this factory method to support extractEfromB semantics</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="vi">@factory: </span><span class="nf">(args...) -&gt;</span>
+    <span class="k">new</span> <span class="k">this</span> <span class="nx">args</span><span class="p">...</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>--- #</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.valueNow = valueNow = </span><span class="nf">(behavior) -&gt;</span> <span class="nx">behavior</span><span class="p">.</span><span class="nx">last</span><span class="p">.</span><span class="nx">value</span>
 
 <span class="nv">Behavior::valueNow = </span><span class="nf">(behavior) -&gt;</span> <span class="nx">valueNow</span> <span class="k">this</span>
 
@@ -72,7 +72,7 @@
  
  
  
- </pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
+ </pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <p>&lt;&lt;&lt;>>></p>
 
 <p>Jolt - Reactive Objects for JavaScript</p>
 

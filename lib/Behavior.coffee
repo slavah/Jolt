@@ -48,17 +48,18 @@ Jolt.Behavior = class Behavior extends EventStream
 
   UPDATER: (pulse) ->
 
-    super
+    PULSE = super pulse
 
-    value = pulse.value
+    value = PULSE.value.slice 0
     @last =
       arity: value.length
       value: value
 
-    pulse
+    PULSE
 
   # --- #
 
+  # rewrite this factory method to support extractEfromB semantics
   @factory: (args...) ->
     new this args...
 
