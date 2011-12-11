@@ -59,25 +59,23 @@ async.parallel(
     'EventStream/ZeroE.coffee'
     'EventStream/OneE.coffee'
     'EventStream/OneE_high.coffee'
-    'EventStream/BoundE.coffee'
-    'EventStream/SwitchedE.coffee'
-
-    # need: ZeroE/zeroE, OneE/oneE (regular and high variants in API), BoundE/bindE, SwitchedE/switchE
-    # after those should go Behavior, but without factory methods
-
-    'Behavior.coffee'
-
-    # then goes implementation of extractEfromB, though switchE may get intertwined with it
-    # in a separate component file I should compose Behavior's extractEfromB-dependent factory method
-
-    # then I can write MergedE/mergeE, with factory method dependent on extractEfromB
-    # going forward from there, EventStream_api members should have extractEfromB-dependent factory methods
-    # remember that semantics need to still be worked out for Behavior_api members ... notions of junction, etc.
-    #   and their factory methods should not reference extractEfromB, of course
-
     'EventStream/ConcatE.coffee'
     'EventStream/MappedE.coffee'
     'Pulse/Pulse_cat.coffee'
+    'EventStream/BoundE.coffee'
+    'EventStream/SwitchedE.coffee'
+
+    'Behavior.coffee'
+
+    # need implementation of extractEfromB, though switchE may get intertwined;
+    # once extractEfromB is available, I need to either dynamically overwrite,
+    # or go back and redefine in the source, the factory methods for MappedE,
+    # Behavior, etc. to support extractEfromB higher-order semantics; going
+    # forward from there, EventStream_api members' factory methods should make
+    # use of extractEfromB; remember that semantics need to still be worked out
+    # for Behavior_api members ... notions of junction, etc. and their factory
+    # methods should not reference extractEfromB, of course
+
     'Reactor.coffee'
     'packaging/exporter.coffee'
 

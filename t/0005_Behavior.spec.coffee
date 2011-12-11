@@ -43,7 +43,7 @@ describe 'Jolt.Behavior', ->
 
     ( expect myB.valueNow() ).toEqual [[4, 5, 6]]
 
-
+    EventStream.prototype.PulseClass Pulse
 
 
 

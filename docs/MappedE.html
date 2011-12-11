@@ -9,8 +9,7 @@
     <span class="k">new</span> <span class="k">this</span> <span class="nx">fn</span><span class="p">,</span> <span class="nx">args</span><span class="p">...</span>
 
   <span class="nv">updater: </span><span class="nf">(value...) -&gt;</span>
-    <span class="nv">fn = </span><span class="nx">@fn</span>
-    <span class="p">[</span> <span class="p">(</span><span class="nx">fn</span> <span class="nx">value</span><span class="p">...)</span> <span class="p">]</span>
+    <span class="p">[</span> <span class="p">(</span><span class="nx">@fn</span><span class="p">.</span><span class="nx">apply</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">]</span>
 
 
 <span class="nv">Jolt.mapE = mapE = </span><span class="nf">(args...) -&gt;</span>
