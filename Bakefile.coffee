@@ -65,7 +65,7 @@ async.parallel(
     # need: ZeroE/zeroE, OneE/oneE (regular and high variants in API), BoundE/bindE, SwitchedE/switchE
     # after those should go Behavior, but without factory methods
 
-    #'Behavior.coffee'
+    'Behavior.coffee'
 
     # then goes implementation of extractEfromB, though switchE may get intertwined with it
     # in a separate component file I should compose Behavior's extractEfromB-dependent factory method
@@ -75,10 +75,10 @@ async.parallel(
     # remember that semantics need to still be worked out for Behavior_api members ... notions of junction, etc.
     #   and their factory methods should not reference extractEfromB, of course
 
-    #'EventStream/ConcatE.coffee'
-    #'EventStream/MappedE.coffee'
-    #'Pulse/Pulse_cat.coffee'
-    #'Reactor.coffee'
+    'EventStream/ConcatE.coffee'
+    'EventStream/MappedE.coffee'
+    'Pulse/Pulse_cat.coffee'
+    'Reactor.coffee'
     'packaging/exporter.coffee'
 
   ]).map((path) -> ((callback) -> read path, callback))

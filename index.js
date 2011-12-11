@@ -1570,7 +1570,7 @@
   // MYMOD - 14 Nov 2011
   })();
   
-  var BinaryHeap, ContInfo, EventStream, EventStream_api, HeapStore, InternalE, Jolt, OneE, OneE_high, PriorityQueue, Pulse, ReceiverE, ZeroE, beforeNextPulse, beforeQ, cleanupQ, cleanupWeakReference, clog_err, defer, delay, doNotPropagate, exporter, internalE, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, nextRank, nextStamp, oneE, oneE_high, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, scheduleNorm, sendCall, sendEvent, sendEvent_drainAll, sendEvent_drainHighThenNorm, sendEvent_drainHighThenNormThenMid, sendEvent_nodrain, zeroE, _say, _say_helper;
+  var $B, Behavior, BinaryHeap, CATCH_E, ChangesE, ConcatE, ContInfo, EventStream, EventStream_api, FINALLY_E, HEAP_E, HeapStore, InternalE, Jolt, MappedE, OneE, OneE_high, PriorityQueue, Pulse, Pulse_cat, Pulse_catch_and_trace, Reactor, ReceiverE, ZeroE, beforeNextPulse, beforeQ, changesE, cleanupQ, cleanupWeakReference, clog_err, concatE, defaultCatchE, defaultFinallyE, defaultHeapE, defer, delay, doNotPropagate, exporter, extractB, internalE, isB, isE, isNodeJS, isP, lastRank, lastStamp, linkHigh, linkTight, mapE, nextRank, nextStamp, oneE, oneE_high, receiverE, say, sayErr, sayError, scheduleBefore, scheduleCleanup, scheduleHigh, scheduleMid, scheduleNorm, sendCall, sendEvent, sendEvent_drainAll, sendEvent_drainHighThenNorm, sendEvent_drainHighThenNormThenMid, sendEvent_nodrain, valueNow, zeroE, _say, _say_helper;
   var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
   
   BinaryHeap = (function() {
@@ -2667,6 +2667,359 @@
     value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
     return OneE_high.factory.apply(OneE_high, value);
   };
+  
+  Jolt.isB = isB = function(behavior) {
+    return behavior instanceof Behavior;
+  };
+  
+  ChangesE = (function() {
+  
+    __extends(ChangesE, InternalE);
+  
+    function ChangesE(behavior) {
+      var name;
+      ChangesE.__super__.constructor.call(this, behavior);
+      name = behavior.name();
+      if (name) {
+        this._name = name + ' changes';
+      } else {
+        this._name = 'absRank ' + behavior.absRank + ' changes';
+      }
+    }
+  
+    ChangesE.prototype.ClassName = 'ChangesE';
+  
+    ChangesE.factory = function(behavior) {
+      return new this(behavior);
+    };
+  
+    return ChangesE;
+  
+  })();
+  
+  changesE = function(behavior) {
+    return ChangesE.factory(behavior);
+  };
+  
+  Jolt.Behavior = Behavior = (function() {
+  
+    __extends(Behavior, EventStream);
+  
+    function Behavior() {
+      var init, length, recvFrom;
+      recvFrom = arguments[0], init = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      Behavior.__super__.constructor.call(this, recvFrom);
+      length = init.length;
+      this.last = {
+        arity: !length ? (init.push(void 0), length += 1) : length,
+        value: init
+      };
+      this._changes = null;
+    }
+  
+    Behavior.prototype.changes = function() {
+      if (!(this._changes != null)) this._changes = changesE(this);
+      return this._changes;
+    };
+  
+    Behavior.prototype.ClassName = 'Behavior';
+  
+    Behavior.prototype.no_null_junc = true;
+  
+    Behavior.prototype.UPDATER = function(pulse) {
+      var PULSE, value;
+      PULSE = Behavior.__super__.UPDATER.call(this, pulse);
+      value = PULSE.value.slice(0);
+      this.last = {
+        arity: value.length,
+        value: value
+      };
+      return PULSE;
+    };
+  
+    Behavior.factory = function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (function(func, args, ctor) {
+        ctor.prototype = func.prototype;
+        var child = new ctor, result = func.apply(child, args);
+        return typeof result === "object" ? result : child;
+      })(this, args, function() {});
+    };
+  
+    return Behavior;
+  
+  })();
+  
+  Jolt.valueNow = valueNow = function(behavior) {
+    return behavior.last.value;
+  };
+  
+  Behavior.prototype.valueNow = function(behavior) {
+    return valueNow(this);
+  };
+  
+  Jolt.$B = Jolt.extractB = $B = extractB = function() {
+    var args;
+    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return Behavior.factory.apply(Behavior, args);
+  };
+  
+  EventStream_api.prototype.$B = EventStream_api.prototype.extractB = function() {
+    var args;
+    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return extractB.apply(null, [this].concat(__slice.call(args)));
+  };
+  
+  Jolt.ConcatE = ConcatE = (function() {
+  
+    __extends(ConcatE, EventStream_api);
+  
+    function ConcatE() {
+      ConcatE.__super__.constructor.apply(this, arguments);
+    }
+  
+    ConcatE.prototype.ClassName = 'ConcatE';
+  
+    ConcatE.prototype.no_null_junc = true;
+  
+    ConcatE.prototype.updater = function() {
+      var value, _ref;
+      value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = []).concat.apply(_ref, value);
+    };
+  
+    return ConcatE;
+  
+  })();
+  
+  Jolt.concatE = concatE = function() {
+    var args;
+    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return ConcatE.factory.apply(ConcatE, args);
+  };
+  
+  EventStream_api.prototype.concatE = function() {
+    var args;
+    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return concatE.apply(null, (args.push(this), args));
+  };
+  
+  Jolt.MappedE = MappedE = (function() {
+  
+    __extends(MappedE, EventStream_api);
+  
+    function MappedE() {
+      var args, fn;
+      fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      this.fn = fn;
+      MappedE.__super__.constructor.apply(this, args);
+    }
+  
+    MappedE.prototype.ClassName = 'MappedE';
+  
+    MappedE.factory = function() {
+      var args, fn;
+      fn = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      if (!(_.isFunction(fn))) {
+        throw '<' + this.prototype.ClassName + '>.factory: 1st argument must be a function';
+      }
+      return (function(func, args, ctor) {
+        ctor.prototype = func.prototype;
+        var child = new ctor, result = func.apply(child, args);
+        return typeof result === "object" ? result : child;
+      })(this, [fn].concat(__slice.call(args)), function() {});
+    };
+  
+    MappedE.prototype.updater = function() {
+      var fn, value;
+      value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      fn = this.fn;
+      return [fn.apply(null, value)];
+    };
+  
+    return MappedE;
+  
+  })();
+  
+  Jolt.mapE = mapE = function() {
+    var args;
+    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return MappedE.factory.apply(MappedE, args);
+  };
+  
+  EventStream_api.prototype.mapE = function() {
+    var args;
+    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return mapE.apply(null, (args.push(this), args));
+  };
+  
+  Jolt.Pulse_cat = Jolt.Pulse_catch_and_trace = Pulse_cat = Pulse_catch_and_trace = (function() {
+  
+    __extends(Pulse_catch_and_trace, Pulse);
+  
+    function Pulse_catch_and_trace() {
+      Pulse_catch_and_trace.__super__.constructor.apply(this, arguments);
+    }
+  
+    Pulse_catch_and_trace.prototype.propagate = function(sender, receiver, isHeap, isCatch, isFinally) {
+      var HEAP, caught, heapP, stamp, timeEnd, timeStart, traceTime;
+      HEAP = this.heap;
+      traceTime = 123;
+      if ((!isHeap) && (!isCatch) && (!isFinally)) {
+        timeStart = new Date;
+        stamp = this.stamp;
+        heapP = new this.constructor(2, false, sender, stamp, ['start', timeStart], new HeapStore(stamp));
+        heapP.propagate(heapP.sender, HEAP_E, true, false, false);
+      } else {
+        'do';
+      }
+      caught = null;
+      try {
+        HEAP = Pulse_catch_and_trace.__super__.propagate.call(this, sender, receiver, isHeap, isCatch, isFinally);
+      } catch (error) {
+        caught = error;
+      } finally {
+        if ((!isHeap) && (!isCatch) && (!isFinally)) {
+          timeEnd = new Date;
+          heapP = new this.constructor(5, false, sender, stamp, ['end', timeEnd, timeEnd - timeStart, traceTime, HEAP], new HeapStore(stamp));
+          heapP.propagate(heapP.sender, HEAP_E, true, false, false);
+        } else {
+          'do';
+        }
+        if (caught) throw caught;
+      }
+      return HEAP;
+    };
+  
+    Pulse_catch_and_trace.prototype.PROPAGATE = function(sender, receiver, isHeap, isCatch, isFinally) {
+      var PULSE, caught, doSub, errP, finP, fn, fnames, prePulse, stamp, subs, timeNow, times, _i, _j, _k, _len, _len2, _len3;
+      caught = false;
+      PULSE = null;
+      timeNow = new Date;
+      fnames = ['tranIN', 'tranVAL', 'tranOUT'];
+      times = {};
+      try {
+        prePulse = {
+          arity: this.arity,
+          junction: this.junction,
+          stamp: this.stamp,
+          value: this.value.slice(0)
+        };
+        subs = {};
+        for (_i = 0, _len = fnames.length; _i < _len; _i++) {
+          fn = fnames[_i];
+          subs[fn] = receiver[fn];
+        }
+        doSub = function(fn) {
+          return receiver[fn] = function(pulse) {
+            var P, t1;
+            t1 = (new Date).valueOf();
+            P = subs[fn].call(receiver, pulse);
+            times[fn] = (new Date).valueOf() - t1;
+            return P;
+          };
+        };
+        for (_j = 0, _len2 = fnames.length; _j < _len2; _j++) {
+          fn = fnames[_j];
+          doSub(fn);
+        }
+        PULSE = receiver.UPDATER(this);
+        if (PULSE !== doNotPropagate && !(isP(PULSE))) {
+          PULSE = null;
+          throw 'receiver\'s UPDATER did not return a pulse object';
+        }
+      } catch (error) {
+        if ((!isHeap) && (!isCatch) && (!isFinally)) {
+          caught = true;
+          stamp = this.stamp;
+          errP = new this.constructor(5, false, receiver, stamp, [error, prePulse, sender, receiver, timeNow], new HeapStore(stamp));
+          errP.propagate(errP.sender, CATCH_E, false, true, false);
+        } else {
+          throw error;
+        }
+      } finally {
+        for (_k = 0, _len3 = fnames.length; _k < _len3; _k++) {
+          fn = fnames[_k];
+          receiver[fn] = subs[fn];
+        }
+        if ((!isHeap) && (!isCatch) && (!isFinally) && (!caught)) {
+          stamp = this.stamp;
+          finP = new this.constructor(4, false, receiver, stamp, [prePulse, PULSE, sender, receiver, timeNow, times], new HeapStore(stamp));
+          finP.propagate(finP.sender, FINALLY_E, false, false, true);
+        }
+      }
+      return PULSE != null ? PULSE : PULSE = doNotPropagate;
+    };
+  
+    return Pulse_catch_and_trace;
+  
+  })();
+  
+  Jolt.HEAP_E = HEAP_E = internalE().name('Jolt.HEAP_E').PulseClass(Pulse_cat);
+  
+  Jolt.CATCH_E = CATCH_E = internalE().name('Jolt.CATCH_E').PulseClass(Pulse_cat);
+  
+  Jolt.FINALLY_E = FINALLY_E = internalE().name('Jolt.FINALLY_E').PulseClass(Pulse_cat);
+  
+  Jolt.defaultHeapE = defaultHeapE = HEAP_E.mapE(function(where, timeNow, timeElapsed, traceTime, HEAP) {
+    var message;
+    switch (where) {
+      case 'start':
+        message = "----HEAP-START----\n" + timeNow + "\nepoch: " + (timeNow.valueOf());
+        return say(message, 'green');
+      case 'end':
+        message = "----HEAP-END-----\n" + timeNow + "\nepoch:   " + (timeNow.valueOf()) + "\n  (time in ms)\nelapsed:  " + timeElapsed + "\ntrace:    " + 0 + "\nest. net: " + 0;
+        return say(message, 'blue');
+    }
+  }).name('Jolt.defaultHeapE').PulseClass(Pulse_cat);
+  
+  Jolt.defaultCatchE = defaultCatchE = CATCH_E.mapE(function(error, prePulse, sender, receiver, timeNow) {
+    var emsg, message, rClass, rName, sClass, sName;
+    if ((typeof error) === 'string') {
+      emsg = error;
+    } else if (error.message != null) {
+      emsg = error.message;
+    } else {
+      emsg = JSON.stringify(error);
+    }
+    if (emsg === '') emsg = 'undefined';
+    if (emsg == null) emsg = 'undefined';
+    sName = sender.name();
+    if (sName == null) sName = 'unnamed';
+    sClass = '(' + sender.ClassName + ')';
+    if (sClass === '(undefined)') sClass = '';
+    rName = receiver.name();
+    if (rName == null) rName = 'unnamed';
+    rClass = '(' + receiver.ClassName + ')';
+    message = "------ERROR------\nsender:    " + sName + "  " + sClass + "\n  rank:    " + (sender.rank || 'n/a') + "\n  absRank: " + (sender.absRank || 'n/a') + "\nreceiver:  " + rName + "  " + rClass + "\n  mode:    " + (receiver.mode()) + "\n  nary:    " + (receiver.isNary()) + "\n  rank:    " + receiver.rank + "\n  absRank: " + receiver.absRank + "\nerror:     " + emsg + "\n----RECV-PULSE---\narity:     " + prePulse.arity + "\njunction:  " + prePulse.junction + "\nstamp:     " + prePulse.stamp + "\nvalue:     " + (JSON.stringify(prePulse.value));
+    return sayError(message, 'bright', 'red');
+  }).name('Jolt.defaultCatchE').PulseClass(Pulse_cat);
+  
+  Jolt.defaultFinallyE = defaultFinallyE = FINALLY_E.mapE(function(prePulse, PULSE, sender, receiver, timeNow, times) {
+    var message, rClass, rName, sClass, sName;
+    sName = sender.name();
+    if (sName == null) sName = 'unnamed';
+    sClass = '(' + sender.ClassName + ')';
+    if (sClass === '(undefined)') sClass = '';
+    rName = receiver.name();
+    if (rName == null) rName = 'unnamed';
+    rClass = '(' + receiver.ClassName + ')';
+    message = "------TRACE------\nsender:    " + sName + "  " + sClass + "\n  rank:    " + (sender.rank || 'n/a') + "\n  absRank: " + (sender.absRank || 'n/a') + "\nreceiver:  " + rName + "  " + rClass + "\n  mode:    " + (receiver.mode()) + "\n  nary:    " + (receiver.isNary()) + "\n  rank:    " + receiver.rank + "\n  absRank: " + receiver.absRank + "\n----RCV-PULSE----\narity:     " + prePulse.arity + "\njunction:  " + prePulse.junction + "\nstamp:     " + prePulse.stamp + "\nvalue:     " + (JSON.stringify(prePulse.value)) + "\n----OUT-PULSE----\narity:     " + PULSE.arity + "\njunction:  " + PULSE.junction + "\nstamp:     " + PULSE.stamp + "\nvalue:     " + (JSON.stringify(PULSE.value)) + "\n-----PROFILE-----\n  (time in ms)\ntranIN:  " + times.tranIN + "\ntranVAL: " + times.tranVAL + "\ntranOUT: " + times.tranOUT;
+    return say(message);
+  }).name('Jolt.defaultFinallyE').PulseClass(Pulse_cat);
+  
+  Jolt.Reactor = Reactor = (function() {
+  
+    __extends(Reactor, EventEmitter);
+  
+    function Reactor() {
+      Reactor.__super__.constructor.apply(this, arguments);
+    }
+  
+    return Reactor;
+  
+  })();
   
   exporter = function(ns, target) {
     var key, value, _results;

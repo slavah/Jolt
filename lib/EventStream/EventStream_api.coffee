@@ -1,5 +1,6 @@
 Jolt.EventStream_api = class EventStream_api extends EventStream
 
+  # rewrite this factory method to support extractEfromB semantics
   @factory: (args...) ->
     new this args...
  
