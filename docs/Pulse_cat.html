@@ -1,38 +1,34 @@
 <!DOCTYPE html>  <html> <head>   <title>Pulse_cat.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="Behavior.html">                 Behavior.coffee               </a>                                           <a class="source" href="LiftedB.html">                 LiftedB.coffee               </a>                                           <a class="source" href="EventStream.html">                 EventStream.coffee               </a>                                           <a class="source" href="BoundE.html">                 BoundE.coffee               </a>                                           <a class="source" href="ConcatE.html">                 ConcatE.coffee               </a>                                           <a class="source" href="EventStream_api.html">                 EventStream_api.coffee               </a>                                           <a class="source" href="InternalE.html">                 InternalE.coffee               </a>                                           <a class="source" href="MappedE.html">                 MappedE.coffee               </a>                                           <a class="source" href="OneE.html">                 OneE.coffee               </a>                                           <a class="source" href="OneE_high.html">                 OneE_high.coffee               </a>                                           <a class="source" href="ReceiverE.html">                 ReceiverE.coffee               </a>                                           <a class="source" href="SwitchedE.html">                 SwitchedE.coffee               </a>                                           <a class="source" href="ZeroE.html">                 ZeroE.coffee               </a>                                           <a class="source" href="Jolt.html">                 Jolt.coffee               </a>                                           <a class="source" href="PriorityQueue.html">                 PriorityQueue.coffee               </a>                                           <a class="source" href="Pulse.html">                 Pulse.coffee               </a>                                           <a class="source" href="Pulse_cat.html">                 Pulse_cat.coffee               </a>                                           <a class="source" href="Reactor.html">                 Reactor.coffee               </a>                                           <a class="source" href="say.html">                 say.coffee               </a>                                           <a class="source" href="exporter.html">                 exporter.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               Pulse_cat.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Jolt.Pulse_cat = </span><span class="nx">Jolt</span><span class="p">.</span><span class="nx">Pulse_catch_and_trace</span> <span class="o">\</span>
 <span class="o">=</span> <span class="nv">Pulse_cat = </span><span class="k">class</span> <span class="nx">Pulse_catch_and_trace</span> <span class="k">extends</span> <span class="nx">Pulse</span>
 
-  <span class="nv">propagate: </span><span class="nf">(pulse, sender, receiver, high, isHeap, isCatch, isFinally) -&gt;</span>
+  <span class="nv">propagate: </span><span class="nf">(sender, receiver, isHeap, isCatch, isFinally) -&gt;</span>
 
-    <span class="nv">HEAP = </span><span class="nx">pulse</span><span class="p">.</span><span class="nx">heap</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>wrong! not sure how to do this yet...</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">traceTime = </span><span class="mi">123</span>
+    <span class="nv">HEAP = </span><span class="nx">@heap</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>wrong! not sure how to do this yet...</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">traceTime = </span><span class="mi">123</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="o">not</span> <span class="nx">isHeap</span><span class="p">)</span> <span class="o">and</span> <span class="p">(</span><span class="o">not</span> <span class="nx">isCatch</span><span class="p">)</span> <span class="o">and</span> <span class="p">(</span><span class="o">not</span> <span class="nx">isFinally</span><span class="p">)</span>
 
       <span class="nv">timeStart = </span><span class="k">new</span> <span class="nb">Date</span>
 
-      <span class="nv">stamp = </span><span class="nx">pulse</span><span class="p">.</span><span class="nx">stamp</span>
+      <span class="nv">stamp = </span><span class="nx">@stamp</span>
 
-      <span class="nv">heapP = </span><span class="k">new</span> <span class="nx">Pulse_cat</span> <span class="mi">2</span><span class="p">,</span> <span class="o">\</span>
+      <span class="nv">heapP = </span><span class="k">new</span> <span class="nx">@constructor</span> <span class="mi">2</span><span class="p">,</span> <span class="o">\</span>
       <span class="kc">false</span><span class="p">,</span> <span class="o">\</span>
       <span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
       <span class="nx">stamp</span><span class="p">,</span> <span class="o">\</span>
       <span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">,</span> <span class="nx">timeStart</span><span class="p">],</span> <span class="o">\</span>
       <span class="k">new</span> <span class="nx">HeapStore</span> <span class="nx">stamp</span>
 
-      <span class="nx">@constructor</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">heapP</span><span class="p">,</span> <span class="o">\</span>
-      <span class="nx">heapP</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
+      <span class="nx">heapP</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">heapP</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
       <span class="nx">HEAP_E</span><span class="p">,</span> <span class="o">\</span>
-      <span class="kc">true</span><span class="p">,</span> <span class="o">\</span>
       <span class="kc">true</span><span class="p">,</span> <span class="o">\</span>
       <span class="kc">false</span><span class="p">,</span> <span class="o">\</span>
       <span class="kc">false</span>
-
-      <span class="nx">setPropagating</span> <span class="kc">true</span>
 
     <span class="k">else</span>
       <span class="s">&#39;do&#39;</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>mark the trace time for subtraction purposes</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nv">caught = </span><span class="kc">null</span>
 
     <span class="k">try</span>
-      <span class="nv">HEAP = </span><span class="k">super</span> <span class="nx">pulse</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span><span class="p">,</span> <span class="nx">high</span><span class="p">,</span> <span class="nx">isHeap</span><span class="p">,</span> <span class="nx">isCatch</span><span class="p">,</span> <span class="nx">isFinally</span>
+      <span class="nv">HEAP = </span><span class="k">super</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span><span class="p">,</span> <span class="nx">isHeap</span><span class="p">,</span> <span class="nx">isCatch</span><span class="p">,</span> <span class="nx">isFinally</span>
 
     <span class="k">catch</span> <span class="nx">error</span>
       <span class="nv">caught = </span><span class="nx">error</span>
@@ -42,17 +38,15 @@
 
         <span class="nv">timeEnd = </span><span class="k">new</span> <span class="nb">Date</span>
 
-        <span class="nv">heapP = </span><span class="k">new</span> <span class="nx">Pulse_cat</span> <span class="mi">5</span><span class="p">,</span> <span class="o">\</span>
+        <span class="nv">heapP = </span><span class="k">new</span> <span class="nx">@constructor</span> <span class="mi">5</span><span class="p">,</span> <span class="o">\</span>
         <span class="kc">false</span><span class="p">,</span> <span class="o">\</span>
         <span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
         <span class="nx">stamp</span><span class="p">,</span> <span class="o">\</span>
         <span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">,</span> <span class="nx">timeEnd</span><span class="p">,</span> <span class="p">(</span><span class="nx">timeEnd</span> <span class="o">-</span> <span class="nx">timeStart</span><span class="p">),</span> <span class="nx">traceTime</span><span class="p">,</span> <span class="nx">HEAP</span><span class="p">],</span> <span class="o">\</span>
         <span class="k">new</span> <span class="nx">HeapStore</span> <span class="nx">stamp</span>
 
-        <span class="nx">@constructor</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">heapP</span><span class="p">,</span> <span class="o">\</span>
-        <span class="nx">heapP</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
+        <span class="nx">heapP</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">heapP</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
         <span class="nx">HEAP_E</span><span class="p">,</span> <span class="o">\</span>
-        <span class="kc">true</span><span class="p">,</span> <span class="o">\</span>
         <span class="kc">true</span><span class="p">,</span> <span class="o">\</span>
         <span class="kc">false</span><span class="p">,</span> <span class="o">\</span>
         <span class="kc">false</span>
@@ -64,7 +58,7 @@
     <span class="nx">HEAP</span>
 
 
-  <span class="nv">PROPAGATE: </span><span class="nf">(pulse, sender, receiver, high, isHeap, isCatch, isFinally) -&gt;</span>
+  <span class="nv">PROPAGATE: </span><span class="nf">(sender, receiver, isHeap, isCatch, isFinally) -&gt;</span>
 
     <span class="nv">caught = </span><span class="kc">false</span>
 
@@ -72,16 +66,16 @@
 
     <span class="nv">timeNow = </span><span class="k">new</span> <span class="nb">Date</span>
 
-    <span class="nv">fnames = </span><span class="p">[</span><span class="s">&#39;tranRCV&#39;</span><span class="p">,</span><span class="s">&#39;tranVAL&#39;</span><span class="p">,</span><span class="s">&#39;tranOUT&#39;</span><span class="p">]</span>
+    <span class="nv">fnames = </span><span class="p">[</span><span class="s">&#39;tranIN&#39;</span><span class="p">,</span><span class="s">&#39;tranVAL&#39;</span><span class="p">,</span><span class="s">&#39;tranOUT&#39;</span><span class="p">]</span>
 
     <span class="nv">times = </span><span class="p">{}</span>
 
     <span class="k">try</span>
       <span class="nv">prePulse =</span>
-        <span class="nv">arity: </span>   <span class="nx">pulse</span><span class="p">.</span><span class="nx">arity</span>
-        <span class="nv">junction: </span><span class="nx">pulse</span><span class="p">.</span><span class="nx">junction</span>
-        <span class="nv">stamp: </span>   <span class="nx">pulse</span><span class="p">.</span><span class="nx">stamp</span>
-        <span class="nv">value: </span>  <span class="p">(</span><span class="nx">pulse</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">slice</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="nv">arity: </span>   <span class="nx">@arity</span>
+        <span class="nv">junction: </span><span class="nx">@junction</span>
+        <span class="nv">stamp: </span>   <span class="nx">@stamp</span>
+        <span class="nv">value: </span>  <span class="p">(</span><span class="nx">@value</span><span class="p">.</span><span class="nx">slice</span> <span class="mi">0</span><span class="p">)</span>
 
       <span class="nv">subs = </span><span class="p">{}</span>
       <span class="nx">subs</span><span class="p">[</span><span class="nx">fn</span><span class="p">]</span> <span class="o">=</span> <span class="nx">receiver</span><span class="p">[</span><span class="nx">fn</span><span class="p">]</span> <span class="k">for</span> <span class="nx">fn</span> <span class="k">in</span> <span class="nx">fnames</span>
@@ -94,7 +88,7 @@
           <span class="nx">P</span>
       <span class="nx">doSub</span> <span class="nx">fn</span> <span class="k">for</span> <span class="nx">fn</span> <span class="k">in</span> <span class="nx">fnames</span>
 
-      <span class="nv">PULSE = </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">UPDATER</span> <span class="nx">pulse</span>
+      <span class="nv">PULSE = </span><span class="nx">receiver</span><span class="p">.</span><span class="nx">UPDATER</span> <span class="k">this</span>
 
       <span class="k">if</span> <span class="nx">PULSE</span> <span class="o">isnt</span> <span class="nx">doNotPropagate</span> <span class="o">and</span> <span class="o">not</span> <span class="p">(</span><span class="nx">isP</span> <span class="nx">PULSE</span><span class="p">)</span>
         <span class="nv">PULSE = </span><span class="kc">null</span>
@@ -103,51 +97,42 @@
     <span class="k">catch</span> <span class="nx">error</span>
       <span class="k">if</span> <span class="p">(</span><span class="o">not</span> <span class="nx">isHeap</span><span class="p">)</span> <span class="o">and</span> <span class="p">(</span><span class="o">not</span> <span class="nx">isCatch</span><span class="p">)</span> <span class="o">and</span> <span class="p">(</span><span class="o">not</span> <span class="nx">isFinally</span><span class="p">)</span>
         <span class="nv">caught = </span><span class="kc">true</span>
-        <span class="nv">stamp = </span><span class="nx">pulse</span><span class="p">.</span><span class="nx">stamp</span>
+        <span class="nv">stamp = </span><span class="nx">@stamp</span>
 
-        <span class="nv">errP = </span><span class="k">new</span> <span class="nx">Pulse_cat</span> <span class="mi">5</span><span class="p">,</span> <span class="o">\</span>
+        <span class="nv">errP = </span><span class="k">new</span> <span class="nx">@constructor</span> <span class="mi">5</span><span class="p">,</span> <span class="o">\</span>
         <span class="kc">false</span><span class="p">,</span> <span class="o">\</span>
         <span class="nx">receiver</span><span class="p">,</span> <span class="o">\</span>
         <span class="nx">stamp</span><span class="p">,</span> <span class="o">\</span>
         <span class="p">[</span><span class="nx">error</span><span class="p">,</span> <span class="nx">prePulse</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span><span class="p">,</span> <span class="nx">timeNow</span><span class="p">],</span> <span class="o">\</span>
         <span class="k">new</span> <span class="nx">HeapStore</span> <span class="nx">stamp</span>
 
-        <span class="nx">@constructor</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">errP</span><span class="p">,</span> <span class="o">\</span>
-        <span class="nx">errP</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
+        <span class="nx">errP</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">errP</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
         <span class="nx">CATCH_E</span><span class="p">,</span> <span class="o">\</span>
-        <span class="kc">true</span><span class="p">,</span> <span class="o">\</span>
         <span class="kc">false</span><span class="p">,</span> <span class="o">\</span>
         <span class="kc">true</span><span class="p">,</span> <span class="o">\</span>
         <span class="kc">false</span>
 
-        <span class="nx">setPropagating</span> <span class="kc">true</span>
-
       <span class="k">else</span>
-        <span class="nx">setPropagating</span> <span class="kc">false</span>
         <span class="k">throw</span> <span class="nx">error</span>
 
     <span class="k">finally</span>
       <span class="nx">receiver</span><span class="p">[</span><span class="nx">fn</span><span class="p">]</span> <span class="o">=</span> <span class="nx">subs</span><span class="p">[</span><span class="nx">fn</span><span class="p">]</span> <span class="k">for</span> <span class="nx">fn</span> <span class="k">in</span> <span class="nx">fnames</span>
 
       <span class="k">if</span> <span class="p">(</span><span class="o">not</span> <span class="nx">isHeap</span><span class="p">)</span> <span class="o">and</span> <span class="p">(</span><span class="o">not</span> <span class="nx">isCatch</span><span class="p">)</span> <span class="o">and</span> <span class="p">(</span><span class="o">not</span> <span class="nx">isFinally</span><span class="p">)</span> <span class="o">and</span> <span class="p">(</span><span class="o">not</span> <span class="nx">caught</span><span class="p">)</span>
-        <span class="nv">stamp = </span><span class="nx">pulse</span><span class="p">.</span><span class="nx">stamp</span>
+        <span class="nv">stamp = </span><span class="nx">@stamp</span>
 
-        <span class="nv">finP = </span><span class="k">new</span> <span class="nx">Pulse_cat</span> <span class="mi">4</span><span class="p">,</span> <span class="o">\</span>
+        <span class="nv">finP = </span><span class="k">new</span> <span class="nx">@constructor</span> <span class="mi">4</span><span class="p">,</span> <span class="o">\</span>
         <span class="kc">false</span><span class="p">,</span> <span class="o">\</span>
         <span class="nx">receiver</span><span class="p">,</span> <span class="o">\</span>
         <span class="nx">stamp</span><span class="p">,</span> <span class="o">\</span>
         <span class="p">[</span><span class="nx">prePulse</span><span class="p">,</span> <span class="nx">PULSE</span><span class="p">,</span> <span class="nx">sender</span><span class="p">,</span> <span class="nx">receiver</span><span class="p">,</span> <span class="nx">timeNow</span><span class="p">,</span> <span class="nx">times</span><span class="p">],</span> <span class="o">\</span>
         <span class="k">new</span> <span class="nx">HeapStore</span> <span class="nx">stamp</span>
 
-        <span class="nx">@constructor</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">finP</span><span class="p">,</span> <span class="o">\</span>
-        <span class="nx">finP</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
+        <span class="nx">finP</span><span class="p">.</span><span class="nx">propagate</span> <span class="nx">finP</span><span class="p">.</span><span class="nx">sender</span><span class="p">,</span> <span class="o">\</span>
         <span class="nx">FINALLY_E</span><span class="p">,</span> <span class="o">\</span>
-        <span class="kc">true</span><span class="p">,</span> <span class="o">\</span>
         <span class="kc">false</span><span class="p">,</span> <span class="o">\</span>
         <span class="kc">false</span><span class="p">,</span> <span class="o">\</span>
         <span class="kc">true</span>
-
-        <span class="nx">setPropagating</span> <span class="kc">true</span>
 
     <span class="nx">PULSE</span> <span class="o">?=</span> <span class="nx">doNotPropagate</span>
 
@@ -167,7 +152,7 @@
 <span class="s">        </span><span class="si">#{</span><span class="nx">timeNow</span><span class="si">}</span><span class="s"></span>
 <span class="s">        epoch: </span><span class="si">#{</span><span class="nx">timeNow</span><span class="p">.</span><span class="nx">valueOf</span><span class="p">()</span><span class="si">}</span><span class="s"></span>
 <span class="s">      &quot;&quot;&quot;</span>
-      <span class="nx">say</span> <span class="nx">message</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="s">&#39;green&#39;</span>
+      <span class="nx">say</span> <span class="nx">message</span><span class="p">,</span> <span class="s">&#39;green&#39;</span>
     <span class="k">when</span> <span class="s">&#39;end&#39;</span>
       <span class="nv">message = </span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">        ----HEAP-END-----</span>
@@ -178,7 +163,7 @@
 <span class="s">        trace:    </span><span class="si">#{</span><span class="mi">0</span><span class="si">}</span><span class="s"></span>
 <span class="s">        est. net: </span><span class="si">#{</span><span class="mi">0</span><span class="si">}</span><span class="s"></span>
 <span class="s">      &quot;&quot;&quot;</span>
-      <span class="nx">say</span> <span class="nx">message</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="s">&#39;blue&#39;</span>
+      <span class="nx">say</span> <span class="nx">message</span><span class="p">,</span> <span class="s">&#39;blue&#39;</span>
 <span class="p">).</span><span class="nx">name</span><span class="p">(</span><span class="s">&#39;Jolt.defaultHeapE&#39;</span><span class="p">).</span><span class="nx">PulseClass</span> <span class="nx">Pulse_cat</span>
 
 
@@ -219,7 +204,7 @@
 <span class="s">    value:     </span><span class="si">#{</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span> <span class="nx">prePulse</span><span class="p">.</span><span class="nx">value</span><span class="si">}</span><span class="s"></span>
 <span class="s">  &quot;&quot;&quot;</span>
 
-  <span class="nx">say</span> <span class="nx">message</span><span class="p">,</span> <span class="kc">true</span>
+  <span class="nx">sayError</span> <span class="nx">message</span><span class="p">,</span> <span class="s">&#39;bright&#39;</span><span class="p">,</span> <span class="s">&#39;red&#39;</span>
 <span class="p">).</span><span class="nx">name</span><span class="p">(</span><span class="s">&#39;Jolt.defaultCatchE&#39;</span><span class="p">).</span><span class="nx">PulseClass</span> <span class="nx">Pulse_cat</span>
 
 
@@ -255,7 +240,7 @@
 <span class="s">    value:     </span><span class="si">#{</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span> <span class="nx">PULSE</span><span class="p">.</span><span class="nx">value</span><span class="si">}</span><span class="s"></span>
 <span class="s">    -----PROFILE-----</span>
 <span class="s">      (time in ms)</span>
-<span class="s">    tranRCV: </span><span class="si">#{</span><span class="nx">times</span><span class="p">.</span><span class="nx">tranRCV</span><span class="si">}</span><span class="s"></span>
+<span class="s">    tranIN:  </span><span class="si">#{</span><span class="nx">times</span><span class="p">.</span><span class="nx">tranIN</span><span class="si">}</span><span class="s"></span>
 <span class="s">    tranVAL: </span><span class="si">#{</span><span class="nx">times</span><span class="p">.</span><span class="nx">tranVAL</span><span class="si">}</span><span class="s"></span>
 <span class="s">    tranOUT: </span><span class="si">#{</span><span class="nx">times</span><span class="p">.</span><span class="nx">tranOUT</span><span class="si">}</span><span class="s"></span>
 <span class="s">  &quot;&quot;&quot;</span>
