@@ -8,7 +8,7 @@ beforeEach ->
   Jolt.globalize()
 
 describe 'Jolt.Behavior', ->
-
+  ###
   beforeEach ->
     # While running finalized specs, it's not desirable to have Pulse_cat log
     # to stdio, so we detach defaultCatchE/FinallyE before each spec
@@ -23,7 +23,7 @@ describe 'Jolt.Behavior', ->
     Jolt.HEAP_E.attachListener Jolt.defaultHeapE
     Jolt.CATCH_E.attachListener Jolt.defaultCatchE
     Jolt.FINALLY_E.attachListener Jolt.defaultFinallyE
-
+  ###
 
   it '''
     should

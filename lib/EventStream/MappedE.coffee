@@ -12,8 +12,7 @@ Jolt.MappedE = class MappedE extends EventStream_api
     new this fn, args...
 
   updater: (value...) ->
-    fn = @fn
-    [ (fn value...) ]
+    [ (@fn.apply null, value) ]
 
 
 Jolt.mapE = mapE = (args...) ->

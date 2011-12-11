@@ -2668,109 +2668,6 @@
     return OneE_high.factory.apply(OneE_high, value);
   };
   
-  Jolt.isB = isB = function(behavior) {
-    return behavior instanceof Behavior;
-  };
-  
-  ChangesE = (function() {
-  
-    __extends(ChangesE, InternalE);
-  
-    function ChangesE(behavior) {
-      var name;
-      ChangesE.__super__.constructor.call(this, behavior);
-      name = behavior.name();
-      if (name) {
-        this._name = name + ' changes';
-      } else {
-        this._name = 'absRank ' + behavior.absRank + ' changes';
-      }
-    }
-  
-    ChangesE.prototype.ClassName = 'ChangesE';
-  
-    ChangesE.factory = function(behavior) {
-      return new this(behavior);
-    };
-  
-    return ChangesE;
-  
-  })();
-  
-  changesE = function(behavior) {
-    return ChangesE.factory(behavior);
-  };
-  
-  Jolt.Behavior = Behavior = (function() {
-  
-    __extends(Behavior, EventStream);
-  
-    function Behavior() {
-      var init, length, recvFrom;
-      recvFrom = arguments[0], init = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-      Behavior.__super__.constructor.call(this, recvFrom);
-      length = init.length;
-      this.last = {
-        arity: !length ? (init.push(void 0), length += 1) : length,
-        value: init
-      };
-      this._changes = null;
-    }
-  
-    Behavior.prototype.changes = function() {
-      if (!(this._changes != null)) this._changes = changesE(this);
-      return this._changes;
-    };
-  
-    Behavior.prototype.ClassName = 'Behavior';
-  
-    Behavior.prototype.no_null_junc = true;
-  
-    Behavior.prototype.UPDATER = function(pulse) {
-      var PULSE, value;
-      PULSE = Behavior.__super__.UPDATER.call(this, pulse);
-      value = PULSE.value.slice(0);
-      this.last = {
-        arity: value.length,
-        value: value
-      };
-      return PULSE;
-    };
-  
-    Behavior.factory = function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (function(func, args, ctor) {
-        ctor.prototype = func.prototype;
-        var child = new ctor, result = func.apply(child, args);
-        return typeof result === "object" ? result : child;
-      })(this, args, function() {});
-    };
-  
-    return Behavior;
-  
-  })();
-  
-  Jolt.valueNow = valueNow = function(behavior) {
-    return behavior.last.value;
-  };
-  
-  Behavior.prototype.valueNow = function(behavior) {
-    return valueNow(this);
-  };
-  
-  Jolt.$B = Jolt.extractB = $B = extractB = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return Behavior.factory.apply(Behavior, args);
-  };
-  
-  EventStream_api.prototype.$B = EventStream_api.prototype.extractB = function() {
-    var args;
-    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-    return extractB.apply(null, [this].concat(__slice.call(args)));
-  };
-  
   Jolt.ConcatE = ConcatE = (function() {
   
     __extends(ConcatE, EventStream_api);
@@ -2832,10 +2729,9 @@
     };
   
     MappedE.prototype.updater = function() {
-      var fn, value;
+      var value;
       value = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      fn = this.fn;
-      return [fn.apply(null, value)];
+      return [this.fn.apply(null, value)];
     };
   
     return MappedE;
@@ -3008,6 +2904,109 @@
     message = "------TRACE------\nsender:    " + sName + "  " + sClass + "\n  rank:    " + (sender.rank || 'n/a') + "\n  absRank: " + (sender.absRank || 'n/a') + "\nreceiver:  " + rName + "  " + rClass + "\n  mode:    " + (receiver.mode()) + "\n  nary:    " + (receiver.isNary()) + "\n  rank:    " + receiver.rank + "\n  absRank: " + receiver.absRank + "\n----RCV-PULSE----\narity:     " + prePulse.arity + "\njunction:  " + prePulse.junction + "\nstamp:     " + prePulse.stamp + "\nvalue:     " + (JSON.stringify(prePulse.value)) + "\n----OUT-PULSE----\narity:     " + PULSE.arity + "\njunction:  " + PULSE.junction + "\nstamp:     " + PULSE.stamp + "\nvalue:     " + (JSON.stringify(PULSE.value)) + "\n-----PROFILE-----\n  (time in ms)\ntranIN:  " + times.tranIN + "\ntranVAL: " + times.tranVAL + "\ntranOUT: " + times.tranOUT;
     return say(message);
   }).name('Jolt.defaultFinallyE').PulseClass(Pulse_cat);
+  
+  Jolt.isB = isB = function(behavior) {
+    return behavior instanceof Behavior;
+  };
+  
+  ChangesE = (function() {
+  
+    __extends(ChangesE, InternalE);
+  
+    function ChangesE(behavior) {
+      var name;
+      ChangesE.__super__.constructor.call(this, behavior);
+      name = behavior.name();
+      if (name) {
+        this._name = name + ' changes';
+      } else {
+        this._name = 'absRank ' + behavior.absRank + ' changes';
+      }
+    }
+  
+    ChangesE.prototype.ClassName = 'ChangesE';
+  
+    ChangesE.factory = function(behavior) {
+      return new this(behavior);
+    };
+  
+    return ChangesE;
+  
+  })();
+  
+  changesE = function(behavior) {
+    return ChangesE.factory(behavior);
+  };
+  
+  Jolt.Behavior = Behavior = (function() {
+  
+    __extends(Behavior, EventStream);
+  
+    function Behavior() {
+      var init, length, recvFrom;
+      recvFrom = arguments[0], init = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+      Behavior.__super__.constructor.call(this, recvFrom);
+      length = init.length;
+      this.last = {
+        arity: !length ? (init.push(void 0), length += 1) : length,
+        value: init
+      };
+      this._changes = null;
+    }
+  
+    Behavior.prototype.changes = function() {
+      if (!(this._changes != null)) this._changes = changesE(this);
+      return this._changes;
+    };
+  
+    Behavior.prototype.ClassName = 'Behavior';
+  
+    Behavior.prototype.no_null_junc = true;
+  
+    Behavior.prototype.UPDATER = function(pulse) {
+      var PULSE, value;
+      PULSE = Behavior.__super__.UPDATER.call(this, pulse);
+      value = PULSE.value.slice(0);
+      this.last = {
+        arity: value.length,
+        value: value
+      };
+      return PULSE;
+    };
+  
+    Behavior.factory = function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (function(func, args, ctor) {
+        ctor.prototype = func.prototype;
+        var child = new ctor, result = func.apply(child, args);
+        return typeof result === "object" ? result : child;
+      })(this, args, function() {});
+    };
+  
+    return Behavior;
+  
+  })();
+  
+  Jolt.valueNow = valueNow = function(behavior) {
+    return behavior.last.value;
+  };
+  
+  Behavior.prototype.valueNow = function(behavior) {
+    return valueNow(this);
+  };
+  
+  Jolt.$B = Jolt.extractB = $B = extractB = function() {
+    var args;
+    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return Behavior.factory.apply(Behavior, args);
+  };
+  
+  EventStream_api.prototype.$B = EventStream_api.prototype.extractB = function() {
+    var args;
+    args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+    return extractB.apply(null, [this].concat(__slice.call(args)));
+  };
   
   Jolt.Reactor = Reactor = (function() {
   
