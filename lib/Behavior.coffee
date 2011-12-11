@@ -12,14 +12,11 @@ class ChangesE extends InternalE
     else
       @_name = 'absRank ' + behavior.absRank + ' changes'
 
-  # --- #
-
   ClassName: 'ChangesE'
 
   @factory: (behavior) ->
     new this behavior
 
-# --- #
 
 changesE = (behavior) ->
   ChangesE.factory behavior
